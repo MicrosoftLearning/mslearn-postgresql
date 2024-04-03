@@ -14,7 +14,7 @@ param adminLogin string = 'pgAdmin'
 @description('Password for the database administrator.')
 @minLength(8)
 @secure()
-param adminLoginPassword string
+param adminLoginPassword string = 'Password123!'
 
 @description('Unique name for the Azure OpenAI service.')
 param azureOpenAIServiceName string = 'oai-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
@@ -79,6 +79,21 @@ resource allowAll 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-
 resource rentalsDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-03-01-preview' = {
   name: 'rentals'
   parent: postgreSQLFlexibleServer
+  properties: {
+    charset: 'UTF8'
+    collation: 'en_US.UTF8'
+  }
+}
+
+@description('Configures the "azure.extensions" parameter to allowlist extensions.')
+resource allowlistExtensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-03-01-preview' = {
+  name: 'azure.extensions'
+  parent: postgreSQLFlexibleServer
+  dependsOn: [allowAllAzureServicesAndResourcesWithinAzureIps, allowAll, rentalsDatabase] // Ensure the database is created and configured before setting the parameter, as it requires a "restart."
+  properties: {
+    source: 'user-override'
+    value: 'azure_ai,vector'
+  }
 }
 
 @description('Creates an Azure OpenAI service.')
@@ -131,6 +146,7 @@ output databaseName string = rentalsDatabase.name
 
 output azureOpenAIServiceName string = azureOpenAIService.name
 output azureOpenAIEndpoint string = azureOpenAIService.properties.endpoint
+output azureOpenAIEmbeddingDeploymentName string = azureOpenAIEmbeddingDeployment.name
 
 output languageServiceName string = languageService.name
 output languageServiceEndpoint string = languageService.properties.endpoint
