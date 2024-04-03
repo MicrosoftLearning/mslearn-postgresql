@@ -2,37 +2,37 @@
 param location string = resourceGroup().location
 
 @description('Unique name for the Azure Database for PostgreSQL Flexible Server.')
-param serverName string = 'pgsql-learn-${uniqueString(resourceGroup().id)}'
+param serverName string = 'psql-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+
+@description('The version of PostgreSQL to use.')
+param postgresVersion string = '16'
 
 @description('Login name of the database administrator.')
 @minLength(1)
-param administratorLogin string = 'pgAdmin'
+param adminLogin string = 'pgAdmin'
 
 @description('Password for the database administrator.')
 @minLength(8)
 @secure()
-param administratorLoginPassword string = 'Password123!' // This is bad practice and only used for lab scenarios. Passwords should not be hardcoded in the template.
-
-@description('The version of PostgreSQL to use.')
-param version string = '16'
+param adminLoginPassword string
 
 @description('Unique name for the Azure OpenAI service.')
-param azureOpenAIServiceName string = 'azopenai-pgsql-learn-${uniqueString(resourceGroup().id)}'
+param azureOpenAIServiceName string = 'oai-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the Azure AI Language service account.')
-param languageServiceName string = 'lang-pgsql-learn-${uniqueString(resourceGroup().id)}'
+param languageServiceName string = 'lang-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
 
 @description('Creates a PostgreSQL Flexible Server.')
 resource postgreSQLFlexibleServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
   name: serverName
   location: location
   sku: {
-    name: 'Standard_D2ds_v5'
+    name: 'Standard_D2ds_v4'
     tier: 'GeneralPurpose'
   }
   properties: {
-    administratorLogin: administratorLogin
-    administratorLoginPassword: administratorLoginPassword
+    administratorLogin: adminLogin
+    administratorLoginPassword: adminLoginPassword
     authConfig: {
       activeDirectoryAuth: 'Disabled'
       passwordAuth: 'Enabled'
@@ -42,15 +42,16 @@ resource postgreSQLFlexibleServer 'Microsoft.DBforPostgreSQL/flexibleServers@202
       backupRetentionDays: 7
       geoRedundantBackup: 'Disabled'
     }
+    createMode: 'Default'
     highAvailability: {
       mode: 'Disabled'
     }
     storage: {
       autoGrow: 'Disabled'
       storageSizeGB: 32
-      tier: 'P4'
+      tier: 'P10'
     }
-    version: version
+    version: postgresVersion
   }
 }
 
@@ -59,8 +60,8 @@ resource allowAllAzureServicesAndResourcesWithinAzureIps 'Microsoft.DBforPostgre
   name: 'AllowAllAzureServicesAndResourcesWithinAzureIps'
   parent: postgreSQLFlexibleServer
   properties: {
-    endIpAddress: '0.0.0.0'
     startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
   }
 }
 
@@ -69,8 +70,8 @@ resource allowAll 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-
   name: 'AllowAll'
   parent: postgreSQLFlexibleServer
   properties: {
-    endIpAddress: '255.255.255.255'
     startIpAddress: '0.0.0.0'
+    endIpAddress: '255.255.255.255'
   }
 }
 
