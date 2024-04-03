@@ -11,7 +11,7 @@ param administratorLogin string = 'pgAdmin'
 @description('Password for the database administrator.')
 @minLength(8)
 @secure()
-param administratorLoginPassword string = 'Password123!'
+param administratorLoginPassword string = 'Password123!' // This is bad practice and only used for lab scenarios. Passwords should not be hardcoded in the template.
 
 @description('The version of PostgreSQL to use.')
 param version string = '16'
@@ -31,8 +31,6 @@ resource postgreSQLFlexibleServer 'Microsoft.DBforPostgreSQL/flexibleServers@202
     tier: 'GeneralPurpose'
   }
   properties: {
-    createMode: 'Default'
-    version: version
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
     authConfig: {
@@ -48,21 +46,17 @@ resource postgreSQLFlexibleServer 'Microsoft.DBforPostgreSQL/flexibleServers@202
       mode: 'Disabled'
     }
     storage: {
+      autoGrow: 'Disabled'
       storageSizeGB: 32
       tier: 'P4'
     }
+    version: version
   }
 }
 
-@description('Creates the "rentals" database in the PostgreSQL Flexible Server.')
-resource rentalsDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-03-01-preview' = {
-  name: 'rentals'
-  parent: postgreSQLFlexibleServer
-}
-
-@description('Firewall rule that checks the "Allow all Azure services to access the server" box.')
-resource allowAllWindowsAzureIps 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-03-01-preview' = {
-  name: 'AllowAllWindowsAzureIps' // don't change the name
+@description('Firewall rule that checks the "Allow public access from any Azure service within Azure to this server" box.')
+resource allowAllAzureServicesAndResourcesWithinAzureIps 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-03-01-preview' = {
+  name: 'AllowAllAzureServicesAndResourcesWithinAzureIps'
   parent: postgreSQLFlexibleServer
   properties: {
     endIpAddress: '0.0.0.0'
@@ -70,14 +64,20 @@ resource allowAllWindowsAzureIps 'Microsoft.DBforPostgreSQL/flexibleServers/fire
   }
 }
 
-@description('Firewall rule to allow all IP addresses to connect to the server.')
-resource allowAllIpAddresses 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-03-01-preview' = {
-  name: 'AllowAllIps'
+@description('Firewall rule to allow all IP addresses to connect to the server. Should only be used for lab purposes.')
+resource allowAll 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-03-01-preview' = {
+  name: 'AllowAll'
   parent: postgreSQLFlexibleServer
   properties: {
     endIpAddress: '255.255.255.255'
     startIpAddress: '0.0.0.0'
   }
+}
+
+@description('Creates the "rentals" database in the PostgreSQL Flexible Server.')
+resource rentalsDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-03-01-preview' = {
+  name: 'rentals'
+  parent: postgreSQLFlexibleServer
 }
 
 @description('Creates an Azure OpenAI service.')
