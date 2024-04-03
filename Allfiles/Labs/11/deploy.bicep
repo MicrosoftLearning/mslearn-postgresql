@@ -14,7 +14,7 @@ param adminLogin string = 'pgAdmin'
 @description('Password for the database administrator.')
 @minLength(8)
 @secure()
-param adminLoginPassword string = 'Password123!'
+param adminLoginPassword string
 
 @description('Unique name for the Azure OpenAI service.')
 param azureOpenAIServiceName string = 'oai-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
