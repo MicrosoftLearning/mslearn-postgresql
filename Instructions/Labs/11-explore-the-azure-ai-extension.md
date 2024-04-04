@@ -6,7 +6,7 @@ lab:
 
 # Explore the Azure AI Extension
 
-In this exercise, you will install the `azure_ai` extension in an Azure Database for PostgreSQL - Flexible Server database and explore the extension's capabilities for integrate [Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/overview) and the [Azure AI Language service](https://learn.microsoft.com/azure/ai-services/language-service/) to incorporate rich generative AI capabilities into your database.
+In this exercise, you will install the `azure_ai` extension in an Azure Database for PostgreSQL - Flexible Server database and explore the extension's capabilities for integrating [Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/overview) and the [Azure AI Language service](https://learn.microsoft.com/azure/ai-services/language-service/) to incorporate rich generative AI capabilities into your database.
 
 ## Before you start
 
