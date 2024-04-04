@@ -137,6 +137,7 @@ resource languageService 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
     name: 'S'
   }
   properties: {
+    customSubDomainName: languageServiceName
     publicNetworkAccess: 'Enabled'
   } 
 }
