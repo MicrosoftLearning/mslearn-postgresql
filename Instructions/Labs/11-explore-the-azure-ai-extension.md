@@ -31,7 +31,7 @@ You will need an [Azure subscription](https://azure.microsoft.com/free) where yo
     The resource group name defaults to `rg-postgresql-ai-ms-learn`, but you can provide any name you wish to use to host the resources associated with this exercise.
 
     ```bash
-    RG_NAME=rg-postgresql-ai-ms-learn-kb
+    RG_NAME=rg-postgresql-ai-ms-learn
     ```
 
     In the command below, accept the default region of `eastus2` or replace it with the location you are using for your Azure resources.
@@ -82,7 +82,7 @@ In this task, you use the [psql command-line utility](https://www.postgresql.org
 
 Before you get started exploring the `azure_ai` extension, you will add a couple of tables to the `rentals` database and populate them with sample data so you have information to work with as you review the extension's capabilities.
 
-1. Run the following command to create the tables for storing data in the shape used by this lab:
+1. Run the following commands to create the `listings` and `reviews` tables for storing rental property listing and customer review data:
 
     ```sql
     CREATE TABLE listings (
