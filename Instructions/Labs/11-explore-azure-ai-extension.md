@@ -6,11 +6,11 @@ lab:
 
 # Explore the Azure AI Extension
 
-In this exercise, you will install the `azure_ai` extension in an Azure Database for PostgreSQL - Flexible Server database and explore the extension's capabilities for integrating [Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/overview) and the [Azure AI Language service](https://learn.microsoft.com/azure/ai-services/language-service/) to incorporate rich generative AI capabilities into your database.
+As the lead developer of an AI-powered rental recommendation system for Margie's Travel, you are interested in gaining a better understanding of the generative AI functionality available through the `azure_ai` extension and how it can help you achieve your goal of building an AI-powered app. To accomplish this, you will conduct an in-depth exploration of the functionality it provides, installing the `azure_ai` extension in an Azure Database for PostgreSQL - Flexible Server database and exploring its capabilities for integrating Azure AI and ML services.
 
 ## Before you start
 
-You will need an [Azure subscription](https://azure.microsoft.com/free) where you have administrative rights and you must be approved for Azure OpenAI access in that subscription. If you need Azure OpenAI access, apply at the [Azure OpenAI limited access](https://learn.microsoft.com/legal/cognitive-services/openai/limited-access) page.
+You will need an [Azure subscription](https://azure.microsoft.com/free) with administrative rights, and you must be approved for Azure OpenAI access in that subscription. If you need Azure OpenAI access, apply at the [Azure OpenAI limited access](https://learn.microsoft.com/legal/cognitive-services/openai/limited-access) page.
 
 ### Deploy resources into your Azure subscription
 
@@ -26,20 +26,20 @@ You will need an [Azure subscription](https://azure.microsoft.com/free) where yo
     git clone https://github.com/MicrosoftLearning/mslearn-postgresql.git
     ```
 
-4. Next, you will run a couple of commands to define variables to reduce redundant typing when using commands to create Azure resources. The variables represent the name to assign to your resource group and the Azure region into which resources should be deployed.
+4. Next, you will run a couple of commands to define variables to reduce redundant typing when using Azure CLI commands to create Azure resources. The variables represent the name to assign to your resource group and the Azure region into which resources should be deployed.
+
+    In the first command below, accept the default region of `eastus` or replace it with the location you prefer to use for your Azure resources.
+
+    ```bash
+    REGION=eastus
+    ```
+
+    TODO: Need to provide a list of acceptable regions that support the appropriate gpt-4 model + abstractive summarization in the language service. (maybe just hardcode that one in the bicep template?)
 
     The resource group name defaults to `rg-postgresql-ai-ms-learn`, but you can provide any name you wish to use to host the resources associated with this exercise.
 
     ```bash
-    RG_NAME=rg-postgresql-ai-ms-learn
-    ```
-
-    In the command below, accept the default region of `eastus2` or replace it with the location you are using for your Azure resources.
-
-    TODO: Need to provide a list of acceptable regions that support the appropriate gpt-4 model + abstractive summarization in the language service. (maybe just hardcode that one in the bicep template?)
-
-    ```bash
-    REGION=eastus2
+    RG_NAME=rg-learn-postgresql-ai-$REGION
     ```
 
 5. Run the following Azure CLI command to create your resource group:
@@ -54,15 +54,15 @@ You will need an [Azure subscription](https://azure.microsoft.com/free) where yo
     az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters adminLogin=pgAdmin adminLoginPassword=Password123!
     ```
 
-    The bicep file will deploy an Azure Database for PostgreSQL - Flexible Server, Azure OpenAI, and an Azure AI Language service into your resource group. On the PostgreSQL server, it also adds the `azure_ai` and `pg_vector` extensions to the server's _allowlist_ and creates a database named `rentals` for use in this exercise. In Azure OpenAI, it creates a deployment named `embedding` using the `text-embedding-ada-002` model.
+    The bicep file will deploy an Azure Database for PostgreSQL - Flexible Server, Azure OpenAI, and an Azure AI Language service into your resource group. On the PostgreSQL server, it also adds the `azure_ai` and `pg_vector` extensions to the server's _allowlist_ and creates a database named `rentals` for use in this exercise. Within the Azure OpenAI service, a deployment named `embedding` is provisioned using the `text-embedding-ada-002` model.
 
     The deployment will take several minutes to complete.
 
-7. Close the cloud shell pane once your resource deployment has completed.
+7. Close the cloud shell pane once your resource deployment is complete.
 
 ## Connect to your database using psql in the Azure Cloud Shell
 
-In this task, you use the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) to connect to your database.
+In this task, you connect to your database using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
 
 1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL Flexible Server instance.
 
@@ -72,7 +72,7 @@ In this task, you use the [psql command-line utility](https://www.postgresql.org
 
 3. At the "Password for user pgAdmin" prompt in the cloud shell, enter the password you created for the **pgAdmin** login. The default for this is `Password123!`.
 
-    Once logged in, you will be at the `psql` prompt for the rentals database.
+    Once logged in, the `psql` prompt for the `rentals` database will be displayed.
 
 4. You will be working in the cloud shell throughout the remainder of this exercise, so it can be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
 
@@ -80,7 +80,7 @@ In this task, you use the [psql command-line utility](https://www.postgresql.org
 
 ## Populate the database with sample data
 
-Before you get started exploring the `azure_ai` extension, you will add a couple of tables to the `rentals` database and populate them with sample data so you have information to work with as you review the extension's capabilities.
+Before you explore the `azure_ai` extension, you will add a couple of tables to the `rentals` database and populate them with sample data so you have information to work with as you review the extension's functionality.
 
 1. Run the following commands to create the `listings` and `reviews` tables for storing rental property listing and customer review data:
 
@@ -105,13 +105,13 @@ Before you get started exploring the `azure_ai` extension, you will add a couple
     );
     ```
 
-2. Next, you will use the `COPY` command to load data from CSV files into each of the tables you created above. Start by running the following command to populate the `listings` table:
+2. Next, you will use the `COPY` command to load data from CSV files into each table you created above. Start by running the following command to populate the `listings` table:
 
     ```sql
     \COPY listings FROM 'mslearn-postgresql/Allfiles/Labs/Shared/listings.csv' CSV HEADER
     ```
 
-    The output of the command should be `COPY 50`, indicating that 50 rows were written into the table from the CSV file.
+    The command output should be `COPY 50`, indicating that 50 rows were written into the table from the CSV file.
 
 3. Finally, run the command below to load customer reviews into the `reviews` table:
 
@@ -119,7 +119,7 @@ Before you get started exploring the `azure_ai` extension, you will add a couple
     \COPY reviews FROM 'mslearn-postgresql/Allfiles/Labs/Shared/reviews.csv' CSV HEADER
     ```
 
-    The output of the command should be `COPY 354`, indicating that 354 rows were written into the table from the CSV file.
+    The command output should be `COPY 354`, indicating that 354 rows were written into the table from the CSV file.
 
 ## Install and configure the `azure_ai` extension
 
@@ -153,7 +153,7 @@ Before using the `azure_ai` extension, you must install it into your database an
 
 Reviewing the objects within the `azure_ai` extension can provide a better understanding of its capabilities. In this task, you inspect the various schemas, user-defined functions (UDFs), and composite types added to the database by the extension.
 
-1. When working with `psql` in the cloud shell, it can be useful to enable the use of the extended display of results. Execute the following command to enable the extended display to be automatically applied when it will simplify reading of output.
+1. When working with `psql` in the cloud shell, it can be useful to enable the extended display for query results. Execute the following command to enable the extended display to be automatically applied when it will improve output display.
 
     ```sql
     \x auto

@@ -34,12 +34,10 @@ You will need an [Azure subscription](https://azure.microsoft.com/free) where yo
     RG_NAME=rg-postgresql-ai-ms-learn-kb
     ```
 
-    In the command below, accept the default region of `eastus2` or replace it with the location you are using for your Azure resources.
-
-    TODO: Need to provide a list of acceptable regions that support the appropriate gpt-4 model + abstractive summarization in the language service. (maybe just hardcode that one in the bicep template?)
+    In the command below, accept the default region of `eastus` or replace it with one of the other [Azure regions that supports abstractive summarization](https://learn.microsoft.com/azure/ai-services/language-service/summarization/region-support).
 
     ```bash
-    REGION=eastus2
+    REGION=eastus
     ```
 
 5. Run the following Azure CLI command to create your resource group:
