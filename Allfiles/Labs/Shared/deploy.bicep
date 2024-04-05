@@ -22,6 +22,9 @@ param azureOpenAIServiceName string = 'oai-learn-${resourceGroup().location}-${u
 @description('Unique name for the Azure AI Language service account.')
 param languageServiceName string = 'lang-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
 
+@description('Restore the service instead of creating a new instance. This is useful if you previously soft-delted the service and want to restore it. If you are restoring a service, set this to true. Otherwise, leave this as false.')
+param restore bool = false
+
 @description('Creates a PostgreSQL Flexible Server.')
 resource postgreSQLFlexibleServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
   name: serverName
@@ -108,6 +111,7 @@ resource azureOpenAIService 'Microsoft.CognitiveServices/accounts@2023-05-01' = 
   properties: {
     customSubDomainName: azureOpenAIServiceName
     publicNetworkAccess: 'Enabled'
+    restore: restore
   } 
 }
 
@@ -139,6 +143,7 @@ resource languageService 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   properties: {
     customSubDomainName: languageServiceName
     publicNetworkAccess: 'Enabled'
+    restore: restore
   } 
 }
 
