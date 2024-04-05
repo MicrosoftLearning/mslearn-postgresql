@@ -42,13 +42,13 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     REGION=eastus
     ```
 
-    The next command assigns a named to be used for the resource group that will house all the resources used in this exercise. The resource group named assigned to the corresponding variable is `rg-learn-postgresql-ai-$REGION`, where `$REGION` is the location you specified above. However, you can change it to any other resource group name of your preference.
+    The following command assigns the name to be used for the resource group that will house all the resources used in this exercise. The resource group name assigned to the corresponding variable is `rg-learn-postgresql-ai-$REGION`, where `$REGION` is the location you specified above. However, you can change it to any other resource group name that suits your preference.
 
     ```bash
     RG_NAME=rg-learn-postgresql-ai-$REGION
     ```
 
-    The final command randomly generates a password to use for the PostgreSQL admin login. Make sure you copy it to a safe place so that you can use it later connect to your PostgreSQL flexible server.
+    The final command randomly generates a password for the PostgreSQL admin login. Make sure you copy it to a safe place so that you can use it later to connect to your PostgreSQL flexible server.
 
     ```bash
     a=()
@@ -70,12 +70,43 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
 6. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
 
     ```azurecli
-    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=true adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
+    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
     ```
 
     The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server, Azure OpenAI, and an Azure AI Language service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter), creating a database named `rentals` on the server, and adding a deployment named `embedding` using the `text-embedding-ada-002` model to your Azure OpenAI service. Note that the Bicep file is shared by all modules in this learning path, so you may only use some of the deployed resources in some exercises.
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
+
+    You may encounter a few errors when running the Bicep deployment script. The most common messages and the steps to resolve them are:
+
+    - If you have not previously created an Azure AI Services resource, you may receive a message that the Responsible AI terms have not been read and accepted in your subscription:
+
+        ```bash
+        {"code": "ResourceKindRequireAcceptTerms", "message": "This subscription cannot create TextAnalytics until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal and trying again.}
+        ```
+
+        To resolve this error, run this command to create a Language service in your resource group and accept the Responsible AI terms for your subscription. Once the resource is created, you can rerun the command to execute the Bicep deployment script.
+
+        ```bash
+        az cognitiveservices account create --name lang-temp-$region-$ADMIN_PASSWORD --resource-group $RG_NAME --kind TextAnalytics --sku F0 --location $REGION --yes
+        ```
+
+    - If you previously ran the Bicep deployment script for this learning path and subsequently deleted the resources, you may receive an error message like the following if you are attempting to rerun the script within 48 hours of deleting the resources:
+
+        ```bash
+        {"code": "InvalidTemplateDeployment", "message": "The template deployment 'deploy' is not valid according to the validation procedure. The tracking id is '4e87a33d-a0ac-4aec-88d8-177b04c1d752'. See inner errors for details."}
+    
+        Inner Errors:
+        {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/oai-learn-eastus-gvg3papkkkimy' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
+        ```
+
+        If you receive this message, modify the `azure deployment group create` command above to set the `restore` parameter equal to `true` and rerun it.
+
+    - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and try rerunning the Bicep deployment script.
+
+        ```bash
+        {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus2/providers/Microsoft.Resources/deployments/deploy","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.DBforPostgreSQL/flexibleServers/psql-learn-eastus2-gvg3papkkkimy","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
+        ```
 
 7. Close the Cloud Shell pane once your resource deployment is complete.
 
@@ -89,7 +120,7 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
     ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](media/11-postgresql-rentals-database-connect.png)
 
-3. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the password that was randomly generated from the **pgAdmin** login.
+3. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** login.
 
     Once logged in, the `psql` prompt for the `rentals` database is displayed.
 
@@ -99,7 +130,7 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 ## Populate the database with sample data
 
-Before you explore the `azure_ai` extension, you add a couple of tables to the `rentals` database and populate them with sample data so you have information to work with as you review the extension's functionality.
+Before you explore the `azure_ai` extension, add a couple of tables to the `rentals` database and populate them with sample data so you have information to work with as you review the extension's functionality.
 
 1. Run the following commands to create the `listings` and `reviews` tables for storing rental property listing and customer review data:
 
@@ -150,7 +181,7 @@ Before using the `azure_ai` extension, you must install it into your database an
     SHOW azure.extensions;
     ```
 
-    The output shows the list of extensions on the server's _allowlist_. If everything was correctly installed, your output must include `azure_ai` and `vector`, like this:
+    The command displays the list of extensions on the server's _allowlist_. If everything was correctly installed, your output must include `azure_ai` and `vector`, like this:
 
     ```sql
      azure.extensions 
@@ -166,13 +197,13 @@ Before using the `azure_ai` extension, you must install it into your database an
     CREATE EXTENSION IF NOT EXISTS azure_ai;
     ```
 
-    `CREATE EXTENSION` loads a new extension into the database by running the extension's script file, which typically creates new SQL objects such as functions, data types and schemas. If an extension of the same name already exists, an error is thrown. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
+    `CREATE EXTENSION` loads a new extension into the database by running its script file. This typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
 
 ## Review the objects contained within the `azure_ai` extension
 
-Reviewing the objects within the `azure_ai` extension can provide a better understanding of its capabilities. In this task, you inspect the various schemas, user-defined functions (UDFs), and composite types added to the database by the extension.
+Reviewing the objects within the `azure_ai` extension can help you better understand its capabilities. In this task, you inspect the various schemas, user-defined functions (UDFs), and composite types added to the database by the extension.
 
-1. When working with `psql` in the Cloud Shell, it can be useful to enable the extended display for query results. Execute the following command to enable the extended display to be automatically applied. It improves reading the output of subsequent commands.
+1. When working with `psql` in the Cloud Shell, enabling the extended display for query results may be helpful. Execute the following command to allow the extended display to be automatically applied. It improves reading the output of subsequent commands.
 
     ```sql
     \x auto
@@ -184,7 +215,7 @@ Reviewing the objects within the `azure_ai` extension can provide a better under
     \dx+ azure_ai
     ```
 
-    The meta-command output shows the `azure_ai` extension creates four schemas, multiple user-defined functions (UDFs), several composite types in the database, and the `azure_ai.settings` table. Other than the schemas, all object names are preceded with the schema to which they belong. Schemas are used to group related functions and types added by the extension into buckets. The table below lists the schemas added by the extension and provides a brief description of each:
+    The meta-command output shows the `azure_ai` extension creates four schemas, multiple user-defined functions (UDFs), several composite types in the database, and the `azure_ai.settings` table. Other than the schemas, all object names are preceded by the schema to which they belong. Schemas are used to group related functions and types the extension adds into buckets. The table below lists the schemas added by the extension and provides a brief description of each:
 
     | Schema | Description |
     | ------ | ----------- |
@@ -195,7 +226,7 @@ Reviewing the objects within the `azure_ai` extension can provide a better under
 
 ### Explore the Azure AI schema
 
-The `azure_ai` schema provides the framework for interacting with Azure AI and ML services directly from your database. It contains functions for setting up connections to those services and retrieving them from the `settings` table, which is also hosted in the same schema. The `settings` table provides secure storage in the database for endpoints and keys associated with you Azure AI and ML services.
+The `azure_ai` schema provides the framework for directly interacting with Azure AI and ML services from your database. It contains functions for setting up connections to those services and retrieving them from the `settings` table, which is also hosted in the same schema. The `settings` table provides secure storage in the database for endpoints and keys associated with your Azure AI and ML services.
 
 1. To review the functions defined in a schema, you can use the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC), specifying the schema whose functions should be displayed. Run the following to view the functions in the `azure_ai` schema:
 
@@ -214,7 +245,7 @@ The `azure_ai` schema provides the framework for interacting with Azure AI and M
      azure_ai | version     | text             |                      | func
     ```
 
-    The `set_setting()` function lets you set the endpoint and key of your Azure AI and ML services, so that the extension can connect to them. It accepts a **key** and the **value** to assign to it. The `azure_ai.get_setting()` function provides a way to retrieve the values you set with the `set_setting()` function. It accepts the **key** of the setting you want to view, and returns the values that was assigned to it. For both methods, the key must be one of the following:
+    The `set_setting()` function lets you set the endpoint and key of your Azure AI and ML services so that the extension can connect to them. It accepts a **key** and the **value** to assign to it. The `azure_ai.get_setting()` function provides a way to retrieve the values you set with the `set_setting()` function. It accepts the **key** of the setting you want to view and returns the value assigned to it. For both methods, the key must be one of the following:
 
     | Key | Description |
     | --- | ----------- |
@@ -227,15 +258,15 @@ The `azure_ai` schema provides the framework for interacting with Azure AI and M
 
     > Important
     >
-    > Because the connection information for Azure AI services, including API keys, is stored in a configuration table in the database, the `azure_ai` extension defines a role called `azure_ai_settings_manager` to ensure this information is protected and accessible only to users who have been assigned that role. This role enables reading and writing of settings related to the extension. Only members of the `azure_ai_settings_manager` role can invoke the `azure_ai.get_setting()` and `azure_ai.set_setting()` functions. In Azure Database for PostgreSQL Flexible Server, all admin users (those with the `azure_pg_admin` role assigned) are also assigned the `azure_ai_settings_manager` role.
+    > Because the connection information for Azure AI services, including API keys, is stored in a configuration table in the database, the `azure_ai` extension defines a role called `azure_ai_settings_manager` to ensure this information is protected and accessible only to users who have been assigned that role. This role enables reading and writing of settings related to the extension. Only members of the `azure_ai_settings_manager` role can invoke the `azure_ai.get_setting()` and `azure_ai.set_setting()` functions. In Azure Database for PostgreSQL flexible server, all admin users (those with the `azure_pg_admin` role assigned) are also assigned the `azure_ai_settings_manager` role.
 
-2. To demonstrate how you go about using the `azure_ai.set_setting()` and `azure_ai.get_setting()` function, let's configure the connection to your Azure OpenAI account. Using the same browser tab where your Cloud Shell is open, minimize or restore the Cloud Shell pane, then navigate to your Azure OpenAI resource in the [Azure portal](https://portal.azure.com/). Once you are on the Azure OpenAI resource page, in the resource menu, under **Resource Management** section, select **Keys and Endpoint**, then copy your endpoint and one of the available keys.
+2. To demonstrate how you use the `azure_ai.set_setting()` and `azure_ai.get_setting()` functions, configure the connection to your Azure OpenAI account. Using the same browser tab where your Cloud Shell is open, minimize or restore the Cloud Shell pane, then navigate to your Azure OpenAI resource in the [Azure portal](https://portal.azure.com/). Once you are on the Azure OpenAI resource page, in the resource menu, under the **Resource Management** section, select **Keys and Endpoint**, then copy your endpoint and one of the available keys.
 
     ![Screenshot of the Azure OpenAI service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/11-azure-openai-keys-and-endpoints.png)
 
     You can use either `KEY 1` or `KEY 2`. Always having two keys allows you to securely rotate and regenerate keys without causing service disruption.
 
-3. Once you have your endpoint and key, maximize the Cloud Shell pane again, then use the commands below to add your values to the configuration table. Make sure you replace the `{endpoint}` and `{api-key}` tokens with the values you retrieved from the Azure portal.
+3. Once you have your endpoint and key, maximize the Cloud Shell pane again, then use the commands below to add your values to the configuration table. Ensure you replace the `{endpoint}` and `{api-key}` tokens with the values you retrieved from the Azure portal.
 
     ```sql
     SELECT azure_ai.set_setting('azure_openai.endpoint', '{endpoint}');
@@ -256,7 +287,7 @@ The `azure_ai` schema provides the framework for interacting with Azure AI and M
 
 ### Review the Azure OpenAI schema
 
-The `azure_openai` schema provides the ability to integrate the creation of vector embedding of text values into your database using Azure OpenAI. Using this schema, you can [generate embeddings with Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/how-to/embeddings) directly from the database to create vector representations of input text, which can then be used in vector similarity searches, as well as consumed by machine learning models. The schema contains a single function, `create_embeddings()` with two overloads. One overload accepts a single input string and the other accepts an array of input strings.
+The `azure_openai` schema provides the ability to integrate the creation of vector embedding of text values into your database using Azure OpenAI. Using this schema, you can [generate embeddings with Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/how-to/embeddings) directly from the database to create vector representations of input text, which can then be used in vector similarity searches, as well as consumed by machine learning models. The schema contains a single function, `create_embeddings()`, with two overloads. One overload accepts a single input string, and the other expects an array of input strings.
 
 1. As you did above, you can use the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC) to view the details of the functions in the `azure_openai` schema:
 
@@ -293,17 +324,17 @@ The `azure_openai` schema provides the ability to integrate the creation of vect
     1  | Stylish One-Bedroom Apartment | {0.020068742,0.00022734122,0.0018286322,-0.0064167166,-0.02335632,0.007961482,-0.0025977138,-0.018629603,-0.028360302,-0.015645698,-0.032849364,0.0165039,-0.012523159,-0.0126948,-0.018840853,0.0024013175,0.032717332,0.01362562,-0.014576245,-0.010106988,-0.038394675,-0.00013161861,0.028967647,-0.016107807,-0.018378744,0.0057433574,0.00837738,-0.014945932,-0.016358666,0.006020623,0.024927491,-0.005941404,-0.020847727,-0.0020695892,-0.0118498,-0.011011402,0.00024384513,0.020451633,0.012952261,-0.002800712,0.0011107125,-0.010225817,-0.0068986304,0.017890228,0.005103006,0.0042712092,-0.0016487397,-0.016464291,-0.013982104,0.004947869,...}
     ```
 
-    The vector embeddings are abbreviated in the above output for brevity.
+    For brevity, the vector embeddings are abbreviated in the above output.
 
-    [Embeddings](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#embeddings) are a concept in machine learning and natural language processing (NLP) that involves representing objects such as words, documents, or entities, as [vectors](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#vectors) in a multi-dimensional space. Embeddings allow machine learning models to evaluate how closely related are two pieces of information. This technique efficiently identifies relationships and similarities between data, allowing algorithms to identify patterns and make accurate predictions.
+    [Embeddings](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#embeddings) are a concept in machine learning and natural language processing (NLP) that involves representing objects such as words, documents, or entities, as [vectors](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#vectors) in a multi-dimensional space. Embeddings allow machine learning models to evaluate how closely two pieces of information are related. This technique efficiently identifies relationships and similarities between data, allowing algorithms to identify patterns and make accurate predictions.
 
     The `azure_ai` extension allows you to generate embeddings for input text. To enable the generated vectors to be stored alongside the rest of your data in the database, you must install the `vector` extension by following the guidance in the [enable vector support in your database](https://learn.microsoft.com/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension) documentation. However, that is outside of the scope of this exercise.
 
 ### Examine the azure_cognitive schema
 
-The `azure_cognitive` schema provides the framework for interacting with Azure AI Services directly from your database. The Azure AI services integrations included in the schema provides a rich set of AI Language features, accessible directly from the database. The functionalities include sentiment analysis, language detection, key phrase extraction, entity recognition, text summarization, and translation. These capabilities are enabled through the [Azure AI Language service](https://learn.microsoft.com/azure/ai-services/language-service/overview).
+The `azure_cognitive` schema provides the framework for directly interacting with Azure AI Services from your database. The Azure AI services integrations in the schema offer a rich set of AI Language features accessible directly from the database. The functionalities include sentiment analysis, language detection, key phrase extraction, entity recognition, text summarization, and translation. These capabilities are enabled through the [Azure AI Language service](https://learn.microsoft.com/azure/ai-services/language-service/overview).
 
-1. To review all of the functions defined in a schema, you can use the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC) like you have done previously. To view the functions in the `azure_cognitive` schema run:
+1. To review all of the functions defined in a schema, you can use the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC) as you have done previously. To view the functions in the `azure_cognitive` schema, run:
 
     ```sql
     \df azure_cognitive.*
@@ -315,7 +346,7 @@ The `azure_cognitive` schema provides the framework for interacting with Azure A
     \df azure_cognitive.analyze_sentiment
     ```
 
-    In the output, observe there are three overloads for the function, with one accepting a single input string and the other two expecting arrays of text. The output shows the function's schema, name, result data type, and argument data types. This information can help you gain an understanding of how to use the function.
+    In the output, observe that the function has three overloads, with one accepting a single input string and the other two expecting arrays of text. The output shows the function's schema, name, result data type, and argument data types. This information can help you understand how to use the function.
 
 3. Repeat the above command, replacing the `analyze_sentiment` function name with each of the following function names, to inspect all of the available functions in the schema:
 
@@ -330,7 +361,7 @@ The `azure_cognitive` schema provides the framework for interacting with Azure A
 
     For each function, inspect the various forms of the function and their expected inputs and resulting data types.
 
-4. In addition to functions, the `azure_cognitive` schema also contains several composite types, which are used as return data types from the various functions. It is imperative to understand the structure of the data type of the result that a function returns, so you can correctly handle the output in your queries. As an example, run the following command to inspect the `sentiment_analysis_result` type:
+4. Besides functions, the `azure_cognitive` schema also contains several composite types used as return data types from the various functions. It is imperative to understand the structure of the data type that a function returns so you can correctly handle the output in your queries. As an example, run the following command to inspect the `sentiment_analysis_result` type:
 
     ```sql
     \dT+ azure_cognitive.sentiment_analysis_result
@@ -354,9 +385,9 @@ The `azure_cognitive` schema provides the framework for interacting with Azure A
      negative_score | double precision |           |          |         | plain    |
     ```
 
-    The `azure_cognitive.sentiment_analysis_result` is a composite type containing the sentiment predictions of the input text. It includes the sentiment, which can be positive, negative, neutral, or mixed, and the scores for positive, neutral, and negative aspects found in the text. The scores are represented as real numbers between 0 and 1. For example, in (neutral,0.26,0.64,0.09), the sentiment is neutral with a positive score of 0.26, neutral of 0.64, and negative at 0.09.
+    The `azure_cognitive.sentiment_analysis_result` is a composite type containing the sentiment predictions of the input text. It includes the sentiment, which can be positive, negative, neutral, or mixed, and the scores for positive, neutral, and negative aspects found in the text. The scores are represented as real numbers between 0 and 1. For example, in (neutral, 0.26, 0.64, 0.09), the sentiment is neutral, with a positive score of 0.26, neutral of 0.64, and negative at 0.09.
 
-6. As with the `azure_openai` functions, to successfully make calls against Azure AI Services using the `azure_ai` extension, you must provide the endpoint and a key for your Azure AI Language service. Using the same browser tab where the Cloud Shell is open, minimize or restore the Cloud Shell pane, navigate to your Language service resource in the [Azure portal](https://portal.azure.com/), and in the resource menu, under the **Resource Management** section, select **Keys and Endpoint**.
+6. As with the `azure_openai` functions, to successfully make calls against Azure AI Services using the `azure_ai` extension, you must provide the endpoint and a key for your Azure AI Language service. Using the same browser tab where the Cloud Shell is open, minimize or restore the Cloud Shell pane, and then navigate to your Language service resource in the [Azure portal](https://portal.azure.com/). In the resource menu, under the **Resource Management** section, select **Keys and Endpoint**.
 
     ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/11-azure-language-service-keys-and-endpoints.png)
 
@@ -385,7 +416,7 @@ The `azure_cognitive` schema provides the framework for interacting with Azure A
 
 ## Inspect the Azure ML schema
 
-The `azure_ml` schema provides functions with the ability to connect to Azure ML services directly from your database.
+The `azure_ml` schema allows functions to connect to Azure ML services directly from your database.
 
 1. To review the functions defined in a schema, you can use the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC). To view the functions in the `azure_ml` schema, run:
 
@@ -394,6 +425,8 @@ The `azure_ml` schema provides functions with the ability to connect to Azure ML
     ```
 
     In the output, observe there are two functions defined in this schema, `azure_ml.inference()` and `azure_ml.invoke()`, the details of which are displayed below:
+
+    TODO: Get verification that the `invoke` function is replacing `inference` and update this section accordingly.
 
     ```sql
                                 List of functions
@@ -405,7 +438,7 @@ The `azure_ml` schema provides functions with the ability to connect to Azure ML
     Type                | func
     ```
 
-    The `inference()` function is used with trained machine learning model to make predictions or generate outputs based on new, unseen data.
+    The `inference()` function uses a trained machine learning model to make predictions or generate outputs based on new, unseen data.
 
     ```sql
     -----------------------------------------------------------------------------------------------------------
@@ -416,15 +449,13 @@ The `azure_ml` schema provides functions with the ability to connect to Azure ML
     Type                | func
     ```
 
-    The `invoke()` function...
+    The `invoke()` function uses a trained machine learning model to make predictions or generate outputs based on new, unseen data.
 
-    TODO: Provide some small details on the invoke function.
-
-    You can connect to an Azure ML deployed endpoint in the same way you connected to your Azure OpenAI and Azure AI Services endpoints, by providing an endpoint and key. As interacting with Azure ML requires having a trained and deployed model, it is out of scope for this exercise, so you are not setting up that connection to try it out here.
+    You can connect to an Azure ML deployed endpoint in the same way you connected to your Azure OpenAI and Azure AI Services endpoints by providing an endpoint and key. Interacting with Azure ML requires having a trained and deployed model, so it is out of scope for this exercise, and you are not setting up that connection to try it out here.
 
 ## Clean up
 
-Once you have completed this exercise, you should delete the Azure resources you have created. You are charged for the configured capacity, not how much the database is used. To delete your resource group and all resources you created for this lab, follow these instructions.
+Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
 
 > Note
 >
