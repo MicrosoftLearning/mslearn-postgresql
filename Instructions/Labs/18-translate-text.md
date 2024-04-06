@@ -132,7 +132,7 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 In order to translate listings, you will need to have English-language listings data available. If you have not created the `listings` table in the `rentals` database in a prior module, follow these instructions to create the table.
 
-1. Run the following commands to create the `listings` and `reviews` tables for storing rental property listing and customer review data:
+1. Run the following commands to create the `listings` table for storing rental property listing data:
 
     ```sql
     CREATE TABLE listings (
