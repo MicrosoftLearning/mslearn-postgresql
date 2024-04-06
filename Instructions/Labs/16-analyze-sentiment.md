@@ -1,12 +1,12 @@
 ---
 lab:
-    title: 'Perform Sentiment Analysis'
+    title: 'Analyze Sentiment'
     module: 'Build AI apps with Azure Database for PostgreSQL'
 ---
 
-# Perform Sentiment Analysis
+# Analyze Sentiment
 
-As part of the AI-powered app you are building for Margie's Travel, you would like to provide users with information on the sentiment of individual reviews and the overall sentiment of all reviews for a given rental listing. To accomplish this, you will use the `azure_ai` extension in Azure Database for PostgreSQL flexible server to integrate sentiment analysis functionality into your database.
+As part of the AI-powered app you are building for Margie's Travel, you want to provide users with information on the sentiment of individual reviews and the overall sentiment of all reviews for a given rental property. To accomplish this, use the `azure_ai` extension in Azure Database for PostgreSQL flexible server to integrate sentiment analysis functionality into your database.
 
 ## Before you start
 
@@ -14,7 +14,7 @@ You need an [Azure subscription](https://azure.microsoft.com/free) with administ
 
 ### Deploy resources into your Azure subscription
 
-This step will guide you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
+This step guides you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
 
 > Note
 >
@@ -46,7 +46,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     RG_NAME=rg-learn-postgresql-ai-$REGION
     ```
 
-    The final command randomly generates a password for the PostgreSQL admin login. Make sure you copy it to a safe place so that you can use it later to connect to your PostgreSQL flexible server.
+    The final command randomly generates a password for the PostgreSQL admin login. **Make sure you copy it** to a safe place to use later to connect to your PostgreSQL flexible server.
 
     ```bash
     a=()
@@ -124,11 +124,13 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 ## Populate the database with sample data
 
-Before you can analyze the sentiment of rental property reviews using the `azure_ai` extension, you must add sample data to your database. You will add a table to the `rentals` database and populate it with customer reviews so you have data on which to perform sentiment analysis.
+Before you can analyze the sentiment of rental property reviews using the `azure_ai` extension, you must add sample data to your database. Add a table to the `rentals` database and populate it with customer reviews so you have data on which to perform sentiment analysis.
 
 1. Run the following command to create a table named `reviews` for storing property reviews submitted by customers:
 
     ```sql
+    DROP TABLE IF EXISTS reviews;
+
     CREATE TABLE reviews (
         id int,
         listing_id int, 
@@ -137,7 +139,7 @@ Before you can analyze the sentiment of rental property reviews using the `azure
     );
     ```
 
-2. Next, you will use the `COPY` command to populate the table with data from a CSV file. Execute the command below to load customer reviews into the `reviews` table:
+2. Next, use the `COPY` command to populate the table with data from a CSV file. Execute the command below to load customer reviews into the `reviews` table:
 
     ```sql
     \COPY reviews FROM 'mslearn-postgresql/Allfiles/Labs/Shared/reviews.csv' CSV HEADER
@@ -147,15 +149,15 @@ Before you can analyze the sentiment of rental property reviews using the `azure
 
 ## Install and configure the `azure_ai` extension
 
-Before using the `azure_ai` extension, you must install it into your database and configure it to connect to your Azure AI Services resource. The `azure_ai` extension allows you to integrate the Azure AI Language services directly into your database. To enable the extension in your database, follow the steps below:
+Before using the `azure_ai` extension, you must install it into your database and configure it to connect to your Azure AI Services resources. The `azure_ai` extension allows you to integrate the Azure OpenAI and Azure AI Language services into your database. To enable the extension in your database, follow these steps:
 
-1. You should first verify that the `azure_ai` extension was successfully added to your server's _allowlist_ by the bicep script you ran when setting up the exercise environment by executing the following command at the `psql` command prompt:
+1. Execute the following command at the `psql` prompt to verify that the `azure_ai` and the `vector` extensions were successfully added to your server's _allowlist_ by the Bicep deployment script you ran when setting up your environment:
 
     ```sql
     SHOW azure.extensions;
     ```
 
-    In the output, you will see the list of extensions on the server's _allowlist_. The output should include `azure_ai` and will look like the following:
+    The command displays the list of extensions on the server's _allowlist_. If everything was correctly installed, your output must include `azure_ai` and `vector`, like this:
 
     ```sql
      azure.extensions 
@@ -171,57 +173,68 @@ Before using the `azure_ai` extension, you must install it into your database an
     CREATE EXTENSION IF NOT EXISTS azure_ai;
     ```
 
-    `CREATE EXTENSION` loads a new extension into the database by running the extension's script file, which typically creates new SQL objects such as functions, data types and schemas. If an extension of the same name already exists, an error will be thrown. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
+    `CREATE EXTENSION` loads a new extension into the database by running its script file. This typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
 
-## Integrate Azure AI Services
+## Connect Your Azure AI Services Account
 
 The Azure AI services integrations included in the `azure_cognitive` schema of the `azure_ai` extension provide a rich set of AI Language features accessible directly from the database. Sentiment analysis capabilities are enabled through the [Azure AI Language service](https://learn.microsoft.com/azure/ai-services/language-service/overview).
 
-1. To successfully make calls against Azure AI services using the `azure_ai` extension, you must provide the endpoint and a key for your Azure AI Language service. Using the same browser tab where the Cloud Shell is open, navigate to your Language service resource in the [Azure portal](https://portal.azure.com/) and select the **Keys and Endpoint** item under **Resource Management** from the left-hand navigation menu.
+1. To successfully make calls against your Azure AI Language services using the `azure_ai` extension, you must provide its endpoint and key to the extension. Using the same browser tab where the Cloud Shell is open, navigate to your Language service resource in the [Azure portal](https://portal.azure.com/) and select the **Keys and Endpoint** item under **Resource Management** from the left-hand navigation menu.
 
     ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/16-azure-language-service-keys-endpoints.png)
 
-2. Copy your endpoint and access key values, then in the commands below, replace the `{endpoint}` and `{api-key}` tokens with values you retrieved from the Azure portal. Run the commands from the `psql` command prompt in the Cloud Shell to add your values to the `azure_ai.settings` table.
+2. Copy your endpoint and access key values, then in the commands below, replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Run the commands from the `psql` command prompt in the Cloud Shell to add your values to the `azure_ai.settings` table.
 
     ```sql
-    SELECT azure_ai.set_setting('azure_cognitive.endpoint','{endpoint}');
+    SELECT azure_ai.set_setting('azure_cognitive.endpoint', '{endpoint}');
     ```
 
     ```sql
     SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '{api-key}');
     ```
 
-### Analyze the sentiment of reviews
+## Review the Analyze Sentiment Capabilities of the Extension
 
 In this task, you use the `azure_cognitive.analyze_sentiment` function to evaluate reviews of rental property listings.
 
-1. You are working exclusively in the Cloud Shell for the remainder of this exercise, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the Cloud Shell pane.
+1. For the remainder of this exercise, you work exclusively in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the Cloud Shell pane.
 
     ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/16-azure-cloud-shell-pane-maximize.png)
 
-2. When working with `psql` in the Cloud Shell, it can be useful to enable the extended display for query results. Execute the following command to enable the extended display to be automatically applied when it will improve output display.
+2. When working with `psql` in the Cloud Shell, enabling the extended display for query results may be helpful, as it improves the readability of output for subsequent commands. Execute the following command to allow the extended display to be automatically applied.
 
     ```sql
     \x auto
     ```
 
-3. The sentiment analysis capabilities of the `azure_ai` extension are found within the `azure_cognitive` schema. You use the `analyze_sentiment` function. Run the command below to review that function:
+3. The sentiment analysis capabilities of the `azure_ai` extension are found within the `azure_cognitive` schema. You use the `analyze_sentiment()` function. Use the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC) to examine the function by running:
 
     ```sql
     \df azure_cognitive.analyze_sentiment
     ```
 
-    The output shows the function's schema, name, result data type, and argument data types. This information can help you understand how to interact with the function from your queries.
+    The meta-command output shows the function's schema, name, result data type, and arguments. This information helps you understand how to interact with the function from your queries.
 
-    TODO: Add a bit more here about the three overloads of the function and the differences between them. Also briefly talk about the retry delay and max attempts params. Also talk about the requirements arguments (text and language). Perhaps provide a link to the supported languages?
+    The output shows three overloads of the `analyze_sentiment()` function, allowing you to review their differences. The `Argument data types` property in the output reveals the list of arguments the three function overloads expect:
 
-4. An essential aspect of working with the `analyze_sentiment()` function is understanding the structure of the result data type so you can correctly handle its return value. Run the following command to inspect the `sentiment_analysis_result` type:
+    | Argument | Type | Default | Description |
+    | -------- | ---- | ------- | ----------- |
+    | text | `text` || The text for which sentiment should be analyzed. |
+    | language_text | `text` or `text[]` || Language code (or array of language codes) representing the language of the text to analyze for sentiment. Review the [list of supported languages](https://learn.microsoft.com/azure/ai-services/language-service/sentiment-opinion-mining/language-support) to retrieve the necessary language codes. |
+    | batch_size | `integer` | 10 | Only for the two overload expecting an input of `text[]`. Specifies the number of records to process at a time. |
+    | disable_service_logs | `boolean` | false | Flag indicating whether to turn off service logs. |
+    | timeout_ms | `integer` | 3600000 | Timeout in milliseconds after which the operation is stopped. |
+    | throw_on_error | `boolean` | true | Flag indicating whether the function should, on error, throw an exception resulting in a rollback of the wrapping transaction. |
+    | max_attempts | `integer` | 1 | Number of times to retry the call to Azure AI Services in the event of a failure. |
+    | retry_delay_ms | `integer` | 1000 | Amount of time, in milliseconds, to wait before attempting to retry calling the Azure AI Services endpoint. |
+
+4. It is imperative to understand the structure of the data type that a function returns so you can correctly handle the output in your queries. As an example, run the following command to inspect the `sentiment_analysis_result` type:
 
     ```sql
     \dT+ azure_cognitive.sentiment_analysis_result
     ```
 
-5. The output of the above command reveals the `sentiment_analysis_result` type is a `tuple`. To understand the structure of that `tuple`,  run the following command to look at the columns contained within the `sentiment_analysis_result` composite type:
+5. The output of the above command reveals the `sentiment_analysis_result` type is a `tuple`. You can dig further into the structure of that `tuple` by running the following command to look at the columns contained within the `sentiment_analysis_result` type:
 
     ```sql
     \d+ azure_cognitive.sentiment_analysis_result
@@ -239,28 +252,28 @@ In this task, you use the `azure_cognitive.analyze_sentiment` function to evalua
      negative_score | double precision |           |          |         | plain    |
     ```
 
-    The `azure_cognitive.sentiment_analysis_result` is a composite type containing the sentiment predictions of the input text. It includes the sentiment, which can be positive, negative, neutral, or mixed, and the scores for positive, neutral, and negative aspects found in the text. The scores are represented as real numbers between 0 and 1. For example, in (neutral,0.26,0.64,0.09), the sentiment is neutral with a positive score of 0.26, neutral of 0.64, and negative at 0.09.
+    The `azure_cognitive.sentiment_analysis_result` is a composite type containing the sentiment predictions of the input text. It includes the sentiment, which can be positive, negative, neutral, or mixed, and the scores for positive, neutral, and negative aspects found in the text. The scores are represented as real numbers between 0 and 1. For example, in (neutral, 0.26, 0.64, 0.09), the sentiment is neutral, with a positive score of 0.26, neutral of 0.64, and negative at 0.09.
 
-6. Now that you have an understanding of the `analyze_sentiment` function and its return type, it is time to put it into action. To start, execute the following simple query, which performs sentiment analysis inline on a couple of reviews:
+## Analyze the sentiment of reviews
+
+1. Now that you have reviewed the `analyze_sentiment` function and the `sentiment_analysis_result` it returns, let's put the function to use. Execute the following simple query, which performs sentiment analysis on a handful of comments in the `reviews` table:
 
     ```sql
     SELECT
         id,
-        comments,
         azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment
     FROM reviews
-    WHERE id IN (1, 3);
+    WHERE id <= 10
+    ORDER BY id;
     ```
 
-    Using the `analyze_sentiment()` function inline allows you to quickly analyze sentiment of text directly within your queries.
+    From the two records analyzed, note the `sentiment` values in the output, `(mixed,0.71,0.09,0.2)` and `(positive,0.99,0.01,0)`. These represent the `sentiment_analysis_result` returned by the `analyze_sentiment()` function in the above query. The analysis was performed over the `comments` field in the `reviews` table.
 
-    TODO: talk about the overload of the function used above, sending in only a single string of text at a time, and how that might not be the most efficient approach when dealing with a larger number of records.
+    > Note
+    >
+    > Using the `analyze_sentiment()` function inline allows you to quickly analyze the text's sentiment within your queries. While this works well for a small number of records, it may not be ideal for analyzing the sentiment of a large number of records or updating all the records in a table that may contain tens of thousands of reviews or more.
 
-    TODO: Talk about the output, focusing on the return type (one mixed and on positive).
-
-    TODO: Set up an example that passes in an array of comments to be analyzed, so we can also look at that return type.
-
-7. With the above approach, the sentiment of the entire review is analyzed, but there may be times when you want to analyze each sentence within a block of text. To do this, you can use the overload of the `analyze_sentiment()` function that accepts an array of text.
+2. Another approach that can be useful for longer reviews is to analyze the sentiment of each sentence within it. To do this, use the overload of the `analyze_sentiment()` function, which accepts an array of text.
 
     ```sql
     SELECT
@@ -269,13 +282,15 @@ In this task, you use the `azure_cognitive.analyze_sentiment` function to evalua
     WHERE id = 1;
     ```
 
-    In the above query, you used the `STRING_TO_ARRAY` function from PostgreSQL, and to ensure there are no empty array elements, which will cause errors with the `analyze_sentiment()` function, the `ARRAY_REMOVE` function was also used to remove any elements that are an empty string.
+    In the above query, you used the `STRING_TO_ARRAY` function from PostgreSQL. Additionally, the `ARRAY_REMOVE` function was used to remove any array elements that are empty strings, as these will cause errors with the `analyze_sentiment()` function.
 
-8. The previous query returned the `sentiment_analysis_result` directly from the query. However, you will most likely want to get at the underlying values within that `tuple`. Execute the following query that looks for overwhelmingly positive reviews and extracts the sentiment components into individual fields:
+    The output from the query allows you to get a better understanding of the `mixed` sentiment assigned to the overall review. The sentences are a mixture of positive, neutral, and negative sentiments.
+
+3. The previous two queries returned the `sentiment_analysis_result` directly from the query. However, you will likely want to retrieve the underlying values within the `sentiment_analysis_result` `tuple`. Execute the following query that looks for overwhelmingly positive reviews and extracts the sentiment components into individual fields:
 
     ```sql
     WITH cte AS (
-        SELECT id, comments, azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment FROM reviews LIMIT 100
+        SELECT id, comments, azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment FROM reviews
     )
     SELECT
         id,
@@ -289,27 +304,13 @@ In this task, you use the `azure_cognitive.analyze_sentiment` function to evalua
     LIMIT 5;
     ```
 
-    The above query uses a common table expression or CTE to get the sentiment scores for the first 100 records in the `reviews` table. It then selects the `sentiment` composite type columns from the CTE to extract the individual values from the `sentiment_analysis_result`.
+    The above query uses a common table expression or CTE to get the sentiment scores for all records in the `reviews` table. It then selects the `sentiment` composite type columns from the `sentiment_analysis_result` returned by the CTE to extract the individual values from `tuple.`
 
-9. You can likewise run a similar query to look for negative reviews:
+## Store Sentiment in the Reviews Table
 
-    ```sql
-    WITH cte AS (
-        SELECT id, comments, azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment FROM reviews LIMIT 100
-    )
-    SELECT
-        id,
-        (sentiment).sentiment,
-        (sentiment).positive_score,
-        (sentiment).neutral_score,
-        (sentiment).negative_score,
-        comments
-    FROM cte
-    WHERE (sentiment).negative_score > 0.70
-    LIMIT 5;
-    ```
+For the rental property recommendation system you are building for Margie's Travel, you want to store sentiment ratings in the database so you do not have to make calls and incur costs every time sentiment assessments are requested. Performing sentiment analysis on the fly can be great for small numbers of records or analyzing data in near-real time. Still, for your stored reviews, adding the sentiment data into the database for use in your application makes sense. To do this, you want to alter the `reviews` table to add columns for storing the sentiment assessment and the positive, neutral, and negative scores.
 
-10. TODO: Run another query to insert the values into new columns in the database.
+1. Run the following query to update the `reviews` table so it can store sentiment details:
 
     ```sql
     ALTER TABLE reviews
@@ -319,40 +320,63 @@ In this task, you use the `azure_cognitive.analyze_sentiment` function to evalua
     ADD COLUMN negative_score numeric;
     ```
 
-11. TODO: Write insert query
-
-    TODO: Performing sentiment analysis on the fly can be great for small numbers of records or analyzing data in near-real time, but for your stored reviews, it makes sense to add the sentiment data into the database for use in your application.
-
-    First, you want to update the existing records in the database...
-
-    This is where we can talk about retries and max attempts...
+2. Next, you want to update the existing records in the `reviews` table with their sentiment value and associated scores.
 
     ```sql
     WITH cte AS (
-        SELECT
-            id,
-            azure_cognitive.analyze_sentiment(comments, 'en', throw_on_error=false, ) AS sentiment
-        FROM reviews
+        SELECT id, azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment FROM reviews
     )
     UPDATE reviews AS r
     SET
-        (sentiment).sentiment,
-        (sentiment).positive_score,
-        (sentiment).neutral_score,
-        (sentiment).negative_score
+        sentiment = (cte.sentiment).sentiment,
+        positive_score = (cte.sentiment).positive_score,
+        neutral_score = (cte.sentiment).neutral_score,
+        negative_score = (cte.sentiment).negative_score
     FROM cte
     WHERE r.id = cte.id;
     ```
 
-12. TODO: Write a query or stored procedure that can be used to analyze sentiment as new reviews are submitted and talk about how that could be used by the app.
+    Executing this query takes a long time! This is because the comments for every review in the table are sent individually to the Language service's endpoint for analysis. Sending records in batches is a more efficient approach when dealing with a large number of records.
+
+3. Let's run the query below to perform the same update action, but this time send comments from the `reviews` table in batches of 10 (this is the maximum batch size allowed) and evaluate the difference in performance.
 
     ```sql
-    TODO: write query to insert the data into the new columns in the database.
+    WITH cte AS (
+        SELECT azure_cognitive.analyze_sentiment(ARRAY(SELECT comments FROM reviews ORDER BY id), 'en', batch_size => 10) as sentiments
+    ),
+    sentiment_cte AS (
+        SELECT
+            ROW_NUMBER() OVER () AS id, --ORDER BY sentiments
+            sentiments AS sentiment
+        FROM cte
+    )
+    UPDATE reviews AS r
+    SET
+        sentiment = (sentiment_cte.sentiment).sentiment,
+        positive_score = (sentiment_cte.sentiment).positive_score,
+        neutral_score = (sentiment_cte.sentiment).neutral_score,
+        negative_score = (sentiment_cte.sentiment).negative_score
+    FROM sentiment_cte
+    WHERE r.id = sentiment_cte.id;
+    ```
+
+    While this query is a bit more complex, using two CTEs, it is much more performant. In this query, the first CTE analyzes the sentiment of batches of review comments, and the second extracts the resulting table of `sentiment_analysis_results` into a new table containing an `id` based on the ordinal position and ``sentiment_analysis_result` for each row. The second CTE can then be used in the update statement to write the values into the database.
+
+4. Next, run a query to observe the update results, searching for reviews with a **negative** sentiment, starting with the most negative first.
+
+    ```sql
+    SELECT
+        id,
+        negative_score,
+        comments
+    FROM reviews
+    WHERE sentiment = 'negative'
+    ORDER BY negative_score DESC;
     ```
 
 ## Clean up
 
-After you have completed this exercise, you should delete the Azure resources you have created. You are charged for the configured capacity, not how much the database is used. To delete your resource group and all resources you created for this lab, follow the instructions below.
+Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
 
 > Note
 >
@@ -360,12 +384,12 @@ After you have completed this exercise, you should delete the Azure resources yo
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
 
-    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/11-azure-portal-home-azure-services-resource-groups.png)
+    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/16-azure-portal-home-azure-services-resource-groups.png)
 
-2. In the filter for any field search box, enter the name of the resource group you created for these labs in Lab 1, and then select the resource group from the list.
+2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select your resource group from the list.
 
 3. On the **Overview** page of your resource group, select **Delete resource group**.
 
-    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/11-resource-group-delete.png)
+    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/16-resource-group-delete.png)
 
 4. In the confirmation dialog, enter the name of the resource group you are deleting to confirm and then select **Delete**.
