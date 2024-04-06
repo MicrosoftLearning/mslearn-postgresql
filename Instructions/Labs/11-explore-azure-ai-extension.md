@@ -135,6 +135,8 @@ Before you explore the `azure_ai` extension, add a couple of tables to the `rent
 1. Run the following commands to create the `listings` and `reviews` tables for storing rental property listing and customer review data:
 
     ```sql
+    DROP TABLE IF EXISTS listings;
+
     CREATE TABLE listings (
         id int,
         name varchar(100),
@@ -147,6 +149,8 @@ Before you explore the `azure_ai` extension, add a couple of tables to the `rent
     ```
 
     ```sql
+    DROP TABLE IF EXISTS reviews;
+
     CREATE TABLE reviews (
         id int,
         listing_id int, 
