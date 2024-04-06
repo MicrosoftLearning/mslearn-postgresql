@@ -6,7 +6,7 @@ lab:
 
 # Lab Title
 
-In this exercise, you will install the `azure_ai` extension in an Azure Database for PostgreSQL flexible server database and explore the extension's capabilities for integrating [Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/overview) and the [Azure AI Language service](https://learn.microsoft.com/azure/ai-services/language-service/) to incorporate rich generative AI capabilities into your database.
+In this exercise, you install the `azure_ai` extension in an Azure Database for PostgreSQL flexible server database and explore the extension's capabilities for integrating [Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/overview) and the [Azure AI Language service](https://learn.microsoft.com/azure/ai-services/language-service/) to incorporate rich generative AI capabilities into your database.
 
 ## Before you start
 
@@ -14,7 +14,7 @@ You need an [Azure subscription](https://azure.microsoft.com/free) with administ
 
 ### Deploy resources into your Azure subscription
 
-This step will guide you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
+This step guides you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
 
 > Note
 >

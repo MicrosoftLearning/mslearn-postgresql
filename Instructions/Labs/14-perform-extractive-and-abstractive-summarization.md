@@ -14,7 +14,7 @@ You need an [Azure subscription](https://azure.microsoft.com/free) with administ
 
 ### Deploy resources into your Azure subscription
 
-This step will guide you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
+This step guides you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
 
 > Note
 >

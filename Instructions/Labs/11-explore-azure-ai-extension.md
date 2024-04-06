@@ -16,7 +16,7 @@ You need an [Azure subscription](https://azure.microsoft.com/free) with administ
 
 ### Deploy resources into your Azure subscription
 
-This step will guide you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
+This step guides you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
 
 > Note
 >
@@ -203,7 +203,7 @@ Before using the `azure_ai` extension, you must install it into your database an
 
 Reviewing the objects within the `azure_ai` extension can help you better understand its capabilities. In this task, you inspect the various schemas, user-defined functions (UDFs), and composite types added to the database by the extension.
 
-1. When working with `psql` in the Cloud Shell, enabling the extended display for query results may be helpful. Execute the following command to allow the extended display to be automatically applied. It improves reading the output of subsequent commands.
+1. When working with `psql` in the Cloud Shell, enabling the extended display for query results may be helpful, as it improves the readability of output for subsequent commands. Execute the following command to allow the extended display to be automatically applied.
 
     ```sql
     \x auto
@@ -266,7 +266,7 @@ The `azure_ai` schema provides the framework for directly interacting with Azure
 
     You can use either `KEY 1` or `KEY 2`. Always having two keys allows you to securely rotate and regenerate keys without causing service disruption.
 
-3. Once you have your endpoint and key, maximize the Cloud Shell pane again, then use the commands below to add your values to the configuration table. Ensure you replace the `{endpoint}` and `{api-key}` tokens with the values you retrieved from the Azure portal.
+3. Once you have your endpoint and key, maximize the Cloud Shell pane again, then use the commands below to add your values to the configuration table. Ensure you replace the `{endpoint}` and `{api-key}` tokens with the values you copied from the Azure portal.
 
     ```sql
     SELECT azure_ai.set_setting('azure_openai.endpoint', '{endpoint}');
@@ -304,6 +304,8 @@ The `azure_openai` schema provides the ability to integrate the creation of vect
     | batch_size | `integer` | 100 | Only for the overload expecting an input of `text[]`. Specifies the number of records to process at a time. |
     | timeout_ms | `integer` | 3600000 | Timeout in milliseconds after which the operation is stopped. |
     | throw_on_error | `boolean` | true | Flag indicating whether the function should, on error, throw an exception resulting in a rollback of the wrapping transaction. |
+    | max_attempts | `integer` | 1 | Number of times to retry the call to Azure OpenAI service in the event of a failure. |
+    | retry_delay_ms | `integer` | 1000 | Amount of time, in milliseconds, to wait before attempting to retry calling the Azure OpenAI service endpoint. |
 
 2. To provide a simplified example of using the function, run the following query, which creates a vector embedding for the `description` field in the `listings` table. The `deployment_name` parameter in the function is set to `embedding`, which is the name of the deployment of the `text-embedding-ada-002` model in your Azure OpenAI service (it was created with that name by the Bicep deployment script):
 
@@ -412,7 +414,7 @@ The `azure_cognitive` schema provides the framework for directly interacting wit
     WHERE id IN (1, 3);
     ```
 
-    Observe the `sentiment` values in the output, `(mixed,0.71,0.09,0.2)` and `(positive,0.99,0.01,0)`. These represent the `sentiment_analysis_result` returned by the `analyze_sentiment()` function in the above query. The analysis was performed over the `comments` field in the `reviews` records.
+    Observe the `sentiment` values in the output, `(mixed,0.71,0.09,0.2)` and `(positive,0.99,0.01,0)`. These represent the `sentiment_analysis_result` returned by the `analyze_sentiment()` function in the above query. The analysis was performed over the `comments` field in the `reviews` table.
 
 ## Inspect the Azure ML schema
 
@@ -465,7 +467,7 @@ Once you have completed this exercise, delete the Azure resources you created. Y
 
     ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/11-azure-portal-home-azure-services-resource-groups.png)
 
-2. In the filter for any field search box, enter the name of the resource group you created for these labs in Lab 1, and then select the resource group from the list.
+2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select your resource group from the list.
 
 3. On the **Overview** page of your resource group, select **Delete resource group**.
 
