@@ -183,6 +183,10 @@ The Azure AI services integrations included in the `azure_cognitive` schema of t
 
     ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/16-azure-language-service-keys-endpoints.png)
 
+    > Note
+    >
+    > If you received the message `NOTICE:  extension "azure_ai" already exists, skipping CREATE EXTENSION` when installing the `azure_ai` extension above and have previously configured the extension with your Language service endpoint and key, you can use the `azure_ai.get_setting()` function to confirm those settings are correct, and then skip step 2 if they are.
+
 2. Copy your endpoint and access key values, then in the commands below, replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Run the commands from the `psql` command prompt in the Cloud Shell to add your values to the `azure_ai.settings` table.
 
     ```sql
@@ -195,7 +199,7 @@ The Azure AI services integrations included in the `azure_cognitive` schema of t
 
 ## Review the Analyze Sentiment Capabilities of the Extension
 
-In this task, you use the `azure_cognitive.analyze_sentiment` function to evaluate reviews of rental property listings.
+In this task, you use the `azure_cognitive.analyze_sentiment()` function to evaluate reviews of rental property listings.
 
 1. For the remainder of this exercise, you work exclusively in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the Cloud Shell pane.
 
@@ -219,16 +223,16 @@ In this task, you use the `azure_cognitive.analyze_sentiment` function to evalua
 
     | Argument | Type | Default | Description |
     | -------- | ---- | ------- | ----------- |
-    | text | `text` || The text for which sentiment should be analyzed. |
+    | text | `text` or `text[]` || The text(s) for which sentiment should be analyzed. |
     | language_text | `text` or `text[]` || Language code (or array of language codes) representing the language of the text to analyze for sentiment. Review the [list of supported languages](https://learn.microsoft.com/azure/ai-services/language-service/sentiment-opinion-mining/language-support) to retrieve the necessary language codes. |
     | batch_size | `integer` | 10 | Only for the two overload expecting an input of `text[]`. Specifies the number of records to process at a time. |
     | disable_service_logs | `boolean` | false | Flag indicating whether to turn off service logs. |
-    | timeout_ms | `integer` | 3600000 | Timeout in milliseconds after which the operation is stopped. |
+    | timeout_ms | `integer` | NULL | Timeout in milliseconds after which the operation is stopped. |
     | throw_on_error | `boolean` | true | Flag indicating whether the function should, on error, throw an exception resulting in a rollback of the wrapping transaction. |
     | max_attempts | `integer` | 1 | Number of times to retry the call to Azure AI Services in the event of a failure. |
     | retry_delay_ms | `integer` | 1000 | Amount of time, in milliseconds, to wait before attempting to retry calling the Azure AI Services endpoint. |
 
-4. It is imperative to understand the structure of the data type that a function returns so you can correctly handle the output in your queries. As an example, run the following command to inspect the `sentiment_analysis_result` type:
+4. It is also imperative to understand the structure of the data type that a function returns so you can correctly handle the output in your queries. Run the following command to inspect the `sentiment_analysis_result` type:
 
     ```sql
     \dT+ azure_cognitive.sentiment_analysis_result
@@ -256,7 +260,7 @@ In this task, you use the `azure_cognitive.analyze_sentiment` function to evalua
 
 ## Analyze the sentiment of reviews
 
-1. Now that you have reviewed the `analyze_sentiment` function and the `sentiment_analysis_result` it returns, let's put the function to use. Execute the following simple query, which performs sentiment analysis on a handful of comments in the `reviews` table:
+1. Now that you have reviewed the `analyze_sentiment()` function and the `sentiment_analysis_result` it returns, let's put the function to use. Execute the following simple query, which performs sentiment analysis on a handful of comments in the `reviews` table:
 
     ```sql
     SELECT
@@ -346,7 +350,7 @@ For the rental property recommendation system you are building for Margie's Trav
     ),
     sentiment_cte AS (
         SELECT
-            ROW_NUMBER() OVER () AS id, --ORDER BY sentiments
+            ROW_NUMBER() OVER () AS id,
             sentiments AS sentiment
         FROM cte
     )
