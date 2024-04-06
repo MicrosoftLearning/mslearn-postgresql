@@ -6,7 +6,7 @@ lab:
 
 # Perform Extractive and Abstractive Summarization
 
-In this exercise, you use the `azure_ai` extension in Azure Database For PostgreSQL flexible server to perform abstractive and extractive summarization on rental property descriptions and compare the resulting summaries.
+The rental property app maintained by Margie's Travel provides a way for property managers to provide a description of rental listings. Many of the descriptions in the system are long, providing many details about the rental property, its neighborhood, and local attractions, stores, and other amenities. A feature that has been requested as you implement new AI-powered capabilities for the app is using generative AI to create concise summaries of these descriptions, making it easier for your users to quickly review properties. In this exercise, you use the `azure_ai` extension in Azure Database For PostgreSQL flexible server to perform abstractive and extractive summarization on rental property descriptions and compare the resulting summaries.
 
 ## Before you start
 
@@ -24,7 +24,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 2. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/11-portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/14-portal-toolbar-cloud-shell.png)
 
 3. At the Cloud Shell prompt, enter the following to clone the GitHub repo containing exercise resources:
 
@@ -46,7 +46,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     RG_NAME=rg-learn-postgresql-ai-$REGION
     ```
 
-    The final command randomly generates a password for the PostgreSQL admin login. Make sure you copy it to a safe place so that you can use it later to connect to your PostgreSQL flexible server.
+    The final command randomly generates a password for the PostgreSQL admin login. **Make sure you copy it** to a safe place to use later to connect to your PostgreSQL flexible server.
 
     ```bash
     a=()
@@ -116,7 +116,7 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 2. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `rentals` database.
 
-    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](media/11-postgresql-rentals-database-connect.png)
+    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](media/14-postgresql-rentals-database-connect.png)
 
 3. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** login.
 
@@ -124,15 +124,17 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 4. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
 
-    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/11-azure-cloud-shell-pane-maximize.png)
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/14-azure-cloud-shell-pane-maximize.png)
 
 ## Populate the database with sample data
 
-Before you get started exploring the `azure_ai` extension, you will add a couple of tables to the `rentals` database and populate them with sample data.
+Before you can generate summaries of rental property descriptions using the `azure_ai` extension, you must add sample data to your database. Add a table to the `rentals` database and populate it with rental property listings so you have property descriptions from which to create summaries.
 
-1. Run the following command to create the tables for storing data in the shape used by this lab:
+1. Run the following command to create a table named `listings` for storing listing data for rental properties:
 
     ```sql
+    DROP TABLE IF EXISTS listings;
+
     CREATE TABLE listings (
         id int,
         name varchar(100),
@@ -144,18 +146,7 @@ Before you get started exploring the `azure_ai` extension, you will add a couple
     );
     ```
 
-    TODO: Remove the reviews table from this one. It isn't used.
-
-    ```sql
-    CREATE TABLE reviews (
-        id int,
-        listing_id int, 
-        date date,
-        comments text
-    );
-    ```
-
-2. Next, you will use the `COPY` command to load data from CSV files into each of the tables you created above. Start by running the following command to populate the `listings` table:
+2. Next, use the `COPY` command to populate the table with data from a CSV file. Execute the command below to load customer reviews into the `listings` table:
 
     ```sql
     \COPY listings FROM 'mslearn-postgresql/Allfiles/Labs/Shared/listings.csv' CSV HEADER
@@ -163,35 +154,210 @@ Before you get started exploring the `azure_ai` extension, you will add a couple
 
     The output of the command should be `COPY 50`, indicating that 50 rows were written into the table from the CSV file.
 
-3. Finally, run the command below to load customer reviews into the `reviews` table:
+## Install and configure the `azure_ai` extension
 
-    TODO: Remove the reviews table from this one. It isn't used.
+Before using the `azure_ai` extension, you must install it into your database and configure it to connect to your Azure AI Services resources. The `azure_ai` extension allows you to integrate the Azure OpenAI and Azure AI Language services into your database. To enable the extension in your database, follow these steps:
+
+1. Execute the following command at the `psql` prompt to verify that the `azure_ai` and the `vector` extensions were successfully added to your server's _allowlist_ by the Bicep deployment script you ran when setting up your environment:
 
     ```sql
-    \COPY reviews FROM 'mslearn-postgresql/Allfiles/Labs/Shared/reviews.csv' CSV HEADER
+    SHOW azure.extensions;
     ```
 
-    The output of the command should be `COPY 354`, indicating that 354 rows were written into the table from the CSV file.
+    The command displays the list of extensions on the server's _allowlist_. If everything was correctly installed, your output must include `azure_ai` and `vector`, like this:
 
-## Procedure 1
+    ```sql
+     azure.extensions 
+    ------------------
+     azure_ai,vector
+    ```
 
-Procedure overview
+    Before an extension can be installed and used in Azure Database for PostgreSQL flexible server, it must be added to the server's _allowlist_, as described in [how to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
 
-1. Step 1
-2. Step 2
-3. etc.
+2. Now, you are ready to install the `azure_ai` extension using the [CREATE EXTENSION](https://www.postgresql.org/docs/current/sql-createextension.html) command.
 
-## Procedure n
+    ```sql
+    CREATE EXTENSION IF NOT EXISTS azure_ai;
+    ```
 
-Procedure overview
+    `CREATE EXTENSION` loads a new extension into the database by running its script file. This typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
 
-1. Step 1
-2. Step 2
-3. etc.
+## Connect Your Azure AI Services Account
+
+The Azure AI services integrations included in the `azure_cognitive` schema of the `azure_ai` extension provide a rich set of AI Language features accessible directly from the database. The text summarization capabilities are enabled through the [Azure AI Language service](https://learn.microsoft.com/azure/ai-services/language-service/overview).
+
+1. To successfully make calls against your Azure AI Language services using the `azure_ai` extension, you must provide its endpoint and key to the extension. Using the same browser tab where the Cloud Shell is open, navigate to your Language service resource in the [Azure portal](https://portal.azure.com/) and select the **Keys and Endpoint** item under **Resource Management** from the left-hand navigation menu.
+
+    ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/14-azure-language-service-keys-endpoints.png)
+
+    > Note
+    >
+    > If you received the message `NOTICE:  extension "azure_ai" already exists, skipping CREATE EXTENSION` when installing the `azure_ai` extension above and have previously configured the extension with your Language service endpoint and key, you can use the `azure_ai.get_setting()` function to confirm those settings are correct, and then skip step 2 if they are.
+
+2. Copy your endpoint and access key values, then in the commands below, replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Run the commands from the `psql` command prompt in the Cloud Shell to add your values to the `azure_ai.settings` table.
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_cognitive.endpoint', '{endpoint}');
+    ```
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '{api-key}');
+    ```
+
+## Review the Summarization Capabilities of the Extension
+
+In this task, you review the two summarization functions available in the `azure_cognitive` schema.
+
+1. For the remainder of this exercise, you work exclusively in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the Cloud Shell pane.
+
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/14-azure-cloud-shell-pane-maximize.png)
+
+2. When working with `psql` in the Cloud Shell, enabling the extended display for query results may be helpful, as it improves the readability of output for subsequent commands. Execute the following command to allow the extended display to be automatically applied.
+
+    ```sql
+    \x auto
+    ```
+
+3. The text summarization of the `azure_ai` extension are found within the `azure_cognitive` schema. For extractive summarization, use the `summarize_extractive()` function. Use the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC) to examine the function by running:
+
+    ```sql
+    \df azure_cognitive.summarize_extractive
+    ```
+
+    The meta-command output shows the function's schema, name, result data type, and arguments. This information helps you understand how to interact with the function from your queries.
+
+    The output shows three overloads of the `summarize_extractive()` function, allowing you to review their differences. The `Argument data types` property in the output reveals the list of arguments the three function overloads expect:
+
+    | Argument | Type | Default | Description |
+    | -------- | ---- | ------- | ----------- |
+    | text | `text` or `text[]` || The text(s) for which summaries should be generated. |
+    | language_text | `text` or `text[]` || Language code (or array of language codes) representing the language of the text to summarize. Review the [list of supported languages](https://learn.microsoft.com/azure/ai-services/language-service/summarization/language-support) to retrieve the necessary language codes. |
+    | sentence_count | `integer` | 3 | The number of summary sentences to generate. |
+    | sort_by | `text` | 'offset' | The sort order for the generated summary sentences. |
+    | batch_size | `integer` | 25 | Only for the two overload expecting an input of `text[]`. Specifies the number of records to process at a time. |
+    | disable_service_logs | `boolean` | false | Flag indicating whether to turn off service logs. |
+    | timeout_ms | `integer` | NULL | Timeout in milliseconds after which the operation is stopped. |
+    | throw_on_error | `boolean` | true | Flag indicating whether the function should, on error, throw an exception resulting in a rollback of the wrapping transaction. |
+    | max_attempts | `integer` | 1 | Number of times to retry the call to Azure AI Services in the event of a failure. |
+    | retry_delay_ms | `integer` | 1000 | Amount of time, in milliseconds, to wait before attempting to retry calling the Azure AI Services endpoint. |
+
+4. Repeat the above step, but this time run the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC) for the `azure_cognitive.summarize_abstractive()` function and review the output.
+
+    The two functions have similar signatures, although `summarize_abstractive()` does not have the `sort_by` parameter, and it returns an array of `text` versus the array of `azure_cognitive.sentence` composite types returned by the `summarize_extractive()` function. This has to do with the way the two different methods generate summaries. Extractive summarization identifies the most important sentences within the text it is summarizing, ranks them, and then returns those as the summary. Abstractive summarization, on the other hand, uses generative AI to create new, original sentences that summarize the key points of the text.
+
+5. It is also imperative to understand the structure of the data type that a function returns so you can correctly handle the output in your queries. To inspect the `azure_cognitive.sentence` type returned by the `summarize_extractive()` function, run:
+
+    ```sql
+    \dT+ azure_cognitive.sentence
+    ```
+
+6. The output of the above command reveals the `sentence` type is a `tuple`. To examine the structure of that `tuple` and review at the columns contained within the `sentence` composite type, execute:
+
+    ```sql
+    \d+ azure_cognitive.sentence
+    ```
+
+    The output of that command should look similar to the following:
+
+    ```sql
+                            Composite type "azure_cognitive.sentence"
+       Column   |       Type       | Collation | Nullable | Default | Storage  | Description 
+    ------------+------------------+-----------+----------+---------+----------+-------------
+     text       | text             |           |          |         | extended | 
+     rank_score | double precision |           |          |         | plain    |
+    ```
+
+    The `azure_cognitive.sentence` is a composite type containing the text of an extractive sentence and a rank score for each sentence, indicating how relevant the sentence is to the text's main topic. Document summarization ranks extracted sentences, and you can determine whether they're returned in the order they appear, or according to their rank.
+
+## Create Summaries for Property Descriptions
+
+In this task, you use the `summarize_extractive()` and `summarize_abstractive()` functions to create concise two-sentence summaries for property descriptions.
+
+1. Now that you have reviewed the `summarize_extractive()` function and the `sentiment_analysis_result` it returns, let's put the function to use. Execute the following simple query, which performs sentiment analysis on a handful of comments in the `reviews` table:
+
+    ```sql
+    SELECT
+        id,
+        name,
+        description,
+        azure_cognitive.summarize_extractive(description, 'en', 2) AS extractive_summary
+    FROM listings
+    WHERE id IN (1, 2);
+    ```
+
+    Compare the two sentences in the `extractive_summary` field in the output to the original `description`, noting that the sentences are not original, but simply extracted from the `description`. The numeric values listed after each sentence are the rank score assigned by the Language service.
+
+2. Next, perform abstractive summarization on the same records:
+
+    ```sql
+    SELECT
+        id,
+        name,
+        description,
+        azure_cognitive.summarize_abstractive(description, 'en', 2) AS abstractive_summary
+    FROM listings
+    WHERE id IN (1, 2);
+    ```
+
+    The abstractive summarization capabilities of the extension provide a unique, natural language summary that encapsulates the overall intent of the original text.
+
+3. Run a final query to do a side-by-side comparison of the two summarization techniques:
+
+    ```sql
+    SELECT
+        id,
+        azure_cognitive.summarize_extractive(description, 'en', 2) AS extractive_summary,
+        azure_cognitive.summarize_abstractive(description, 'en', 2) AS abstractive_summary
+    FROM listings
+    WHERE id IN (1, 2);
+    ```
+
+    By placing the generated summaries side-by-side, it is easy to compare the quality of the summaries generated by each of the methods. For the Margie's Travel application, abstractive summarization appears to be the better option, providing concise summaries that deliver high-quality information in a natural and readable manner. The extractive summaries, while providing some details, are more disjointed, and do not deliver the same value as the original content created by abstractive summarization.
+
+## Store Description Summary in the Database
+
+1. Run the following query to alter the `listings` table, adding a new `summary` column:
+
+    ```sql
+    ALTER TABLE listings
+    ADD COLUMN summary text;
+    ```
+
+2. To use generative AI to create summaries for all the existing properties in the database, it is most efficient to send in the descriptions in batches, allowing the language service to process multiple records simultaneously.
+
+    ```sql
+    WITH batch_cte AS (
+        SELECT azure_cognitive.summarize_abstractive(ARRAY(SELECT description FROM listings ORDER BY id), 'en', batch_size => 25) AS summary
+    ),
+    summary_cte AS (
+        SELECT
+            ROW_NUMBER() OVER () AS id,
+            ARRAY_TO_STRING(summary, ',') AS summary
+        FROM cte
+    )
+    UPDATE listings AS l
+    SET summary = s.summary
+    FROM summary_cte AS s
+    WHERE l.id = s.id;
+    ```
+
+    The update statement uses two common table expressions (CTEs) to perform work on the data prior to update the `listings` table with summaries. The first CTE (`batch_cte`) sends all of the `description` values from the `listings` table to the Language service for abstractive summaries to be generated. It does this in batches of 25 records at a time. The second CTE (`summary_cte`) using the ordinal position of the summaries returned by the `summarize_abstractive()` function to assign each summary an `id` that corresponds to the record the `description` came from in the `listings` table. It also uses the `ARRAY_TO_STRING` function to pull the generated summaries out of the text array (`text[]`) return value and convert it into a simple string. Finally, the `UPDATE` statement writes the summary into the `listings` table for the associated listing.
+
+3. As a last step, run a query to view the summaries written into the `listings` table:
+
+    ```sql
+    SELECT
+        id,
+        name,
+        description,
+        summary
+    FROM listings
+    LIMIT 5;
+    ```
 
 ## Clean up
 
-After you have completed this exercise, you should delete the Azure resources you have created. You are charged for the configured capacity, not how much the database is used. To delete your resource group and all resources you created for this lab, follow the instructions below.
+Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
 
 > Note
 >
@@ -199,49 +365,12 @@ After you have completed this exercise, you should delete the Azure resources yo
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
 
-    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/11-azure-portal-home-azure-services-resource-groups.png)
+    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/14-azure-portal-home-azure-services-resource-groups.png)
 
-2. In the filter for any field search box, enter the name of the resource group you created for these labs in Lab 1, and then select the resource group from the list.
+2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select your resource group from the list.
 
 3. On the **Overview** page of your resource group, select **Delete resource group**.
 
-    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/11-resource-group-delete.png)
+    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/14-resource-group-delete.png)
 
 4. In the confirmation dialog, enter the name of the resource group you are deleting to confirm and then select **Delete**.
-
-
-
-## TODO: Lab steps
-
-1. Create Language Service
-2. Get Language service key and endpoint
-3. Set up connection to database
-4. Configure azure_ai extension with endpoint and key for azure_cognitive schema
-5. Connect to reviews table
-6. Use `azure_cognitive.summarize_extractive()` method to generate extractive summaries for a few records (limit this to just showcase the capability and not to do it for all records in the table, as it is a large table.)
-7. Use `azure_cognitive.summarize_abstractive()` method to generate abstractive summaries for a few records (limit this to just showcase the capability and not to do it for all records in the table, as it is a large table.)
-8. Compare the outputs from the two methods
-9. Talk about performance and implications for using each method?
-
-- The steps to create an Azure AI Services Language service in the Azure portal are as follows:
-  - Navigate to the [Azure portal](https://portal.azure.com/).
-  - Select **Create a resource** under **Azure services** on the Azure home page, then enter "Language service" into the **Search the Marketplace** box on the Marketplace page and select the **Language service** tile in the search results.
-  - Select **Create** on the **Language service** page to create a new language service resource.
-  - Select **Continue to create your resource** on the **Select additional features** page.
-  - On the Create Language **Basics** tab:
-    - Ensure you select the same resource group that you chose for your Azure OpenAI service.
-    - Set the region to one of the [regions that supports abstractive summarization](https://learn.microsoft.com/azure/ai-services/language-service/summarization/region-support) (**North Europe**, **East US**, **UK South**, or **Southeast Asia**). This does not have to be the same region associated with your other resources.
-    - Provide a _globally unique_ service name.
-    - You can choose either the **Free F0** or **S** pricing tier for this service.
-    - Ensure the box certifying you have reviewed and acknowledge the terms in the Responsible AI Notice is checked.
-  - Select the **Review + create** button to review your choices and then select **Create** to provision the service.
-
-    ![The settings to create a Language service are displayed on the Create Language Basics tab.](../../media/Solution/0601_Language_Service.png)
-
-- The steps to retrieve the endpoint and key values for your Language service and add them to `config.json` are as follows:
-  - Navigate to your Language service resource in the [Azure portal](https://portal.azure.com/).
-  - Select the **Keys and Endpoint** menu item under **Resource Management** in the left-hand menu.
-  - Copy the **Endpoint** value and paste it into the `config.json` file as the **LanguageEndpoint** value.
-  - Copy the **KEY 1** value and paste it into the `config.json` file as the **LanguageKey** value.
-
-    ![The Language service's Keys and Endpoint page is displayed, with the Endpoint and KEY 1 copy to clipboard buttons highlighted.](../../media/Solution/0601-Language-Keys-and-Endpoint.png)
