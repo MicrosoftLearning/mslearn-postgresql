@@ -6,6 +6,8 @@ lab:
 
 # Lab Title
 
+TODO: Use `reviews` table for this one, and create a "concise 5 word summary" of reviews to use as a "headline" in the reviews section of the application. Combined with the sentiment value, this will provide users with a quick way of assessing a review.
+
 In this exercise, you install the `azure_ai` extension in an Azure Database for PostgreSQL flexible server database and explore the extension's capabilities for integrating [Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/overview) and the [Azure AI Language service](https://learn.microsoft.com/azure/ai-services/language-service/) to incorporate rich generative AI capabilities into your database.
 
 ## Before you start
@@ -46,7 +48,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     RG_NAME=rg-learn-postgresql-ai-$REGION
     ```
 
-    The final command randomly generates a password for the PostgreSQL admin login. Make sure you copy it to a safe place so that you can use it later to connect to your PostgreSQL flexible server.
+    The final command randomly generates a password for the PostgreSQL admin login. **Make sure you copy it** to a safe place to use later to connect to your PostgreSQL flexible server.
 
     ```bash
     a=()
@@ -128,29 +130,28 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 ## Populate the database with sample data
 
-Before you get started exploring the `azure_ai` extension, you will add a couple of tables to the `rentals` database and populate them with sample data so you have information to work with as you review the extension's capabilities.
+Before you can generate query-based summaries of rental property descriptions using Azure OpenAI, you must add sample data to your database. Add a table to the `rentals` database and populate it with rental property listings so you have property descriptions from which to create summaries.
 
-1. Run the following command to create the tables for storing data in the shape used by this lab:
+1. Run the following command to create a table named `reviews` for storing property reviews submitted by customers:
 
     ```sql
-    CREATE TABLE listings (
+    DROP TABLE IF EXISTS reviews;
+
+    CREATE TABLE reviews (
         id int,
-        name varchar(100),
-        description text,
-        property_type varchar(25),
-        room_type varchar(30),
-        price numeric,
-        weekly_price numeric
+        listing_id int, 
+        date date,
+        comments text
     );
     ```
 
-2. Next, you will use the `COPY` command to load data from CSV files into each of the tables you created above. Start by running the following command to populate the `listings` table:
+2. Next, use the `COPY` command to populate the table with data from a CSV file. Execute the command below to load customer reviews into the `reviews` table:
 
     ```sql
-    \COPY listings FROM 'mslearn-postgresql/Allfiles/Labs/Shared/listings.csv' CSV HEADER
+    \COPY reviews FROM 'mslearn-postgresql/Allfiles/Labs/Shared/reviews.csv' CSV HEADER
     ```
 
-    The output of the command should be `COPY 50`, indicating that 50 rows were written into the table from the CSV file.
+    The command output should be `COPY 354`, indicating that 354 rows were written into the table from the CSV file.
 
 ## Install and configure the `azure_ai` extension
 
@@ -202,7 +203,7 @@ Procedure overview
 
 ## Clean up
 
-After you have completed this exercise, you should delete the Azure resources you have created. You are charged for the configured capacity, not how much the database is used. To delete your resource group and all resources you created for this lab, follow the instructions below.
+Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
 
 > Note
 >
@@ -210,15 +211,19 @@ After you have completed this exercise, you should delete the Azure resources yo
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
 
-    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/11-azure-portal-home-azure-services-resource-groups.png)
+    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/15-azure-portal-home-azure-services-resource-groups.png)
 
-2. In the filter for any field search box, enter the name of the resource group you created for these labs in Lab 1, and then select the resource group from the list.
+2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select your resource group from the list.
 
 3. On the **Overview** page of your resource group, select **Delete resource group**.
 
-    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/11-resource-group-delete.png)
+    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/15-resource-group-delete.png)
 
 4. In the confirmation dialog, enter the name of the resource group you are deleting to confirm and then select **Delete**.
+
+
+
+
 
 
 Throughout this exercise, you will dive into real-world examples, experiment with various prompts, and evaluate their impact on summarization quality.
