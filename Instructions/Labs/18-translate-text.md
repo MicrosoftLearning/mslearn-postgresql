@@ -6,7 +6,7 @@ lab:
 
 # Translate Text with Azure AI Translator
 
-As the lead developer for Margie's Travel (MT), you have been asked to assist in an internationalization effort. Today, all of the rental listings for the MT short-term rentals service are in the English language. You want to translate these listings into a variety of languages without extensive development effort. All of your data is hosted in Azure Database for PostgreSQL - Flexible Server, and you would like to take advantage of Azure AI Services to perform translation.
+As the lead developer for Margie's Travel, you have been asked to assist in an internationalization effort. Today, all of the rental listings for the company's short-term rentals service are in the English language. You want to translate these listings into a variety of languages without extensive development effort. All of your data is hosted in Azure Database for PostgreSQL - Flexible Server, and you would like to take advantage of Azure AI Services to perform translation.
 
 In this exercise, you will translate English-language text into a variety of languages using the Azure AI Translator service via Azure Database for PostgreSQL - Flexible Server.
 
@@ -20,7 +20,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
 
 > Note
 >
-> If you are doing multiple modules in this learning path, you can share the Azure environment between them. In that case, you only need to complete this resource deployment step once.
+> If you are doing multiple modules in this learning path, you should delete the resources you created in the prior modules and then follow these instructions.
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/).
 
@@ -70,10 +70,10 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
 6. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
 
     ```azurecli
-    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
+    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-translate.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
     ```
 
-    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server, Azure OpenAI, and an Azure AI Language service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter), creating a database named `rentals` on the server, and adding a deployment named `embedding` using the `text-embedding-ada-002` model to your Azure OpenAI service. Note that the Bicep file is shared by all modules in this learning path, so you may only use some of the deployed resources in some exercises.
+    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server and Azure AI Translator service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter), creating a database named `rentals` on the server. Note that the Bicep file is different from the other modules in this learning path.
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
@@ -82,13 +82,13 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     - If you have not previously created an Azure AI Services resource, you may receive a message that the Responsible AI terms have not been read and accepted in your subscription:
 
         ```bash
-        {"code": "ResourceKindRequireAcceptTerms", "message": "This subscription cannot create TextAnalytics until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal and trying again.}
+        {"code": "ResourceKindRequireAcceptTerms", "message": "This subscription cannot create TextTranslation until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal and trying again.}
         ```
 
         To resolve this error, run this command to create a Language service in your resource group and accept the Responsible AI terms for your subscription. Once the resource is created, you can rerun the command to execute the Bicep deployment script.
 
         ```bash
-        az cognitiveservices account create --name lang-temp-$region-$ADMIN_PASSWORD --resource-group $RG_NAME --kind TextAnalytics --sku F0 --location $REGION --yes
+        az cognitiveservices account create --name lang-temp-$region-$ADMIN_PASSWORD --resource-group $RG_NAME --kind TextTranslation --sku F0 --location $REGION --yes
         ```
 
     - If you previously ran the Bicep deployment script for this learning path and subsequently deleted the resources, you may receive an error message like the following if you are attempting to rerun the script within 48 hours of deleting the resources:
@@ -227,6 +227,7 @@ Before using the `azure_ai` extension, you must install it into your database an
     SELECT azure_ai.set_setting('azure_cognitive.endpoint','https://<YOUR_ENDPOINT>.cognitiveservices.azure.com/');
     SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '<YOUR_KEY>');
     SELECT azure_ai.set_setting('azure_cognitive.region', '<YOUR_REGION>');
+    ```
 
 ## Create a stored procedure to translate listings data
 
@@ -336,13 +337,13 @@ Once you have completed this exercise, delete the Azure resources you created. Y
 
 > Note
 >
-> If you plan on completing additional modules in this learning path, you can skip this task until you have finished all the modules you intend to complete.
+> If you plan on completing additional modules in this learning path, you should run this task and then run the deployment script in the next module you intend to complete.
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
 
     ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/11-azure-portal-home-azure-services-resource-groups.png)
 
-2. In the filter for any field search box, enter the name of the resource group you created for these labs in Lab 1, and then select the resource group from the list.
+2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select the resource group from the list.
 
 3. On the **Overview** page of your resource group, select **Delete resource group**.
 
