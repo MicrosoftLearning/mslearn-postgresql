@@ -34,6 +34,14 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     git clone https://github.com/MicrosoftLearning/mslearn-postgresql.git
     ```
 
+    If you have already cloned this GitHub repo in a prior module, it will still be available to you and you may receive the following error message:
+
+    ```bash
+    fatal: destination path 'mslearn-postgresql' already exists and is not an empty directory.
+    ```
+
+    If you receive this message, you can safely continue to the next step.
+
 4. Next, you run three commands to define variables to reduce redundant typing when using Azure CLI commands to create Azure resources. The variables represent the name to assign to your resource group (`RG_NAME`), the Azure region (`REGION`) into which resources will be deployed, and a randomly generated password for the PostgreSQL administrator login (`ADMIN_PASSWORD`).
 
     In the first command, the region assigned to the corresponding variable is `eastus`, but you can also replace it with a location of your preference. However, if replacing the default, you must select another [Azure region that supports abstractive summarization](https://learn.microsoft.com/azure/ai-services/language-service/summarization/region-support) to ensure you can complete all of the tasks in the modules in this learning path.
@@ -187,6 +195,8 @@ You have the `listings` data in place, but you will need two additional tables i
         ('sw');
     ```
 
+    The command output should be `INSERT 0 5`, indicating that you have inserted five new rows into the table.
+
 ## Install and configure the `azure_ai` extension
 
 Before using the `azure_ai` extension, you must install it into your database and configure it to connect to your Azure AI Services resources. The `azure_ai` extension allows you to integrate the Azure OpenAI and Azure AI Language services into your database. To enable the extension in your database, follow these steps:
@@ -261,10 +271,10 @@ In order to populate the language translation table, you will create a stored pr
 2. Execute the stored procedure using the following SQL command:
 
     ```sql
-    CALL translate_listing_descriptions(5);
+    CALL translate_listing_descriptions(10);
     ```
 
-    This call will take on average one second per rental listing to translate into five languages. The command output should be `CALL`, indicating that the stored procedure call succeeded.
+    This call will take on average one second per rental listing to translate into five languages, so each run should take approximately 10 seconds. The command output should be `CALL`, indicating that the stored procedure call succeeded.
 
 3. Call the stored procedure four more times, for a total of five times that you have called this procedure. That will generate translations for every listing in the table.
 
