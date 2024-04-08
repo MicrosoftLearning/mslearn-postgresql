@@ -179,36 +179,43 @@ You will train a new Azure Machine Learning Automated Machine Learning (AutoML) 
 
     ![Screenshot of the Compute page with a red box highlighting the Next button.](media/19-aml-automl-compute.png)
 
-16. Once you have everything configured, submit the training job. Wait for the training job to complete. This may take up to one hour. Once the process completes, the Status will display a green check mark and a text label of **Completed**.
+16. Once you have everything configured, submit the training job. Wait for the training job to complete. This may take slightly longer than one hour due to machine provisioning and training times. Once the process completes, the Status will display a green check mark and a text label of **Completed**.
 
-    TODO:
-    ![Screenshot of the completed AutoML job with a red box highlighting the Status section.]
+    ![Screenshot of the completed AutoML job with a red box highlighting the Status section.](media/19-aml-automl-completed.png)
+
+    > Note
+    >
+    > A warning message indicating that no scores have improved over the past 20 iterations is fine. This tells us that early termination occurred.
 
 ## Deploy the best-fitting Azure ML model
 
 Now that you have trained a series of models using Azure Machine Learning, the next step is to deploy the best-fit model.
 
-1. Select the **+ Register model** option on hte completed job to register a model. Choose the best-fit model option and name the model **RentalListings**.
+1. Select the **+ Register model** option on the completed job to register a model. Ensure that the **Job output** has the best model and then select **Next**.
 
-    TODO:
-    ![Screenshot of ...]
+    ![Screenshot of the Select output screen with model type of MLflow and a job output of the best model. A red box surrounds the Next button.](media/19-aml-automl-deploy-output.png)
 
-2. Navigate to the **Models** menu in Azure Machine Learning and select your registered model.
+2. Name the model **RentalListings** and then select the **Next** button.
 
-    TODO:
-    ![Screenshot of...]
+    ![Screenshot of the Model settings screen with the value of RentalListings entered into the Name field. Red highlighting boxes surround the Name text box and Next button.](media/19-aml-automl-deploy-model-settings.png)
 
-3. Use the **Deploy** option to create a new **Real-time endpoint**. This endpoint should run on 1 instance of **Standard_DS2_v2**. Choose an appropriate **Endpoint name** and an appropriate **Deployment name** and then select **Deploy**.
+3. Select the **Register** button to complete model registration. Then, select the link to go to the model.
 
-    TODO:
-    ![Screenshot of ...]
+    ![Screenshot of the Rental-Listings job overview after successful model registration. A red box highlights the link to navigate to the model.](media/19-aml-automl-deploy-success.png)
 
-4. After the endpoint deploys, navigate to the **Endpoints** menu on the left-hand side and select your new managed endpoint. Navigate to the **Consume** tab and copy the REST endpoint and primary key so you can use them in the next section. Keep track of the REST endpoint URL and endpoint key, as you will need them in the next section.
+4. Select the **Deploy** button option and create a new **Real-time endpoint**.
 
-    TODO:
-    ![Screenshot of...]
+    ![Screenshot of the Real-time endpoint menu option highlighted by a red box.](media/19-aml-automl-deploy-rte.png)
 
-5. In order to test that your endpoint is running correctly, you can use the **Test** tab on your endpoint. Then, paste in the following block, replacing any input that currently exists. Select the **Test** button and you should see a JSON output containing an array with a single decimal value, indicating the number of US dollars you should expect this particular property to earn for a single night of rental.
+5. On the deployment fly-out menu, set the **Virtual machine** to something like **Standard_DS2_v2** and the **Instance count** to 1. Select the **Deploy** button. Deployment may take several minutes to complete, as the deployment process includes provisioning a virtual machine and deploying the model as a Docker container.
+
+    ![Screenshot of the deployment fly-out menu. The Virtual machine is Standard_DS2_v2 and Instance count is 1. Red boxes highlight the Virtual machine drop-down, Instance count textbox, and Deploy button.](media/19-aml-automl-deploy-endpoint.png)
+
+6. After the endpoint deploys, navigate to the **Consume** tab and copy the REST endpoint and primary key so you can use them in the next section.
+
+    ![Screenshot of the endpoint Consume tab. Red boxes highlight the copy buttons for the REST endpoint and primary authentication key.](media/19-aml-automl-endpoint-consume.png)
+
+7. In order to test that your endpoint is running correctly, you can use the **Test** tab on your endpoint. Then, paste in the following block, replacing any input that currently exists. Select the **Test** button and you should see a JSON output containing an array with a single decimal value, indicating the number of US dollars you should expect this particular property to earn for a single night of rental.
 
     ```json
     {
@@ -227,13 +234,12 @@ Now that you have trained a series of models using Azure Machine Learning, the n
           "beds"
         ],
         "index": [0],
-        "data": [["False", "False", "False", "Central Area", "98122", "House", "Entire home/apt", 4, 1.5, 3, 3]]
+        "data": [["0", "0", "0", "Central Area", "98122", "House", "Entire home/apt", 4, 1.5, 3, 3]]
       }
     }
     ```
 
-    TODO:
-    ![Screenshot of...]
+    ![Screenshot of the endpoint Test tab. The Input box contains a sample call and the jsonOutput box contains the estimated value. The Test button is highlighted with a red box.](media/19-aml-automl-endpoint-test.png)
 
 ## Install and configure the `azure_ai` extension
 
