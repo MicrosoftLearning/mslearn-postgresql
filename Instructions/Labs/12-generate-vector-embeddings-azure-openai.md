@@ -6,7 +6,7 @@ DIAGRAM:
 - description column from the sample --> OpenAI API & back into vector column
 - query text, through OpenAI into vector, then arrow to document vectors showing the `<=>` distance operator
 
-By the end of this exercise, you'll have an Azure Database for PostgreSQL flexible server instance with the `pgvector` and `azure_ai` extensions enabled. You'll generate embeddings for the [Seattle Airbnb Open Data](https://www.kaggle.com/datasets/airbnb/seattle?select=listings.csv) dataset's `listings` table. You'll also run semantic searches against these listings by generating a query's embedding vector and performing a vector cosine distance search.
+By the end of this exercise, you'll have an Azure Database for PostgreSQL flexible server instance with the `vector` and `azure_ai` extensions enabled. You'll generate embeddings for the [Seattle Airbnb Open Data](https://www.kaggle.com/datasets/airbnb/seattle?select=listings.csv) dataset's `listings` table. You'll also run semantic searches against these listings by generating a query's embedding vector and performing a vector cosine distance search.
 
 ## Prerequisites & setup
 
@@ -17,7 +17,9 @@ By the end of this exercise, you'll have an Azure Database for PostgreSQL flexib
 
 ## Open a database connection
 
-If you're using Microsoft Entra authentication, you can connect using `psql` with an access token. For more detailed instructions, see: [Authenticate with Microsoft Entra ID](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-configure-sign-in-azure-ad-authentication#authenticate-with-microsoft-entra-id). Example with Bash:
+If you're using Microsoft Entra authentication, you can connect using `psql` with an access token. For detailed instructions, read [Authenticate with Microsoft Entra ID](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-configure-sign-in-azure-ad-authentication#authenticate-with-microsoft-entra-id).
+
+Example with Bash:
 
 ```bash
 export PGHOST=<your db server>
@@ -28,45 +30,45 @@ export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --quer
 psql sslmode=require
 ```
 
-If you're using Cloud Shell, it already knows who you are. Otherwise, you can run `az login` from a command line as described [here](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli-interactively) to fetch the access token for your user.
+If you're using Cloud Shell, it already knows who you are (ie you're already authenticated with you Azure credentials in that session of the shell). Otherwise, you can run `az login` from a command line, as described [here](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli-interactively) to fetch the access token for your user.
 
-**TIP**: you may wish to put the above in a script to authenticate new sessions quickly. Make sure to use the `az account` command in the script, not the actual password.
+**Suggestion**: You may wish to save the script provided above inside a file, to authenticate new sessions quickly. Make sure you use the `az account` command in the script, not the actual password.
 
-If you're using a user and password, you can connect like this; it will prompt you for the password:
+If you're authenticating to PostgreSQL with a user and its corresponding password, you can connect using the following command (it will prompt you for the password):
 
 ```bash
-psql --host=<your db server> --port=5432 --username=<db user> --dbname=<db name>
+psql --host=<postgresql_server_fqdn> --port=5432 --username=<database_user> --dbname=<database_name>
 ```
 
-## Setup: configure extensions
+## Setup: Configure extensions
 
-To store and query vectors, and to generate embeddings, you need to allow-list and enable two extensions for Azure Database for PostgreSQL Flexible Server.
+To store and query vectors, and to generate embeddings, you need to allow-list and enable two extensions for Azure Database for PostgreSQL Flexible Server: `vector` and `azure_ai`.
 
-1. Add `vector` and `azure_ai` to the server parameter `azure.extensions`, following these [instructions](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
+1. To allow-list both extensions, add `vector` and `azure_ai` to the server parameter `azure.extensions`, as per the instructions provided in [How to use PostgreSQL extensions](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
 
-2. Enable the `vector` extension. For detailed instructions, see: [How to enable and use `pgvector` on Azure Database for PostgreSQL - Flexible Server](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension).
+2. To enable the `vector` extension, run the following SQL command. For detailed instructions, read [How to enable and use `pgvector` on Azure Database for PostgreSQL - Flexible Server](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension).
 
    ```postgresql
    CREATE EXTENSION vector;
    ```
 
-3. Enable the `azure_ai` extension. You'll need the endpoint and API key for the Azure OpenAI resource. For detailed instructions, see: [Enable the `azure_ai` extension](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension).
+3. To enable the `azure_ai` extension, run the following SQL command. You'll need the endpoint and API key for the Azure OpenAI resource. For detailed instructions, read [Enable the `azure_ai` extension](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension).
 
    ```postgresql
    CREATE EXTENSION azure_ai;
-   SELECT azure_ai.set_setting('azure_openai.endpoint','https://<endpoint>.openai.azure.com');
+   SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<endpoint>.openai.azure.com');
    SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
    ```
 
 ## Load the sample data
 
-First, let's load the [Seattle Airbnb Open Data](https://www.kaggle.com/datasets/airbnb/seattle?select=listings.csv) dataset's `listings` table into the Azure Database for PostgreSQL flexible server instance.
+First, let's load the [Seattle Airbnb Open Data dataset's `listings` table](https://www.kaggle.com/datasets/airbnb/seattle?select=listings.csv) into the Azure Database for PostgreSQL flexible server instance.
 
-The full `listings` sample table (TODO link to listings.csv) has 92 columns. To simplify, we'll only import 3: the listing's `id`, its `name`, and its `description`. This data is stored in (TODO link to listings-reduced.csv).
+The full `listings` sample table has 92 columns<!-- (TODO link to listings.csv) -->. To simplify, we'll only import three: `id`, `name`, and `description`. <!-- This data is stored in (TODO link to listings-reduced.csv). -->
 
 1. Create the `listings` table in your database.
 
-   In the `psql` session, run this SQL:
+   In the `psql` prompt, run:
 
     ```sql
    CREATE TABLE listings (
@@ -87,7 +89,7 @@ The full `listings` sample table (TODO link to listings.csv) has 92 columns. To 
 
 2. Import the `listings.csv` file.
 
-   In the `psql` session, run this command:
+   In the `psql` prompt, run:
 
    ```postgresql
    \copy listings(id, name, description) FROM '/path/to/listings-reduced.csv' DELIMITER ',' CSV HEADER
@@ -103,13 +105,13 @@ The full `listings` sample table (TODO link to listings.csv) has 92 columns. To 
    (1 row)
    ```
 
-**TIP**: if you're using Cloud Shell, you can upload the CSV file to the file system running `psql` using the *Upload file* button in the shell toolbar. This uploads the file to the home directory. If you didn't change the directory of the shell, then `listings-reduced.csv` will not need a path qualifier.
+**Suggestion**: If you're running psql from the Cloud Shell, you can upload the CSV file to the file system of that shell, by using the *Upload file* button in the shell toolbar. The file is uploaded to the home directory. If you didn't change the context directory of the shell, since you started the shell, you should still be positioned in the home directory and, therefore, referring to the upload copy of `listings-reduced.csv` doesn't need a path qualifier.
 
 ![Cloud Shell toolbar highlighting the upload button](media/12-uploadfile.png)
 
-To reset your sample data, you may execute `DROP TABLE listings` and restart this process.
+To reset your sample data, you can execute `DROP TABLE listings`, and repeat all steps from [Load the sample data](#load-the-sample-data).
 
-Read more about the `\copy` command [here](https://www.postgresql.org/docs/current/sql-copy.html), noting the difference between `copy` (server side) and `\copy` (client side).
+To learn more about the `\copy` command used in the previous step, refer to [psql's copy meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMANDS-COPY). To learn about the differences between psql's meta-command `\copy` (client side) and `copy` (server side) command, refer to [COPY command](https://www.postgresql.org/docs/current/sql-copy.html#NOTES).
 
 ## Create and store embedding vectors
 
@@ -123,19 +125,19 @@ Now that we have some sample data, it's time to generate and store the embedding
    ALTER TABLE listings ADD COLUMN listing_vector vector(1536);
    ```
 
-1. Generate an embedding vector for each listing by calling Azure OpenAI.
+1. Generate an embedding vector for the description of each listing, by calling Azure OpenAI through the create_embeddings user defined function, which is implemented by the azure_ai extension:
 
    ```postgresql
    UPDATE listings
-   SET listing_vector = azure_openai.create_embeddings('<deployment name serving model text-embedding-ada-002>', description)
+   SET listing_vector = azure_openai.create_embeddings('<embedding-ada-002>', description)
    WHERE listing_vector IS NULL;
    ```
 
-   Note that the active quotas may not allow updating all ~4k rows in a single call. You may run this query to generate 100 embeddings. To generate an embedding for each listing, run the query multiple times. Running it once is enough for this module.
+   Note that the active quotas may not allow updating all ~4k rows in a single call. In that case, you may run this query to generate 100 embeddings. To have the embedding generated for the description of all listings, run the query multiple times. Running it once is enough for this module.
 
    ```postgresql
    UPDATE listings
-   SET listing_vector = azure_openai.create_embeddings('<deployment name serving model text-embedding-ada-002>', description)
+   SET listing_vector = azure_openai.create_embeddings('<embedding-ada-002>', description)
    FROM (SELECT id FROM listings WHERE listing_vector IS NULL ORDER BY id LIMIT 100) subset
    WHERE listings.id = subset.id;
    ```
@@ -146,7 +148,7 @@ Now that we have some sample data, it's time to generate and store the embedding
    SELECT listing_vector FROM listings LIMIT 1;
    ```
 
-   You will get a result like this, but with 1536 vector columns:
+   You will get a result similar to this, but with 1536 vector columns:
 
    ```
    postgres=> SELECT listing_vector FROM listings LIMIT 1;
@@ -171,13 +173,13 @@ Now that you have listings data augmented with embedding vectors, it's time to r
    create_embeddings | {-0.0020871465,-0.002830255,0.030923981, ...}
    ```
 
-1. Use the embedding in a cosine search, fetching the top 10 most similar listings to the query.
+1. Use the embedding in a cosine search (`<=>` represents cosine distance operation), fetching the top 10 most similar listings to the query.
 
    ```
    SELECT id, name FROM listings ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding-ada-002', 'bright natural light')::vector LIMIT 10;
    ```
 
-   You'll get a result like this, depending on which rows were assigned embedding vectors:
+   You'll get a result similar to this. Results may vary, depending on which rows were assigned embedding vectors, and what were the exact values the embeddings model produced for any given description:
 
    ```
       id   |                name                 
@@ -195,7 +197,7 @@ Now that you have listings data augmented with embedding vectors, it's time to r
    (10 rows)
    ```
 
-1. You may also select the `description` to see which text matched. For example, this returns the best match:
+1. You may also project the `description` column, to be able to read the text of the matching rows whose description were semantically similar. For example, this query returns the best match:
 
    ```
    SELECT id, name, description FROM listings ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding-ada-002', 'bright natural light')::vector LIMIT 1;
@@ -242,7 +244,7 @@ After performing the above steps, the `listings` table contains sample data from
    SELECT COUNT(*) > 0 FROM listings WHERE listing_vector IS NOT NULL;
    ```
 
-   The result:
+   The result must show a `t`, meaning true. An indication that there's at least one row with embeddings of its corresponding description column:
 
    ```
     ?column? 
