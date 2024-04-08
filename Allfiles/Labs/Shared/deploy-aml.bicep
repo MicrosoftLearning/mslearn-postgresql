@@ -32,7 +32,7 @@ param keyVaultName string = 'kv-${resourceGroup().location}-${uniqueString(resou
 param appInsightsName string = 'appi-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the container registry.')
-param containerRegistryName string = 'acr-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+param containerRegistryName string = 'acr${resourceGroup().location}${uniqueString(resourceGroup().id)}'
 
 @description('Creates a PostgreSQL Flexible Server.')
 resource postgreSQLFlexibleServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
