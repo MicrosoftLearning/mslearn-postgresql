@@ -233,7 +233,7 @@ In this task, you review the two summarization functions available in the `azure
     | text | `text` or `text[]` || The text(s) for which summaries should be generated. |
     | language_text | `text` or `text[]` || Language code (or array of language codes) representing the language of the text to summarize. Review the [list of supported languages](https://learn.microsoft.com/azure/ai-services/language-service/summarization/language-support) to retrieve the necessary language codes. |
     | sentence_count | `integer` | 3 | The number of summary sentences to generate. |
-    | sort_by | `text` | 'offset' | The sort order for the generated summary sentences. |
+    | sort_by | `text` | 'offset' | The sort order for the generated summary sentences. Acceptable values are "offset" and "rank," with offset representing the start position of each extracted sentence within the original content and rank being an AI generated indicator or how relevant a sentence is determined to be to the main idea of the content. |
     | batch_size | `integer` | 25 | Only for the two overload expecting an input of `text[]`. Specifies the number of records to process at a time. |
     | disable_service_logs | `boolean` | false | Flag indicating whether to turn off service logs. |
     | timeout_ms | `integer` | NULL | Timeout in milliseconds after which the operation is stopped. |
@@ -299,7 +299,19 @@ In this task, you use the `summarize_extractive()` and `summarize_abstractive()`
     WHERE id IN (1, 2);
     ```
 
-    The abstractive summarization capabilities of the extension provide a unique, natural language summary that encapsulates the overall intent of the original text.
+    The extension's abstractive summarization capabilities provide a unique, natural-language summary that encapsulates the overall intent of the original text.
+
+    If you receive an error similar to the following, you chose a region that does not support abstractive summarization when creating your Azure environment:
+
+    ```bash
+    ERROR:  azure_cognitive.summarize_abstractive: InvalidRequest: Invalid Request.
+
+    InvalidParameterValue: Job task: 'AbstractiveSummarization-task' failed with validation errors: ['Invalid Request.']
+
+    InvalidRequest: Job task: 'AbstractiveSummarization-task' failed with validation error: Document abstractive summarization is not supported in the region Central US. The supported regions are North Europe, East US, West US, UK South, Southeast Asia.
+    ```
+
+    To be able to perform this step and complete the remaining tasks using abstractive summarization, you must create a new Azure AI Language service in one of the supported regions specified in the error message. This service can be provisioned in the same resource group you used for other lab resources. Alternatively, you may substitute extractive summarization for the remaining tasks but will not get the benefit of being able to compare the output of the two different summarization techniques.
 
 3. Run a final query to do a side-by-side comparison of the two summarization techniques:
 
