@@ -152,7 +152,7 @@ Before you can generate summaries of rental property descriptions using the `azu
     );
     ```
 
-2. Next, use the `COPY` command to populate the table with data from a CSV file. Execute the command below to load customer reviews into the `listings` table:
+2. Next, use the `COPY` command to populate the table with data from a CSV file. Execute the command below to load rental properties into the `listings` table:
 
     ```sql
     \COPY listings FROM 'mslearn-postgresql/Allfiles/Labs/Shared/listings.csv' CSV HEADER
