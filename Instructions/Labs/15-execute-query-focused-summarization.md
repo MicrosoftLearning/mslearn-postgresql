@@ -1,14 +1,12 @@
 ---
 lab:
-    title: 'Execute Query-based Summarization'
+    title: 'Execute Query-focused Summarization'
     module: 'Build AI apps with Azure Database for PostgreSQL'
 ---
 
-# Lab Title
+# Execute Query-focused Summarization
 
-TODO: Use `reviews` table for this one, and create a "concise 5 word summary" of reviews to use as a "headline" in the reviews section of the application. Combined with the sentiment value, this will provide users with a quick way of assessing a review.
-
-In this exercise, you install the `azure_ai` extension in an Azure Database for PostgreSQL flexible server database and explore the extension's capabilities for integrating [Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/overview) and the [Azure AI Language service](https://learn.microsoft.com/azure/ai-services/language-service/) to incorporate rich generative AI capabilities into your database.
+In this exercise, you use [Azure OpenAI Studio](https://oai.azure.com/) to explore the query-focused summarization capabilities of [Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/overview) and experiment with prompt engineering.
 
 ## Before you start
 
@@ -61,13 +59,19 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     echo $ADMIN_PASSWORD
     ```
 
-5. Run the following Azure CLI command to create your resource group:
+5. If you have access to more than one Azure subscription, and your default subscription is not the one in which you want to create the resource group and other resources for this exercise, run this command to set the appropriate subscription, replacing the `<subscriptionName|subscriptionId>` token with either the name or ID of the subscription you want to use:
+
+    ```azurecli
+    az account set --subscription <subscriptionName|subscriptionId>
+    ```
+
+6. Run the following Azure CLI command to create your resource group:
 
     ```azurecli
     az group create --name $RG_NAME --location $REGION
     ```
 
-6. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
+7. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
 
     ```azurecli
     az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
@@ -108,98 +112,81 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
         {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus2/providers/Microsoft.Resources/deployments/deploy","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.DBforPostgreSQL/flexibleServers/psql-learn-eastus2-gvg3papkkkimy","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
         ```
 
-7. Close the Cloud Shell pane once your resource deployment is complete.
+8. Close the Cloud Shell pane once your resource deployment is complete.
 
-## Connect to your database using psql in the Azure Cloud Shell
+## Create a completions model in Azure OpenAI
 
-In this task, you connect to the `rentals` database on your Azure Database for PostgreSQL server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
+To use Azure OpenAI to perform query-focused summarization, you must deploy a large language model in your service. In this task, you deploy a `GPT 3.5 Turbo` model into your Azure OpenAI service.
 
-1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL flexible server.
+1. In the [Azure portal](https://portal.azure.com/), navigate to your Azure OpenAI resource.
 
-2. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `rentals` database.
+2. On the **Overview** blade, select **Go to Azure OpenAI Studio** in the toolbar.
 
-    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](media/11-postgresql-rentals-database-connect.png)
+    ![Screenshot of the Azure OpenAI Overview blade, with a red box highlighting the Go to Azure OpenAI Studio button on the toolbar.](media/15-azure-openai-go-to-studio.png)
 
-3. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** login.
+3. In Azure OpenAI Studio, under **Management** in the resource menu, select **Deployments**, and then select **Create new deployment** from the toolbar on the **Deployments** page.
 
-    Once logged in, the `psql` prompt for the `rentals` database is displayed.
+    ![Screenshot of the Deployments page in Azure OpenAI Studio, with red boxes highlighting the Deployments menu item and the Create new deployment button.](media/15-azure-openai-studio-deployments-create-new.png)
 
-4. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
+4. In the **Deploy model** dialog, select **gpt-35-turbo** as the model and enter "completions" into the **Deployment name** field, then select **Create**.
 
-    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/11-azure-cloud-shell-pane-maximize.png)
+    ![Screenshot of the Deploy model dialog, with red boxes highlighting the Select a model and Deployment name fields, and the Create button.](media/15-azure-openai-studio-deploy-model.png)
 
-## Populate the database with sample data
+    Once created, you will see two deployments in your account, `embedding` and the newly created `completions`. The Bicep deployment script you ran to deploy Azure resources into your resource group deployed the' embedding' model.
 
-Before you can generate query-based summaries of rental property descriptions using Azure OpenAI, you must add sample data to your database. Add a table to the `rentals` database and populate it with rental property listings so you have property descriptions from which to create summaries.
+## Experiment with Prompt Engineering and Summarization
 
-1. Run the following command to create a table named `reviews` for storing property reviews submitted by customers:
+In this task, you explore prompt engineering techniques, experimenting with various prompts and evaluating their impact on summarization quality in the Azure OpenAI Studio Chat playground.
 
-    ```sql
-    DROP TABLE IF EXISTS reviews;
+1. In Azure OpenAI Studio, select **Chat** under **Playground** in the resource menu to open the **Chat playground**.
 
-    CREATE TABLE reviews (
-        id int,
-        listing_id int, 
-        date date,
-        comments text
-    );
+    ![Screenshot of the Chat playground page in Azure OpenAI Studio, with the Chat menu item highlighted with a red box.](media/15-azure-openai-studio-chat-playground.png)
+
+2. In the Chat playground's **Setup** panel, ensure the **Prompt** tab is selected, then select **Empty Example** in the **Select a template** dropdown. In the **Update system message** dialog, check the  **Don't show this again** box and select **Continue**.
+
+    ![Screenshot of the Chat playground Setup panel with Empty Example selected in the select a template dropdown and highlighted with a red box.](media/15-azure-openai-studio-chat-playground-setup-template-selection.png)
+
+3. When working with large language models, the prompt is typically referred to as the _system message_. To test the impact of different prompts, start by entering the following simple summarization prompt into the **System message** box and selecting **Apply changes**.
+
+    ```md
+    Summarize the following:
     ```
 
-2. Next, use the `COPY` command to populate the table with data from a CSV file. Execute the command below to load customer reviews into the `reviews` table:
+4. Copy the following `description` value retrieved from the `listings` table in the database, paste it into the user query box in the Chat playground, and then select the **Send** button.
 
-    ```sql
-    \COPY reviews FROM 'mslearn-postgresql/Allfiles/Labs/Shared/reviews.csv' CSV HEADER
+    ```md
+    This home is full of light, art and comfort. 5 mins to Downtown, 1 min to coffee. The Space This is a 1000 square foot, two bedroom, one bathroom house. This home has a large kitchen and two very large indoor eating spaces. The open plan kitchen and living room have two sets of French doors opening to west facing decks with additional seating and lots of room to play. The two bedrooms are very comfy with new carpet and separately controlled heating. Take advantage of our kitchen for meals, or venture out and sample Seattle's restaurants during your stay here! Start the morning off right with some coffee on the deck. Or head out to Tenth West, Storyville Coffee Company, or Caffe Fiore. Then enjoy a nice, leisurely breakfast at The Seattle Grind, Macrina Bakery & Café, or Bustle. All are popular stops near our house. Head out for some fresh morning air – go for a nice walk at Kerry Park, Parsons Gardens, or Discovery Park. Try Bounty Kitchen, Le Reve Bakery & Café, or 5 Spot for lunch.
     ```
 
-    The command output should be `COPY 354`, indicating that 354 rows were written into the table from the CSV file.
+    ![Screenshot of the chat panel in Azure OpenAI Studio with the query text box and send buttons highlighted with red boxes.](media/15-azure-openai-studio-chat-playground-start-chatting.png)
 
-## Install and configure the `azure_ai` extension
+5. Observe the summarization produced. The summary produced is a natural language summarization of the description provided. Still, the prompt did not give the model any specific instructions other than to generate a summary of the text. Hence, it had no guidelines, such as the number of sentences, to inform how it produced or formatted the summary.
 
-Before using the `azure_ai` extension, you must install it into your database and configure it to connect to your Azure AI Services resources. The `azure_ai` extension allows you to integrate the Azure OpenAI and Azure AI Language services into your database. To enable the extension in your database, follow the steps below:
+6. Now, update the system message with a prompt that provides a bit more direction, selecting **Apply changes** after updating the **System message** field:
 
-1. You should first verify that the `azure_ai` extension was successfully added to your server's _allowlist_ by the bicep script you ran when setting up the exercise environment by executing the following command at the `psql` command prompt:
-
-    ```sql
-    SHOW azure.extensions;
+    ```md
+    Generate a concise two-sentence summary of the following property description:
     ```
 
-    In the output, you will see the list of extensions on the server's _allowlist_. The output should include `azure_ai` and will look like the following:
+7. Copy the above property description again, paste it into the user query box, and select **Send**.
 
-    ```sql
-     azure.extensions 
-    ------------------
-     azure_ai,vector
+8. Observe the difference in the output. The summary is now more succinct and contains only two sentences.
+
+    Providing specific instructions about how you want the output formatted steers the behavior of the language model and the response, or completion, it returns. This is the essence of prompt engineering.
+
+9. You can experiment with other prompts to evaluate their impact on the model completion. Try a few prompts that specify different formats, such as:
+
+    ```md
+    Generate three bullet points summarizing the house layout of the following property description:
     ```
 
-    Before an extension can be installed and used in Azure Database for PostgreSQL flexible server, it must be added to the server's _allowlist_, as described in [how to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
+    or
 
-2. Now, you are ready to install the `azure_ai` extension using the [CREATE EXTENSION](https://www.postgresql.org/docs/current/sql-createextension.html) command.
-
-    ```sql
-    CREATE EXTENSION IF NOT EXISTS azure_ai;
+    ```md
+    Create a three-sentence summary of the following property description and generate a bulleted list of the names of nearby amenities:
     ```
 
-    `CREATE EXTENSION` loads a new extension into the database by running the extension's script file, which typically creates new SQL objects such as functions, data types and schemas. If an extension of the same name already exists, an error will be thrown. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
-
-
-
-
-
-## Procedure 1
-
-Procedure overview
-
-1. Step 1
-2. Step 2
-3. etc.
-
-## Procedure n
-
-Procedure overview
-
-1. Step 1
-2. Step 2
-3. etc.
+Query-focused summarization allows you to generate summaries driven by instructions provided in prompts. This technique enables you to tailor responses from the language model based on user preferences and requirements. Using this approach, you could generate summaries to display short descriptions of properties that highlight the things most important to individual customers.
 
 ## Clean up
 
@@ -220,49 +207,3 @@ Once you have completed this exercise, delete the Azure resources you created. Y
     ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/15-resource-group-delete.png)
 
 4. In the confirmation dialog, enter the name of the resource group you are deleting to confirm and then select **Delete**.
-
-
-
-
-
-
-Throughout this exercise, you will dive into real-world examples, experiment with various prompts, and evaluate their impact on summarization quality.
-
-This exercise will need to be a bit different because there is no way to do query-based summarization directly from PostgreSQL. The `azure_ai` extension only allows `create_embeddings` functionality against Azure OpenAI. So, for this exercise, the focus needs to be on how this can be done from an application.
-
-TODO: Determine how we can run this from the lab environment. Does a simple app (like Streamlit) need to be used, where users can write/execute the code from a web-based UI, or how should this happen?
-
-TODO: Lab steps
-
-1. Connect to existing Azure OpenAI Service (created in Module 1)
-2. Get Language service key and endpoint
-3. Set up connection to database
-4. Configure azure_ai extension with endpoint and key for azure_cognitive schema
-5. Connect to reviews table
-6. Use `azure_cognitive.summarize_extractive()` method to generate extractive summaries for a few records (limit this to just showcase the capability and not to do it for all records in the table, as it is a large table.)
-7. Use `azure_cognitive.summarize_abstractive()` method to generate abstractive summaries for a few records (limit this to just showcase the capability and not to do it for all records in the table, as it is a large table.)
-8. Compare the outputs from the two methods
-9. Talk about performance and implications for using each method?
-
-- The steps to create an Azure AI Services Language service in the Azure portal are as follows:
-  - Navigate to the [Azure portal](https://portal.azure.com/).
-  - Select **Create a resource** under **Azure services** on the Azure home page, then enter "Language service" into the **Search the Marketplace** box on the Marketplace page and select the **Language service** tile in the search results.
-  - Select **Create** on the **Language service** page to create a new language service resource.
-  - Select **Continue to create your resource** on the **Select additional features** page.
-  - On the Create Language **Basics** tab:
-    - Ensure you select the same resource group that you chose for your Azure OpenAI service.
-    - Set the region to one of the [regions that supports abstractive summarization](https://learn.microsoft.com/azure/ai-services/language-service/summarization/region-support) (**North Europe**, **East US**, **UK South**, or **Southeast Asia**). This does not have to be the same region associated with your other resources.
-    - Provide a _globally unique_ service name.
-    - You can choose either the **Free F0** or **S** pricing tier for this service.
-    - Ensure the box certifying you have reviewed and acknowledge the terms in the Responsible AI Notice is checked.
-  - Select the **Review + create** button to review your choices and then select **Create** to provision the service.
-
-    ![The settings to create a Language service are displayed on the Create Language Basics tab.](../../media/Solution/0601_Language_Service.png)
-
-- The steps to retrieve the endpoint and key values for your Language service and add them to `config.json` are as follows:
-  - Navigate to your Language service resource in the [Azure portal](https://portal.azure.com/).
-  - Select the **Keys and Endpoint** menu item under **Resource Management** in the left-hand menu.
-  - Copy the **Endpoint** value and paste it into the `config.json` file as the **LanguageEndpoint** value.
-  - Copy the **KEY 1** value and paste it into the `config.json` file as the **LanguageKey** value.
-
-    ![The Language service's Keys and Endpoint page is displayed, with the Endpoint and KEY 1 copy to clipboard buttons highlighted.](../../media/Solution/0601-Language-Keys-and-Endpoint.png)
