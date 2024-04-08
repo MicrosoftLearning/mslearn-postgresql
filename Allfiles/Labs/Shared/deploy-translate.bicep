@@ -104,7 +104,7 @@ resource translatorService 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   location: location
   kind: 'TextTranslation'
   sku: {
-    name: 'S'
+    name: 'S1'
   }
   properties: {
     customSubDomainName: translatorServiceName
