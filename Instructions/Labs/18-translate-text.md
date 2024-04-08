@@ -349,7 +349,7 @@ Once you have completed this exercise, delete the Azure resources you created. Y
 
 > Note
 >
-> If you plan on completing additional modules in this learning path, you should run this task and then run the deployment script in the next module you intend to complete.
+> If you plan on completing additional modules in this learning path, you should still run this task and then run the deployment script in the next module you intend to complete.
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
 
