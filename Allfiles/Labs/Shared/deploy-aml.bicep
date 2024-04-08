@@ -32,7 +32,7 @@ param keyVaultName string = 'kv-${resourceGroup().location}-${uniqueString(resou
 param appInsightsName string = 'appi-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the container registry.')
-param containerRegistryName string = 'acr-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+param containerRegistryName string = 'acr${resourceGroup().location}${uniqueString(resourceGroup().id)}'
 
 @description('Creates a PostgreSQL Flexible Server.')
 resource postgreSQLFlexibleServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
@@ -119,7 +119,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
 }
 
 @description('Creates a Key Vault for Azure Machine Learning.')
-resource keyVault 'Microsoft.KeyVault/vaults@2021-06-01' = {
+resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
   name: keyVaultName
   location: location
   properties: {
@@ -148,7 +148,7 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-12
 }
 
 @description('Creates an Application Inslights instance for Azure Machine Learning.')
-resource appInsights 'Microsoft.Insights/components@2021-03-08' = {
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: appInsightsName
   location: location
   kind: 'web'
@@ -159,7 +159,7 @@ resource appInsights 'Microsoft.Insights/components@2021-03-08' = {
 }
 
 @description('Creates a container registry for Azure Machine Learning.')
-resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-06-01' = {
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2022-12-01' = {
   name: containerRegistryName
   location: location
   sku: {
