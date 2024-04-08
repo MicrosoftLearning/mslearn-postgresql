@@ -69,19 +69,25 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     echo $ADMIN_PASSWORD
     ```
 
-5. Run the following Azure CLI command to create your resource group:
+5. If you have access to more than one Azure subscription, and your default subscription is not the one in which you want to create the resource group and other resources for this exercise, run this command to set the appropriate subscription, replacing the `<subscriptionName|subscriptionId>` token with either the name or ID of the subscription you want to use:
+
+    ```azurecli
+    az account set --subscription <subscriptionName|subscriptionId>
+    ```
+
+6. Run the following Azure CLI command to create your resource group:
 
     ```azurecli
     az group create --name $RG_NAME --location $REGION
     ```
 
-6. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
+7. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
 
     ```azurecli
     az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-translate.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
     ```
 
-    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server and Azure AI Translator service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter), creating a database named `rentals` on the server. Note that the Bicep file is different from the other modules in this learning path.
+    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server and Azure AI Translator service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter) and creating a database named `rentals` on the server. Note that the Bicep file is different from the other modules in this learning path.
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
@@ -93,11 +99,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
         {"code": "ResourceKindRequireAcceptTerms", "message": "This subscription cannot create TextTranslation until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal and trying again.}
         ```
 
-        To resolve this error, run this command to create a Language service in your resource group and accept the Responsible AI terms for your subscription. Once the resource is created, you can rerun the command to execute the Bicep deployment script.
-
-        ```bash
-        az cognitiveservices account create --name lang-temp-$region-$ADMIN_PASSWORD --resource-group $RG_NAME --kind TextTranslation --sku F0 --location $REGION --yes
-        ```
+        To resolve this error, you must create your first Language resource from the Azure portal so you can review and acknowledge the terms and conditions. You can do so here: https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics. Create it under any new resource group with some random valid name, also assign some random valid name to the Language service you-re deploying.After that, because you agreed upon the Responsible AI terms for the whole subscription, you can create subsequent Language resources using any deployment tool (for example, SDK, CLI, or ARM template) under the same Azure subscription. Therefore, once you have created that first resource through the portal, you can simply delete it, and rerun the command to execute the Bicep deployment script.
 
     - If you previously ran the Bicep deployment script for this learning path and subsequently deleted the resources, you may receive an error message like the following if you are attempting to rerun the script within 48 hours of deleting the resources:
 
@@ -105,18 +107,18 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
         {"code": "InvalidTemplateDeployment", "message": "The template deployment 'deploy' is not valid according to the validation procedure. The tracking id is '4e87a33d-a0ac-4aec-88d8-177b04c1d752'. See inner errors for details."}
     
         Inner Errors:
-        {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/oai-learn-eastus-gvg3papkkkimy' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
+        {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/oai-learn-eastus-{accountName}' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
         ```
 
         If you receive this message, modify the `azure deployment group create` command above to set the `restore` parameter equal to `true` and rerun it.
 
-    - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and try rerunning the Bicep deployment script.
+    - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and rerun the Bicep deployment script.
 
         ```bash
-        {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus2/providers/Microsoft.Resources/deployments/deploy","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.DBforPostgreSQL/flexibleServers/psql-learn-eastus2-gvg3papkkkimy","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
+        {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus2/providers/Microsoft.Resources/deployments/deploy","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.DBforPostgreSQL/flexibleServers/psql-learn-eastus2-{accountName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
         ```
 
-7. Close the Cloud Shell pane once your resource deployment is complete.
+8. Close the Cloud Shell pane once your resource deployment is complete.
 
 ## Connect to your database using psql in the Azure Cloud Shell
 
