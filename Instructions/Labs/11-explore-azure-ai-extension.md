@@ -83,11 +83,8 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
         {"code": "ResourceKindRequireAcceptTerms", "message": "This subscription cannot create TextAnalytics until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal and trying again.}
         ```
 
-        To resolve this error, run this command to create a Language service in your resource group and accept the Responsible AI terms for your subscription. Once the resource is created, you can rerun the command to execute the Bicep deployment script.
+        To resolve this error, you must create your first Language resource from the Azure portal so you can review and acknowledge the terms and conditions. You can do so here: https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics. Create it under any new resource group with some random valid name, also assign some random valid name to the Language service you-re deploying.After that, because you agreed upon the Responsible AI terms for the whole subscription, you can create subsequent Language resources using any deployment tool (for example, SDK, CLI, or ARM template) under the same Azure subscription. Therefore, once you have created that first resource throught the portal, you can simply delete it, and rerun the command to execute the Bicep deployment script.
 
-        ```bash
-        az cognitiveservices account create --name lang-temp-$region-$ADMIN_PASSWORD --resource-group $RG_NAME --kind TextAnalytics --sku F0 --location $REGION --yes
-        ```
 
     - If you previously ran the Bicep deployment script for this learning path and subsequently deleted the resources, you may receive an error message like the following if you are attempting to rerun the script within 48 hours of deleting the resources:
 
@@ -95,15 +92,15 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
         {"code": "InvalidTemplateDeployment", "message": "The template deployment 'deploy' is not valid according to the validation procedure. The tracking id is '4e87a33d-a0ac-4aec-88d8-177b04c1d752'. See inner errors for details."}
     
         Inner Errors:
-        {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/oai-learn-eastus-gvg3papkkkimy' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
+        {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/{accountName}' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
         ```
 
         If you receive this message, modify the `azure deployment group create` command above to set the `restore` parameter equal to `true` and rerun it.
 
-    - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and try rerunning the Bicep deployment script.
+    - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and rerun the Bicep deployment script.
 
         ```bash
-        {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus2/providers/Microsoft.Resources/deployments/deploy","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.DBforPostgreSQL/flexibleServers/psql-learn-eastus2-gvg3papkkkimy","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
+        {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.Resources/deployments/{deploymentName}","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{serverName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
         ```
 
 7. Close the Cloud Shell pane once your resource deployment is complete.
@@ -219,12 +216,12 @@ Reviewing the objects within the `azure_ai` extension can help you better unders
 
     The meta-command output shows the `azure_ai` extension creates four schemas, multiple user-defined functions (UDFs), several composite types in the database, and the `azure_ai.settings` table. Other than the schemas, all object names are preceded by the schema to which they belong. Schemas are used to group related functions and types the extension adds into buckets. The table below lists the schemas added by the extension and provides a brief description of each:
 
-    | Schema | Description |
-    | ------ | ----------- |
-    | `azure_ai` | The principal schema where the configuration table and UDFs for interacting with the extension reside. |
-    | `azure_openai` | Contains the UDFs that enable calling an Azure OpenAI endpoint. |
-    | `azure_cognitive` | Provides UDFs and composite types related to integrating the database with Azure AI Services. |
-    | `azure_ml` | Includes the UDFs for integrating Azure Machine Learning (ML) services. |
+    | Schema            | Description                                                                                            |
+    | ----------------- | ------------------------------------------------------------------------------------------------------ |
+    | `azure_ai`        | The principal schema where the configuration table and UDFs for interacting with the extension reside. |
+    | `azure_openai`    | Contains the UDFs that enable calling an Azure OpenAI endpoint.                                        |
+    | `azure_cognitive` | Provides UDFs and composite types related to integrating the database with Azure AI Services.          |
+    | `azure_ml`        | Includes the UDFs for integrating Azure Machine Learning (ML) services.                                |
 
 ### Explore the Azure AI schema
 
@@ -299,15 +296,15 @@ The `azure_openai` schema provides the ability to integrate the creation of vect
 
     The output shows the two overloads of the `azure_openai.create_embeddings()` function, allowing you to review the differences between the two versions of the function and the types they return. The `Argument data types` property in the output reveals the list of arguments the two function overloads expect:
 
-    | Argument | Type | Default | Description |
-    | -------- | ---- | ------- | ----------- |
-    | deployment_name | `text` || Name of the deployment in Azure OpenAI Studio that contains the `text-embeddings-ada-002` model. |
-    | input | `text` or `text[]` || Input text (or array of text) for which embeddings are created. |
-    | batch_size | `integer` | 100 | Only for the overload expecting an input of `text[]`. Specifies the number of records to process at a time. |
-    | timeout_ms | `integer` | 3600000 | Timeout in milliseconds after which the operation is stopped. |
-    | throw_on_error | `boolean` | true | Flag indicating whether the function should, on error, throw an exception resulting in a rollback of the wrapping transaction. |
-    | max_attempts | `integer` | 1 | Number of times to retry the call to Azure OpenAI service in the event of a failure. |
-    | retry_delay_ms | `integer` | 1000 | Amount of time, in milliseconds, to wait before attempting to retry calling the Azure OpenAI service endpoint. |
+    | Argument        | Type               | Default | Description                                                                                                                    |
+    | --------------- | ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+    | deployment_name | `text`             |         | Name of the deployment in Azure OpenAI Studio that contains the `text-embeddings-ada-002` model.                               |
+    | input           | `text` or `text[]` |         | Input text (or array of text) for which embeddings are created.                                                                |
+    | batch_size      | `integer`          | 100     | Only for the overload expecting an input of `text[]`. Specifies the number of records to process at a time.                    |
+    | timeout_ms      | `integer`          | 3600000 | Timeout in milliseconds after which the operation is stopped.                                                                  |
+    | throw_on_error  | `boolean`          | true    | Flag indicating whether the function should, on error, throw an exception resulting in a rollback of the wrapping transaction. |
+    | max_attempts    | `integer`          | 1       | Number of times to retry the call to Azure OpenAI service in the event of a failure.                                           |
+    | retry_delay_ms  | `integer`          | 1000    | Amount of time, in milliseconds, to wait before attempting to retry calling the Azure OpenAI service endpoint.                 |
 
 2. To provide a simplified example of using the function, run the following query, which creates a vector embedding for the `description` field in the `listings` table. The `deployment_name` parameter in the function is set to `embedding`, which is the name of the deployment of the `text-embedding-ada-002` model in your Azure OpenAI service (it was created with that name by the Bicep deployment script):
 
@@ -325,7 +322,7 @@ The `azure_openai` schema provides the ability to integrate the creation of vect
     ```sql
     id |             name              |                            vector
     ---+-------------------------------+------------------------------------------------------------
-    1  | Stylish One-Bedroom Apartment | {0.020068742,0.00022734122,0.0018286322,-0.0064167166,-0.02335632,0.007961482,-0.0025977138,-0.018629603,-0.028360302,-0.015645698,-0.032849364,0.0165039,-0.012523159,-0.0126948,-0.018840853,0.0024013175,0.032717332,0.01362562,-0.014576245,-0.010106988,-0.038394675,-0.00013161861,0.028967647,-0.016107807,-0.018378744,0.0057433574,0.00837738,-0.014945932,-0.016358666,0.006020623,0.024927491,-0.005941404,-0.020847727,-0.0020695892,-0.0118498,-0.011011402,0.00024384513,0.020451633,0.012952261,-0.002800712,0.0011107125,-0.010225817,-0.0068986304,0.017890228,0.005103006,0.0042712092,-0.0016487397,-0.016464291,-0.013982104,0.004947869,...}
+    1  | Stylish One-Bedroom Apartment | {0.020068742,0.00022734122,0.0018286322,-0.0064167166,...}
     ```
 
     For brevity, the vector embeddings are abbreviated in the above output.
