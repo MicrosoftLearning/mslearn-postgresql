@@ -30,7 +30,7 @@ export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --quer
 psql sslmode=require
 ```
 
-If you're using Cloud Shell, it already knows who you are (ie you're already authenticated with you Azure credentials in that session of the shell). Otherwise, you can run `az login` from a command line, as described [here](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli-interactively) to fetch the access token for your user.
+If you're using Cloud Shell, it already knows who you are (ie you're already authenticated with your Azure credentials in that session of the shell). Otherwise, you can run `az login` from a command line, as described [here](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli-interactively) to fetch the access token for your user.
 
 **Suggestion**: You may wish to save the script provided above inside a file, to authenticate new sessions quickly. Make sure you use the `az account` command in the script, not the actual password.
 
