@@ -6,7 +6,7 @@ lab:
 
 # Perform Extractive and Abstractive Summarization
 
-The rental property app maintained by Margie's Travel provides a way for property managers to provide a description of rental listings. Many of the descriptions in the system are long, providing many details about the rental property, its neighborhood, and local attractions, stores, and other amenities. A feature that has been requested as you implement new AI-powered capabilities for the app is using generative AI to create concise summaries of these descriptions, making it easier for your users to quickly review properties. In this exercise, you use the `azure_ai` extension in Azure Database For PostgreSQL flexible server to perform abstractive and extractive summarization on rental property descriptions and compare the resulting summaries.
+The rental property app maintained by Margie's Travel provides a way for property managers to provide a description of rental listings. Many of the descriptions in the system are long, providing many details about the rental property, its neighborhood, and local attractions, stores, and other amenities. A feature that has been requested as you implement new AI-powered capabilities for the app is using generative AI to create concise summaries of these descriptions, making it easier for your users to quickly review properties. In this exercise, you use the `azure_ai` extension in Azure Database For PostgreSQL - Flexible Server to perform abstractive and extractive summarization on rental property descriptions and compare the resulting summaries.
 
 ## Before you start
 
@@ -77,7 +77,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
     ```
 
-    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server, Azure OpenAI, and an Azure AI Language service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter), creating a database named `rentals` on the server, and adding a deployment named `embedding` using the `text-embedding-ada-002` model to your Azure OpenAI service. Note that the Bicep file is shared by all modules in this learning path, so you may only use some of the deployed resources in some exercises.
+    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL - Flexible Server, Azure OpenAI, and an Azure AI Language service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter), creating a database named `rentals` on the server, and adding a deployment named `embedding` using the `text-embedding-ada-002` model to your Azure OpenAI service. Note that the Bicep file is shared by all modules in this learning path, so you may only use some of the deployed resources in some exercises.
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
@@ -118,7 +118,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 In this task, you connect to the `rentals` database on your Azure Database for PostgreSQL server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
 
-1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL flexible server.
+1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL - Flexible Server.
 
 2. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `rentals` database.
 
@@ -178,7 +178,7 @@ Before using the `azure_ai` extension, you must install it into your database an
      azure_ai,vector
     ```
 
-    Before an extension can be installed and used in Azure Database for PostgreSQL flexible server, it must be added to the server's _allowlist_, as described in [how to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
+    Before an extension can be installed and used in Azure Database for PostgreSQL - Flexible Server, it must be added to the server's _allowlist_, as described in [how to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
 
 2. Now, you are ready to install the `azure_ai` extension using the [CREATE EXTENSION](https://www.postgresql.org/docs/current/sql-createextension.html) command.
 
