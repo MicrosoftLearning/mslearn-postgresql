@@ -71,7 +71,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 7. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
 
     ```azurecli
-    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
+    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-postgresql-server.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD databaseName=zoodb
     ```
 
     The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL - Flexible Server, Azure OpenAI, and an Azure AI Language service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter), creating a database named `rentals` on the server, and adding a deployment named `embedding` using the `text-embedding-ada-002` model to your Azure OpenAI service. Note that the Bicep file is shared by all modules in this learning path, so you may only use some of the deployed resources in some exercises.
@@ -99,14 +99,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 8. Close the Cloud Shell pane once your resource deployment is complete.
 
-### Restore AdventureWorks database
-
-1. Clone the PostgreSQL samples database repository at [PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgres).
-    1. For example, you could use the following code from a command prompt:
-
-    ```dos
-    git clone https://github.com/MicrosoftLearning/mslearn-postgres c:\postgresql-samples-databases
-    ```
+### Connect to the database with pgAdmin and Azure Data Studio
 
 1. Download and install pgAdmin 4 from [Download](https://www.pgadmin.org/download/)
 1. Download and install Azure Data Studio from [Download and install Azure Data Studio](/sql/azure-data-studio/download-azure-data-studio).
@@ -151,8 +144,8 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 1. In the Azure portal, navigate to your Azure Database for PostgreSQL flexible server. Check the server is started. If necessary, start the server.
 1. Open Azure Data Studio.
-1. Either navigate to the folder with your exercise script files, or download the **Lab9_vacuum.sql** from [PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgres).
-1. Select File, **Open File**, and select **Lab9_vacuum.sql**.Connect to your Azure Database for PostgreSQL flexible server.
+1. Either navigate to the folder with your exercise script files, or download the **Lab7_vacuum.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/07).
+1. Select File, **Open File**, and select **Lab7_vacuum.sql**.Connect to your Azure Database for PostgreSQL flexible server.
 1. Highlight and run the section **Check zoodb database is selected**. If necessary, make zoodb the current database using the drop-down list.
 1. Highlight and run the section **Display dead tuples**. This query displays the number of dead and live tuples in the database. Make a note of the number of dead tuples.
 1. Highlight and run the section **Change weight** several times. This query updates the weight column for all the animals.
