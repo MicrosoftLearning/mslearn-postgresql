@@ -1,17 +1,16 @@
 ---
-uid: learn.wwl.understand-client-server-communication-postgresql.exercise-explore-azure-data-studio
-title: Exercise: Explore PostgreSQL with Azure Data Studio
-description: Exercise: Explore PostgreSQL with Azure Data Studio
-durationInMinutes: 15
+uid: learn.wwl.understand-postgresql-query-process.exercise-execute-explain
+title: Exercise: Execute the EXPLAIN statement
+description: Exercise: Execute the EXPLAIN statement
+durationInMinutes: 5
 ---
-In this exercise you will download and install Azure Data studio, and then connect to the Azure Database for PostgreSQL server you created in Module 1. If you already have Azure Data Studio installed on your machine you can jump ahead to Connect to Azure Database for PostrgreSQL flexible server.
-
 > [!IMPORTANT]
 > You need your own Azure subscription to complete this exercise. If you do not have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).
 
 ## Create the exercise environment
 
 In this exercise and all later exercises you will use Bicep in the Azure Cloud Shell to deploy your PostgreSQL server.
+Skip deploying resources and installing Azure Data Studio if you have already have these installed.
 
 ### Deploy resources into your Azure subscription
 
@@ -25,7 +24,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 2. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/02-portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/03-portal-toolbar-cloud-shell.png)
 
 3. At the Cloud Shell prompt, enter the following to clone the GitHub repo containing exercise resources:
 
@@ -103,110 +102,28 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 8. Close the Cloud Shell pane once your resource deployment is complete.
 
-## Client tools to connect to PostgreSQL
+## Before you start
 
-### Connect to Azure Database for PostgreSQL with psql
+1. You have installed and started Azure Database for PostgreSQL flexible server.
+1. You have installed Azure Data Studio.
+1. You have already cloned the lab scripts from [PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql.git).
+1. Open Azure Data Studio and connect to your Azure Database for PostgreSQL flexible server.
+1. If you haven't yet created the zoodb, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**. Run the script.
 
-You can install psql locally or connect from the Azure Portal which will open Cloud Shell and prompt you for the password of the admin account.
+## Practice EXPLAIN ANALYZE
 
-#### Connecting locally
+1. In the [Azure portal](https://portal.azure.com), navigate to your Azure Database for PostgreSQL flexible server. Check the server is started or restart it if necessary.
+1. Open Azure Data Studio and connect to your Azure Database for PostgreSQL flexible server.
+1. Select **File**, **Open File**, and navigate to the folder where you saved the scripts. Open **../Allfiles/Labs/03/RepopulateZoo.sql**. Reconnect to the server if necessary.
+1. Select **Run** to execute the query. This repopulates the zoodb database.
+1. Select File, **Open File**, and select **../Allfiles/Labs/03/Lab3_explain.sql**.
+1. In the Lab file, in the section **1. Investigate EXPLAIN ANALYZE** highlight and run Statement A and Statement B separately.
+    1. Which statement updated the database, and why?
+    1. How many milliseconds did it take to plan Statement A?
+    1. What was the execution time for Statement B?
 
-1. Install psql from [here](https://sbp.enterprisedb.com/getfile.jsp?fileid=1258893).
-    1. In the setup wizard, when you reach the **Select Components** dialog box, select **Command Line Tools**.
-1. Bring up a commandline.
-1. The syntax for connecting to the server is:
+## Practice EXPLAIN
 
-    ```sql
-    psql --h <servername> --p <port> -U <username> <dbname>
-    ```
-
-1. At the command prompt enter **`--host=<servername>.postgres.database.azure.com`** where `<servername>` is the name of the Azure Database for PostgreSQL created above.
-    1. You can find the Server name in **Overview** in the Azure portal or as an output from the bicep script.
-
-    ```sql
-   psql -h <servername>.postgres.database.azure.com -p 5432 -U pgAdmin postgres
-    ```
-
-    1. You will be prompted for the password for the admin account you copied above.
-
-1. To create a blank database at the prompt, type:
-
-    ```sql
-    CREATE DATABASE mypgsqldb;
-    ```
-
-1. At the prompt, execute the following command to switch connection to the newly created database **mypgsqldb**:
-
-    ```sql
-    \c mypgsqldb
-    ```
-
-1. Now that you have connected to the server, and created a database you can execute familiar SQL queries, such as create tables in the database:
-
-    ```sql
-    CREATE TABLE inventory (
-        id serial PRIMARY KEY,
-        name VARCHAR(50),
-        quantity INTEGER
-        );
-    ```
-
-1. Load data into the tables
-
-    ```sql
-    INSERT INTO inventory (id, name, quantity) VALUES (1, 'banana', 150);
-    INSERT INTO inventory (id, name, quantity) VALUES (2, 'orange', 154);
-    ```
-
-1. Query and update the data in the tables
-
-    ```sql
-    SELECT * FROM inventory;
-    ```
-
-1. Update the data in the tables.
-
-    ```sql
-    UPDATE inventory SET quantity = 200 WHERE name = 'banana';
-    ```
-
-## Install Azure Data Studio
-
-To install Azure Data Studio for use with Azure Database for PostgreSQL:
-
-1. In a browser, navigate to [Download and install Azure Data Studio](/sql/azure-data-studio/download-azure-data-studio) and under the Windows platform, select **User installer (recommended)**. The executable file is downloaded to your Downloads folder.
-1. Select **Open file**.
-1. The License agreement is displayed. Read and **accept the agreement**, then select **Next**.
-1. In **Select additional Tasks**, select **Add to PATH**, and any other additions you require. Select **Next**.
-1. The **Ready to Install** dialog box is displayed. Review your settings. Select **Back** to make changes or select **Install**.
-1. The **Completing the Azure Data Studio Setup Wizard** dialog box is displayed. Select **Finish**. Azure Data Studio starts.
-
-## Install the PostgreSQL extension
-
-1. Open Azure Data Studio if it is not already open.
-1. From the left menu, select **Extensions** to display the Extensions panel.
-1. In the search bar, enter **PostgreSQL**. The PostgreSQL extension for Azure Data Studio icon is displayed.
-1. Select **Install**. The extension installs.
-
-## Connect to Azure Database for PostgreSQL flexible server
-
-1. Open Azure Data Studio if it is not already open.
-1. From the left menu, select **Connections**.
-1. Select **New Connection**.
-1. Under **Connection Details**, in **Connection type** select **PostgreSQL** from the drop-down list.
-1. In **Server name**, enter the full server name as it appears on the Azure portal.
-1. In **Authentication type**, leave Password.
-1. In User name and Password, enter the user name **pgAdmin** and password **the random admin password** you created above
-1. Select [ x ] Remember password.
-1. The remaining fields are optional.
-1. Select **Connect**. You are connected to the Azure Database for PostgreSQL server.
-1. A list of the server databases is displayed. This includes system databases, and user databases.
-
-## Create the zoo database
-
-1. Either navigate to the folder with your exercise script files, or download the **Lab2_ZooDb.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/02).
-1. Open Azure Data Studio if it is not already open.
-1. Select **File**, **Open file** and navigate to the folder where you saved the script. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**. If a trust warning is displayed select **Open**.
-1. Run the script. The zoodb database is created.
-1. At the top of the screen, use the drop-down arrow to display the databases on the server, including zoodb and system databases.
-1. Scroll down to the end of the script to re-run some of the select statements
+1. In the Lab file, in the section **2. Investigate EXPLAIN** highlight and run that statement.
+    1. What sort key was used, and why?
+1. In the Lab file, in the section **3. Investigate EXPLAIN options** highlight and run each statement separately. Compare the query plan statistics for each option.
