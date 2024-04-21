@@ -1,7 +1,7 @@
 ---
 uid: learn.wwl.secure-azure-database-for-postgresql.exercise-configure-permissions
-title: Exercise: Configure permissions in Azure Database for PostgreSQL
-description: Exercise: Configure permissions in Azure Database for PostgreSQL
+title: Exercise - Configure permissions in Azure Database for PostgreSQL
+description: Exercise - Configure permissions in Azure Database for PostgreSQL
 durationInMinutes: 25
 ---
 In this lab exercises, you'll assign RBAC roles to control access to Azure Database for PostgreSQL resources and PostgreSQL GRANTS to control access to database operations.

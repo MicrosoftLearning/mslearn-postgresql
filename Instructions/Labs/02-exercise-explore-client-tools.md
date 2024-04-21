@@ -1,7 +1,7 @@
 ---
 uid: learn.wwl.understand-client-server-communication-postgresql.exercise-explore-azure-data-studio
-title: Exercise: Explore PostgreSQL with Azure Data Studio
-description: Exercise: Explore PostgreSQL with Azure Data Studio
+title: Exercise - Explore PostgreSQL with Azure Data Studio
+description: Exercise - Explore PostgreSQL with Azure Data Studio
 durationInMinutes: 15
 ---
 In this exercise you will download and install Azure Data studio, and then connect to the Azure Database for PostgreSQL server you created in Module 1. If you already have Azure Data Studio installed on your machine you can jump ahead to Connect to Azure Database for PostrgreSQL flexible server.

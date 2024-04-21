@@ -1,7 +1,7 @@
 ---
 uid: learn.wwl.configure-and-manage-postgresql.exercise-configure-system-parameter-explore-metadata
-title: Exercise: Configure system parameters and explore metedata with system catalogs and views
-description: Exercise: Configure system parameters and explore metedata with system catalogs and views
+title: Exercise - Configure system parameters and explore metedata with system catalogs and views
+description: Exercise - Configure system parameters and explore metedata with system catalogs and views
 durationInMinutes: 30
 ---
 > [!IMPORTANT]

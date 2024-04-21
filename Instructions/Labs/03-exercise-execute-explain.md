@@ -1,7 +1,7 @@
 ---
 uid: learn.wwl.understand-postgresql-query-process.exercise-execute-explain
-title: Exercise: Execute the EXPLAIN statement
-description: Exercise: Execute the EXPLAIN statement
+title: Exercise - Execute the EXPLAIN statement
+description: Exercise - Execute the EXPLAIN statement
 durationInMinutes: 5
 ---
 > [!IMPORTANT]

@@ -1,7 +1,7 @@
 ---
 uid: learn.wwl.understand-write-ahead-logging.exercise-list-table-changes-logical-decode
-title: Exercise: List table changes with logical decoding
-description: Exercise: List table changes with logical decoding
+title: Exercise - List table changes with logical decoding
+description: Exercise - List table changes with logical decoding
 durationInMinutes: 30
 ---
 In this exercise you'll configure logical replication, which is native to PostgreSQL. You will create two servers, which act as publisher and subscriber. Data in the zoodb will be replicated between them.
