@@ -134,9 +134,9 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 ## Populate the database with sample data
 
-Before you can generate summaries of rental property descriptions using the `azure_ai` extension, you must add sample data to your database. Add a table to the `rentals` database and populate it with rental property listings so you have property descriptions from which to create summaries.
+Before you explore the `azure_ai` extension, add a couple of tables to the `rentals` database and populate them with sample data so you have information to work with as you review the extension's functionality.
 
-1. Run the following command to create a table named `listings` for storing listing data for rental properties:
+1. Run the following commands to create the `listings` and `reviews` tables for storing rental property listing and customer review data:
 
     ```sql
     DROP TABLE IF EXISTS listings;
@@ -152,13 +152,32 @@ Before you can generate summaries of rental property descriptions using the `azu
     );
     ```
 
-2. Next, use the `COPY` command to populate the table with data from a CSV file. Execute the command below to load rental properties into the `listings` table:
+    ```sql
+    DROP TABLE IF EXISTS reviews;
+
+    CREATE TABLE reviews (
+        id int,
+        listing_id int, 
+        date date,
+        comments text
+    );
+    ```
+
+2. Next, use the `COPY` command to load data from CSV files into each table you created above. Start by running the following command to populate the `listings` table:
 
     ```sql
     \COPY listings FROM 'mslearn-postgresql/Allfiles/Labs/Shared/listings.csv' CSV HEADER
     ```
 
-    The output of the command should be `COPY 50`, indicating that 50 rows were written into the table from the CSV file.
+    The command output should be `COPY 50`, indicating that 50 rows were written into the table from the CSV file.
+
+3. Finally, run the command below to load customer reviews into the `reviews` table:
+
+    ```sql
+    \COPY reviews FROM 'mslearn-postgresql/Allfiles/Labs/Shared/reviews.csv' CSV HEADER
+    ```
+
+    The command output should be `COPY 354`, indicating that 354 rows were written into the table from the CSV file.
 
 ## Install and configure the `azure_ai` extension
 
@@ -371,6 +390,22 @@ In this task, you use the `summarize_extractive()` and `summarize_abstractive()`
         summary
     FROM listings
     LIMIT 5;
+    ```
+
+## Generate an AI summary of reviews for a listing
+
+For the Margie's Travel app, it may also be useful to display a summary of all reviews for a property to help users quickly assess the overall gist of reviews.
+
+1. Run the following query, which combines all reviews for a listing into a single string, and then generates abstractive summarization over that string:
+
+    ```sql
+    SELECT unnest(azure_cognitive.summarize_abstractive(reviews_combined, 'en')) AS review_summary
+    FROM (
+        -- Combine all reviews for a listing
+        SELECT string_agg(comments, ' ') AS reviews_combined
+        FROM reviews
+        WHERE listing_id = 1
+    );
     ```
 
 ## Clean up
