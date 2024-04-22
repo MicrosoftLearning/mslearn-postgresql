@@ -8,7 +8,7 @@ lab:
 
 As the lead developer for Margie's Travel (MT), you have been asked to help develop a feature estimating nightly rental prices for short-term rentals. You have collected some historical data as a text file and would like to use this to train a simple regression model in Azure Machine Learning. Then, you would like to use that model against data you have hosted in Azure Database for PostgreSQL - Flexible Server.
 
-In this exercise, you will create and deploy a model using Azure Machine Learning's Automated ML (AutoML) functionality. Then, you will use that deployed model to estimate nightly sale prices for short-term rental properties.
+In this exercise, you will create and deploy a model using Azure Machine Learning's Automated machine learning functionality. Then, you will use that deployed model to estimate nightly sale prices for short-term rental properties.
 
 ## Before you start
 
@@ -84,10 +84,10 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
 7. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
 
     ```azurecli
-    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-aml.bicep" --parameters adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
+    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-azure-machine-learning.bicep" --parameters adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
     ```
 
-    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server and an Azure Machine Learning workspace. In order to instantiate the Azure ML workspace, the deployment script will also create all pre-requisite services for Azure ML, including an Azure Blob Storage account, an Azure Key Vault, an Azure Container Repository, an Azure Log Analytics Workspace, and an instance of Azure Application Insights. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter) and creating a database named `rentals` on the server. Note that the Bicep file is different from the other modules in this learning path.
+    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server and an Azure Machine Learning workspace. In order to instantiate the Azure Machine Learning workspace, the deployment script will also create all pre-requisite services for Azure Machine Learning, including an Azure Blob Storage account, an Azure Key Vault, an Azure Container Repository, an Azure Log Analytics Workspace, and an instance of Azure Application Insights. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter) and creating a database named `rentals` on the server. Note that the Bicep file is different from the other modules in this learning path.
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
@@ -103,7 +103,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
 
 ## Train a machine learning model
 
-You will train a new Azure Machine Learning Automated Machine Learning (AutoML) model [using the studio UI](https://learn.microsoft.com/azure/machine-learning/how-to-use-automated-ml-for-ml-models?view=azureml-api-2).
+You will train a new Azure Machine Learning automated machine learning model [using the studio UI](https://learn.microsoft.com/azure/machine-learning/how-to-use-automated-ml-for-ml-models?view=azureml-api-2).
 
 1. Download the `listings-regression.csv` file from [the mslearn-postgresql repository](../../Allfiles/Labs/Shared/listings-regression.csv).
 
@@ -163,13 +163,13 @@ You will train a new Azure Machine Learning Automated Machine Learning (AutoML) 
 
 16. Once you have everything configured, submit the training job. Wait for the training job to complete. This may take slightly longer than one hour due to machine provisioning and training times. Once the process completes, the Status will display a green check mark and a text label of **Completed**.
 
-    ![Screenshot of the completed AutoML job with a red box highlighting the Status section.](media/19-aml-automl-completed.png)
+    ![Screenshot of the completed automated machine learning job with a red box highlighting the Status section.](media/19-aml-automl-completed.png)
 
     > Note
     >
     > A warning message indicating that no scores have improved over the past 20 iterations is fine. This tells us that early termination occurred.
 
-## Deploy the best-fitting Azure ML model
+## Deploy the best-fitting Azure Machine Learning model
 
 Now that you have trained a series of models using Azure Machine Learning, the next step is to deploy the best-fit model.
 
