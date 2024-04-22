@@ -1,8 +1,8 @@
 ---
-uid: learn.wwl.understand-concurrency-postgresql.exercise-understand-locking
-title: Exercise: Understand locking
-description: Exercise: Understand locking
-durationInMinutes: 15
+uid: learn.wwl.tune-queries-azure-database-for-postgresql.exercise-assess-query-performance-query-store
+title: Exercise: Assess query performance using Query Store
+description: Exercise: Assess query performance using Query Store
+durationInMinutes: 20
 ---
 > [!IMPORTANT]
 > You need your own Azure subscription to complete the exercises in this module. If you don't have an Azure subscription, you can set up a free trial account at [Build in the cloud with an Azure free account](https://azure.microsoft.com/free/).
@@ -21,7 +21,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 2. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/08-portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/09-portal-toolbar-cloud-shell.png)
 
 3. At the Cloud Shell prompt, enter the following to clone the GitHub repo containing exercise resources:
 
@@ -113,62 +113,76 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 1. In **Password**, type enter the randomly generated password for the **pgAdmin** login you generated
 1. Select **Remember password**.
 
-## Task 1: Investigate default locking behavior
+### Create tables within the database
 
-1. Open Azure Data Studio.
 1. Either navigate to the folder with your exercise script files, or download the **Lab8_setupTables.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/08).
 1. Select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/08/Lab8_setupTables** and **Open**. Run the script.
 1. Expand **Databases**, right-click **adventureworks** and select **New Query**.
-    [!Screenshot of adventureworks database highlighting New Query context menu item](media/08-new-query.png)
+    [!Screenshot of adventureworks database highlighting New Query context menu item](media/09-new-query.png)
 
-1. Repeat the previous step to create another query tab. You should now have a query tab with a name beginning **SQL_Query_1** and another query tab with a name beginning **SQL_Query_2**.
 1. Select the **SQLQuery_1** tab, type the following query and select **Run**.
 
     ```sql
     SELECT * FROM production.workorder;
     ```
 
-1. Notice that the **stockedqty** value for the first row is **15**.
-1. Select the **SQLQuery_2** tab, type the following query and select **Run**.
+## Task 1: Turn on query capture mode
+
+1. Navigate to the Azure portal and sign in.
+1. Select your Azure Database for PostgreSQL server for this exercise.
+1. In **Settings**, select **Server parameters**.
+1. Navigate to the **pg_qs.query_capture_mode** setting.
+1. Select **TOP**.
+
+   [!Screenshot of settings to turn Query Store on](media/09-settings-turn-query-store-on.png)
+
+1. Navigate to **p g m s_wait_sampling.query_capture_mode**, select **ALL**, and select **Save**.
+    [Screenshot of settings to turn p g m s_wait_sampling.query_capture_mode on](media/09-query-capture-mode.png)
+1. Wait for the server parameters to update.
+
+## View pg_stat data
+
+1. Start Azure Data Studio.
+1. Select **Connect**.
+    [!Screenshot showing Connect icon](media/09-connect.png)
+1. Select your PostgreSQL server and select **Connect**.
+1. Type each of the following query and select **Run**.
 
     ```sql
-    BEGIN TRANSACTION;
-    UPDATE production.workorder
-        SET stockedqty=stockedqty+1
+    SELECT * FROM pg_stat_activity;
     ```
 
-1. Notice that the second query begins a transaction, but doesn't commit the transaction.
-1. Return to **SQLQuery_1** and run the query again.
-1. Notice that the **stockedqty** value for the first row is still **15**. The query is using a snapshot of the data and isn't seeing the updates from the other transaction.
-1. Select the **SQLQuery_2** tab, delete the existing query, type the following query and select **Run**.
+1. Review the metrics that are available.
+1. Leave Azure Data Studio open for the next task.
+
+## Task 2: Examine query statistics
+
+> [!NOTE]
+> For a newly created database, there might be limited statistics, if any. If you wait for 30 minutes there will be statistics from background processes.
+
+1. Select the **azure_sys** database.
+
+    [!Screenshot of the database selector](media/09-database-selector.png)
+
+1. Type each of the following queries and select **Run**.
 
     ```sql
-    ROLLBACK TRANSACTION;
+    SELECT * FROM query_store.query_texts_view;
     ```
-
-## Task 2: Apply table locks to a transaction
-
-1. Select the **SQLQuery_2** tab, type the following query and select **Run**.
 
     ```sql
-    BEGIN TRANSACTION;
-    LOCK TABLE production.workorder IN ACCESS EXCLUSIVE MODE;
-    UPDATE production.workorder
-        SET stockedqty=stockedqty+1
+    SELECT * FROM query_store.qs_view;
     ```
-
-1. Notice that the second query begins a transaction, but doesn't commit the transaction.
-1. Return to **SQLQuery_1** and run the query again.
-1. Notice that the transaction is blocked and won't complete, however long you wait.
-1. Select the **SQLQuery_2** tab, delete the existing query, type the following query and select **Run**.
 
     ```sql
-    ROLLBACK TRANSACTION;
+    SELECT * FROM query_store.runtime_stats_view;
     ```
 
-1. Return to **SQLQuery_1**, wait for a few seconds and notice that the query has completed was the block was removed.
+    ```sql
+    SELECT * FROM query_store.pgms_wait_sampling_view;
+    ```
 
-In this exercise, we've seen the default locking behavior. We then applied locks explicitly and saw that although some locks provide very high levels of protection, these locks can also have performance implications.
+1. Review the metrics that are available.
 
 ## Task 3: Exercise Clean-up
 
