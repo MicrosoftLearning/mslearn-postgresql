@@ -116,8 +116,8 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 ## Task 1: Investigate default locking behavior
 
 1. Open Azure Data Studio.
-1. Either navigate to the folder with your exercise script files, or download the **Lab8_setupTables.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/08).
-1. Select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/08/Lab8_setupTables** and **Open**. Run the script.
+1. Either navigate to the folder with your exercise script files, or download the **Lab8_setupTable.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/08).
+1. Select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/08/Lab8_setupTable** and **Open**. Run the script.
 1. Expand **Databases**, right-click **adventureworks** and select **New Query**.
     [!Screenshot of adventureworks database highlighting New Query context menu item](media/08-new-query.png)
 
