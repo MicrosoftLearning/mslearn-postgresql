@@ -193,7 +193,7 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 
 1. Open Azure Data Studio if it is not already open.
 1. From the left menu, select **Connections**.
-[!Screenshot showing the Connections in Azure Data Studio](media/02-media/connections.png)
+[!Screenshot showing the Connections in Azure Data Studio](media/02-connections.png)
 1. Select **New Connection**.
 [Screenshot of creating a new connection in Azure Data Studio](media/02-create-connection.png)
 1. Under **Connection Details**, in **Connection type** select **PostgreSQL** from the drop-down list.
