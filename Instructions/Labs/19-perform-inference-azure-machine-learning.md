@@ -4,11 +4,11 @@ lab:
     module: 'Build AI apps with Azure Database for PostgreSQL'
 ---
 
-# Translate Text with Azure AI Translator
+# Perform Inference using Azure Machine Learning
 
 As the lead developer for Margie's Travel (MT), you have been asked to help develop a feature estimating nightly rental prices for short-term rentals. You have collected some historical data as a text file and would like to use this to train a simple regression model in Azure Machine Learning. Then, you would like to use that model against data you have hosted in Azure Database for PostgreSQL - Flexible Server.
 
-In this exercise, you will create and deploy a model using Azure Machine Learning's Automated machine learning functionality. Then, you will use that deployed model to estimate nightly sale prices for short-term rental properties.
+In this exercise, you will deploy a model created using Azure Machine Learning's Automated machine learning functionality. Then, you will use that deployed model to estimate nightly sale prices for short-term rental properties.
 
 ## Before you start
 
@@ -101,11 +101,11 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
 
 8. Close the Cloud Shell pane once your resource deployment is complete.
 
-## Train a machine learning model
+## Deploy an Azure Machine Learning model
 
-You will train a new Azure Machine Learning automated machine learning model [using the studio UI](https://learn.microsoft.com/azure/machine-learning/how-to-use-automated-ml-for-ml-models?view=azureml-api-2).
+The first step is to deploy a model to Azure Machine Learning. An example of a model trained on a set of listings data is available in the repository, and you will use this model in your PostgreSQL integration.
 
-1. Download the `listings-regression.csv` file from [the mslearn-postgresql repository](../../Allfiles/Labs/Shared/listings-regression.csv).
+1. Download the `mlflow-model.zip` file from [the mslearn-postgresql repository](../../Allfiles/Labs/Shared/mlflow-model.zip). Extract the files from this into a folder called **mlflow-model**.
 
 2. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Machine Learning workspace.
 
@@ -117,87 +117,37 @@ You will train a new Azure Machine Learning automated machine learning model [us
 
     ![Screenshot of Azure Machine Learning Studio with the Workspaces menu option and the Azure Machine Learning workspace highlighted by red boxes.](media/19-aml-workspace.png)
 
-5. From the **Authoring** menu, select the **Automated ML** menu option. Then, select **+ New Automated ML job**.
+5. Select the **Models** menu option from the **Assets** menu. Then, select the **+ Register** menu option and choose **From local files**.
 
-    ![Screenshot of the Automated ML page with a red box highlighting the New Automated ML job button.](media/19-aml-automl-new-job.png)
+    ![Screenshot of the Model List page. A red box surrounds the Models menu option, the Register drop-down button, and the From local files option.](media/19-aml-register-from-local-files.png)
 
-6. Enter `Rental-Listings` as the experiment name and then select the **Next** button.
+6. In the **Upload model** menu, set the model type to **MLflow**. Then, choose **Browse** and navigate to your **mlflow-model** folder, uploading the assets. After that, select the **Next** button to continue.
 
-    ![Screenshot of the Automated ML job Basic settings screen with the phrase Rental-Listings in the experiment name text box and a red box around the Next button.](media/19-aml-automl-experiment-name.png)
+    ![Screenshot of the Upload model menu page. A red box surrounds the MLflow model type, the Browse button, and the Next button.](media/19-aml-register-upload-model.png)
 
-7. From the **Select task type** menu, choose **Regression** as the task type. Then, select the **+ Create** button to create a new dataset.
+7. Name the model **RentalListings** and then select the **Next** button.
 
-    ![Screenshot of the Automated ML Task type & data settings screen with the task type as Regression and a red box around the Create button.](media/19-aml-automl-task-type.png)
+    ![Screenshot of the Model settings screen with the value of RentalListings entered into the Name field. Red highlighting boxes surround the Name text box and Next button.](media/19-aml-register-model-settings.png)
 
-8. Set the data asset name to `RentalListings` and the dataset type as **Tabular** on the Create data asset screen. Then, select **Next** to continue to the next step of the creation process.
-
-    ![Screenshot of naming a new data asset. The Name field includes the data asset name, RentalListings. The Type field is set to Tabular. A red box surrounds the Next button.](media/19-aml-automl-data-asset-type.png)
-
-9. Choose **From local files** to upload a new file. Then, select the **Next** button. On the screen to select a datastore, choose **workplaceblobstore** and select **Next**. Then, select the **Upload files or folder** and select **Upload files**. This will bring up a file upload dialog. Navigate to the location where you have downloaded `listings-regression.csv` and upload this file. After you have completed the task, the file will appear in the upload list. Select **Next** to continue.
-
-    ![Screenshot of the listings-regression.csv file in the upload list. A red box surrounds the Next button.](media/19-aml-automl-data-asset-upload.png)
-
-10. Navigate past the **Settings** and **Schema** menus by selecting the **Next** button. On the **Review** menu, select **Create** to create the data asset.
-
-    ![Screenshot of the data asset being created. The Create button is surrounded by a red box.](media/19-aml-automl-data-asset-review.png)
-
-11. Creating the data asset will return you to the **Task type & data** menu page. Choose the `RentalListings` data asset from the **Select data** menu and then choose **Next** to continue to the next page.
-
-    ![Screenshot of the Task type & data screen with the RentalListings data asset checked and red boxes surrounding the RentalListings data asset and the Next button.](media/19-aml-automl-task-type-data.png)
-
-12. On the **Task settings** page, select **price** as the target column. Then, select the **View additional configuration settings** link.
-
-    ![Screenshot of the Task settings page with price (Decimal) in the target column and a red box surrounding the View additional configuration settings link.](media/19-aml-automl-task-settings.png)
-
-13. On the **View additional configuration settings** fly-out pane, ensure that **Enable ensemble stacking** is selected. Then, select **Save** to save the change.
-
-    ![Screenshot of the Enable ensemble stacking option surrounded by a red box. The Save button is also surrounded by a red box.](media/19-aml-automl-additional-configuration.png)
-
-14. Returning to the **Task settings** page, in the **Limits** section, set the experiment timeout to **60** minutes to ensure it does not run longer than one hour. Also, select the **Enable early termination** box. Then select the **Next** button to continue.
-
-    ![Screenshot of the Task settings page with the Limits section expanded, the experiment timeout set to 60 minutes, and the Enable early termination box checked. These items and the Next button are highlighted by red boxes.](media/19-aml-automl-task-settings-limits.png)
-
-15. On the **Compute** page, ensure that the compute type is **Serverless** and you are using a **CPU**-based virtual machine at the **Dedicated** tier, using a virtual machine size of **Standard_DS3_v2** or similar. Then, select **Next**.
-
-    ![Screenshot of the Compute page with a red box highlighting the Next button.](media/19-aml-automl-compute.png)
-
-16. Once you have everything configured, submit the training job. Wait for the training job to complete. This may take slightly longer than one hour due to machine provisioning and training times. Once the process completes, the Status will display a green check mark and a text label of **Completed**.
-
-    ![Screenshot of the completed automated machine learning job with a red box highlighting the Status section.](media/19-aml-automl-completed.png)
+8. Select the **Register** button to complete model registration. This will take you back to the **Models** page. Select the newly created model.
 
     > [!Note]
     >
-    > A warning message indicating that no scores have improved over the past 20 iterations is fine. This tells us that early termination occurred.
+    > If you do not see a model, select the **Refresh** menu option button to reload the page. You should see the **RentalListings** model after that.
 
-## Deploy the best-fitting Azure Machine Learning model
-
-Now that you have trained a series of models using Azure Machine Learning, the next step is to deploy the best-fit model.
-
-1. Select the **+ Register model** option on the completed job to register a model. Ensure that the **Job output** has the best model and then select **Next**.
-
-    ![Screenshot of the Select output screen with model type of MLflow and a job output of the best model. A red box surrounds the Next button.](media/19-aml-automl-deploy-output.png)
-
-2. Name the model **RentalListings** and then select the **Next** button.
-
-    ![Screenshot of the Model settings screen with the value of RentalListings entered into the Name field. Red highlighting boxes surround the Name text box and Next button.](media/19-aml-automl-deploy-model-settings.png)
-
-3. Select the **Register** button to complete model registration. Then, select the link to go to the model.
-
-    ![Screenshot of the Rental-Listings job overview after successful model registration. A red box highlights the link to navigate to the model.](media/19-aml-automl-deploy-success.png)
-
-4. Select the **Deploy** button option and create a new **Real-time endpoint**.
+9. Select the **Deploy** button option and create a new **Real-time endpoint**.
 
     ![Screenshot of the Real-time endpoint menu option highlighted by a red box.](media/19-aml-automl-deploy-rte.png)
 
-5. On the deployment fly-out menu, set the **Virtual machine** to something like **Standard_DS2_v2** and the **Instance count** to 1. Select the **Deploy** button. Deployment may take several minutes to complete, as the deployment process includes provisioning a virtual machine and deploying the model as a Docker container.
+10. On the deployment fly-out menu, set the **Virtual machine** to something like **Standard_DS2_v2** and the **Instance count** to 1. Select the **Deploy** button. Deployment may take several minutes to complete, as the deployment process includes provisioning a virtual machine and deploying the model as a Docker container.
 
     ![Screenshot of the deployment fly-out menu. The Virtual machine is Standard_DS2_v2 and Instance count is 1. Red boxes highlight the Virtual machine drop-down, Instance count textbox, and Deploy button.](media/19-aml-automl-deploy-endpoint.png)
 
-6. After the endpoint deploys, navigate to the **Consume** tab and copy the REST endpoint and primary key so you can use them in the next section.
+11. After the endpoint deploys, navigate to the **Consume** tab and copy the REST endpoint and primary key so you can use them in the next section.
 
     ![Screenshot of the endpoint Consume tab. Red boxes highlight the copy buttons for the REST endpoint and primary authentication key.](media/19-aml-automl-endpoint-consume.png)
 
-7. In order to test that your endpoint is running correctly, you can use the **Test** tab on your endpoint. Then, paste in the following block, replacing any input that currently exists. Select the **Test** button and you should see a JSON output containing an array with a single decimal value, indicating the number of US dollars you should expect this particular property to earn for a single night of rental.
+12. In order to test that your endpoint is running correctly, you can use the **Test** tab on your endpoint. Then, paste in the following block, replacing any input that currently exists. Select the **Test** button and you should see a JSON output containing an array with a single decimal value, indicating the number of US dollars you should expect this particular property to earn for a single night of rental.
 
     ```json
     {
@@ -352,6 +302,10 @@ In order to populate the language translation table, you will create a stored pr
         }')::jsonb, deployment_name=>'rentallistings-1');
     $$ LANGUAGE sql;
     ```
+
+    > [!Note]
+    >
+    > The deployment name is, by default, a combination of the model name (**rentallistings**) and the version number (**1**). If you deploy a new version of the model and use the default deployment name, the new deployment name would be called **rentallistings-2**.
 
 2. Execute the function using the following SQL command:
 
