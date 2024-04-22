@@ -41,7 +41,6 @@ In this exercise you'll configure logical replication, which is native to Postgr
     1. **Allow public access from any Azure service within Azure to this server** - checked. This must be checked, so that the publisher and subscriber databases can communicate with each other.
     1. Under Firewall rules, select **+ Add current client IP address**. This adds your current IP address as a firewall rule. You can optionally name this firewall rule to something meaningful.
 1. Select **Review + create**. Then select **Create**.
-    :::image type="content" source="../media/flexible-server-networking.png" alt-text="Screenshot showing the Flexible server Networking page." lightbox="../media/flexible-server-networking.png":::
 
 ## Create a subscriber server
 

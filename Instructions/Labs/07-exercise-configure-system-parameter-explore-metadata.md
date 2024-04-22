@@ -21,7 +21,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 2. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/11-portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/07-portal-toolbar-cloud-shell.png)
 
 3. At the Cloud Shell prompt, enter the following to clone the GitHub repo containing exercise resources:
 
@@ -31,7 +31,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 4. Next, you run three commands to define variables to reduce redundant typing when using Azure CLI commands to create Azure resources. The variables represent the name to assign to your resource group (`RG_NAME`), the Azure region (`REGION`) into which resources will be deployed, and a randomly generated password for the PostgreSQL administrator login (`ADMIN_PASSWORD`).
 
-    In the first command, the region assigned to the corresponding variable is `eastus`, but you can also replace it with a location of your preference. However, if replacing the default, you must select another [Azure region that supports abstractive summarization](https://learn.microsoft.com/azure/ai-services/language-service/summarization/region-support) to ensure you can complete all of the tasks in the modules in this learning path.
+    In the first command, the region assigned to the corresponding variable is `eastus`, but you can also replace it with a location of your preference.
 
     ```bash
     REGION=eastus
@@ -74,7 +74,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-postgresql-server.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD databaseName=zoodb
     ```
 
-    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL - Flexible Server, Azure OpenAI, and an Azure AI Language service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter), creating a database named `rentals` on the server, and adding a deployment named `embedding` using the `text-embedding-ada-002` model to your Azure OpenAI service. Note that the Bicep file is shared by all modules in this learning path, so you may only use some of the deployed resources in some exercises.
+    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed are an Azure Database for PostgreSQL - Flexible Server. The bicep script also creates a database - which can be configured on the commandline as a parameter.
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
@@ -99,50 +99,22 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 8. Close the Cloud Shell pane once your resource deployment is complete.
 
-### Connect to the database with pgAdmin and Azure Data Studio
+### Connect to the database with Azure Data Studio
 
-1. Download and install pgAdmin 4 from [Download](https://www.pgadmin.org/download/)
 1. Download and install Azure Data Studio from [Download and install Azure Data Studio](/sql/azure-data-studio/download-azure-data-studio).
 1. Start Azure Data Studio.
 1. Select the **View** menu and select **Extensions**.
 1. In **Search Extensions in Marketplace**, type **PostgreSQL** and select **Install**.
-    :::image type="content" source="../media/postgresql-extension.png" alt-text="Screenshot of PostgreSQL extension install button.":::
 1. Select **Connections**.
-
-    :::image type="content" source="../media/connections.png" alt-text="Screenshot of Connections button.":::
 1. Select **Servers** and select **New connection**.
-
-    :::image type="content" source="../media/create-connection.png" alt-text="Screenshot of Create a connection button.":::
 1. In **Connection type**, select **PostgreSQL**.
 1. In **Server name**, type the value that you specified when you deployed the server.
 1. In **User name**, type **pgAdmin**.
 1. In **Password**, type enter the randomly generated password for the **pgAdmin** login you generated
 1. Select **Remember password**.
-1. Start pgAdmin and enter the password that you specified during installation.
-1. Right-click **Servers**, select **Register**, and select **Server**.
-    :::image type="content" source="../media/pgadmin-register.png" alt-text="Screenshot of server registration menu in pgAdmin.":::
-1. In **Name**, type **PostgreSQL Exercise 7** and select the **Connection** tab.
-1. In **Host name/address**, type the value that you specified when you deployed the server.
-1. In **User name**, type **pgAdmin**.
-1. In **Password**, type enter the randomly generated password for the **pgAdmin** login you generated
-1. Select **Save password**.
-1. Select **Save**.
-1. Expand **PostgreSQL Exercise**, right-click **Databases**, select **Create**, and select **Database**.
-    :::image type="content" source="../media/create-database.png" alt-text="Screenshot showing Create Database menu item.":::
-1. In **Database**, type **adventureworks** and select **Save**.
-1. Right-click **adventureworks** and select **Restore**.
-1. In **Filename**, type the path that you specified in the git clone statement plus **\AdventureWorksPG.gz**.
-1. In **Number of jobs**, type **1**.
-1. In **Role name**, select **demo**.
-1. Select **Restore**.
-
-    :::image type="content" source="../media/restore.png" alt-text="Screenshot of Restore dialog box.":::
-1. Wait until the restore process completes.
-1. You can disregard any errors that occur because those objects aren't required for these modules.
 
 ## Task 1: Explore the vacuum process in PostgreSQL
 
-1. In the Azure portal, navigate to your Azure Database for PostgreSQL flexible server. Check the server is started. If necessary, start the server.
 1. Open Azure Data Studio.
 1. Either navigate to the folder with your exercise script files, or download the **Lab7_vacuum.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/07).
 1. Select File, **Open File**, and select **Lab7_vacuum.sql**.Connect to your Azure Database for PostgreSQL flexible server.

@@ -35,7 +35,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 4. Next, you run three commands to define variables to reduce redundant typing when using Azure CLI commands to create Azure resources. The variables represent the name to assign to your resource group (`RG_NAME`), the Azure region (`REGION`) into which resources will be deployed, and a randomly generated password for the PostgreSQL administrator login (`ADMIN_PASSWORD`).
 
-    In the first command, the region assigned to the corresponding variable is `eastus`, but you can also replace it with a location of your preference. However, if replacing the default, you must select another [Azure region that supports abstractive summarization](https://learn.microsoft.com/azure/ai-services/language-service/summarization/region-support) to ensure you can complete all of the tasks in the modules in this learning path.
+    In the first command, the region assigned to the corresponding variable is `eastus`, but you can also replace it with a location of your preference.
 
     ```bash
     REGION=eastus
@@ -78,7 +78,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD databaseName=zoodb
     ```
 
-    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL - Flexible Server, Azure OpenAI, and an Azure AI Language service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter), creating a database named `rentals` on the server, and adding a deployment named `embedding` using the `text-embedding-ada-002` model to your Azure OpenAI service. Note that the Bicep file is shared by all modules in this learning path, so you may only use some of the deployed resources in some exercises.
+    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed are an Azure Database for PostgreSQL - Flexible Server. The bicep script also creates a database - which can be configured on the commandline as a parameter.
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
@@ -186,13 +186,16 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. Open Azure Data Studio if it is not already open.
 1. From the left menu, select **Extensions** to display the Extensions panel.
 1. In the search bar, enter **PostgreSQL**. The PostgreSQL extension for Azure Data Studio icon is displayed.
+    [!Screenshot of the PostgreSQL extension for Azure Data Studio](media/02-postgresql-extension.png)
 1. Select **Install**. The extension installs.
 
 ## Connect to Azure Database for PostgreSQL flexible server
 
 1. Open Azure Data Studio if it is not already open.
 1. From the left menu, select **Connections**.
+[!Screenshot showing the Connections in Azure Data Studio](media/02-media/connections.png)
 1. Select **New Connection**.
+[Screenshot of creating a new connection in Azure Data Studio](media/02-create-connection.png)
 1. Under **Connection Details**, in **Connection type** select **PostgreSQL** from the drop-down list.
 1. In **Server name**, enter the full server name as it appears on the Azure portal.
 1. In **Authentication type**, leave Password.
