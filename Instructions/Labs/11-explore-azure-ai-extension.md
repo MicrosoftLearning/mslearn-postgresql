@@ -16,7 +16,7 @@ You need an [Azure subscription](https://azure.microsoft.com/free) with administ
 
 This step guides you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
 
-> Note
+> [!Note]
 >
 > If you are doing multiple modules in this learning path, you can share the Azure environment between them. In that case, you only need to complete this resource deployment step once.
 
@@ -464,7 +464,7 @@ The `azure_ml` schema allows functions to connect to Azure ML services directly 
 
 Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
 
-> Note
+> [!Note]
 >
 > If you plan on completing additional modules in this learning path, you can skip this task until you have finished all the modules you intend to complete.
 

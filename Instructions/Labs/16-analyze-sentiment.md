@@ -16,7 +16,7 @@ You need an [Azure subscription](https://azure.microsoft.com/free) with administ
 
 This step guides you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
 
-> Note
+> [!Note]
 >
 > If you are doing multiple modules in this learning path, you can share the Azure environment between them. In that case, you only need to complete this resource deployment step once.
 
@@ -189,7 +189,7 @@ The Azure AI services integrations included in the `azure_cognitive` schema of t
 
     ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/16-azure-language-service-keys-endpoints.png)
 
-    > Note
+    > [!Note]
     >
     > If you received the message `NOTICE:  extension "azure_ai" already exists, skipping CREATE EXTENSION` when installing the `azure_ai` extension above and have previously configured the extension with your Language service endpoint and key, you can use the `azure_ai.get_setting()` function to confirm those settings are correct, and then skip step 2 if they are.
 
@@ -279,7 +279,7 @@ In this task, you use the `azure_cognitive.analyze_sentiment()` function to eval
 
     From the two records analyzed, note the `sentiment` values in the output, `(mixed,0.71,0.09,0.2)` and `(positive,0.99,0.01,0)`. These represent the `sentiment_analysis_result` returned by the `analyze_sentiment()` function in the above query. The analysis was performed over the `comments` field in the `reviews` table.
 
-    > Note
+    > [!Note]
     >
     > Using the `analyze_sentiment()` function inline allows you to quickly analyze the text's sentiment within your queries. While this works well for a small number of records, it may not be ideal for analyzing the sentiment of a large number of records or updating all the records in a table that may contain tens of thousands of reviews or more.
 
@@ -388,7 +388,7 @@ For the rental property recommendation system you are building for Margie's Trav
 
 Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
 
-> Note
+> [!Note]
 >
 > If you plan on completing additional modules in this learning path, you can skip this task until you have finished all the modules you intend to complete.
 

@@ -18,7 +18,7 @@ You need an [Azure subscription](https://azure.microsoft.com/free) with administ
 
 This step will guide you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
 
-> Note
+> [!Note]
 >
 > If you are doing multiple modules in this learning path, you should delete the resources you created in the prior modules and then follow these instructions.
 
@@ -347,7 +347,7 @@ You have a stored procedure to translate existing listings, but your internation
 
 Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
 
-> Note
+> [!Note]
 >
 > If you plan on completing additional modules in this learning path, you should still run this task and then run the deployment script in the next module you intend to complete.
 

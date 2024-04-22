@@ -16,7 +16,7 @@ You need an [Azure subscription](https://azure.microsoft.com/free) with administ
 
 This step guides you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
 
-> Note
+> [!Note]
 >
 > If you are doing multiple modules in this learning path, you can share the Azure environment between them. In that case, you only need to complete this resource deployment step once.
 
@@ -196,7 +196,7 @@ The Azure AI services integrations included in the `azure_cognitive` schema of t
 
     ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/14-azure-language-service-keys-endpoints.png)
 
-    > Note
+    > [!Note]
     >
     > If you received the message `NOTICE:  extension "azure_ai" already exists, skipping CREATE EXTENSION` when installing the `azure_ai` extension above and have previously configured the extension with your Language service endpoint and key, you can use the `azure_ai.get_setting()` function to confirm those settings are correct, and then skip step 2 if they are.
 
@@ -377,7 +377,7 @@ In this task, you use the `summarize_extractive()` and `summarize_abstractive()`
 
 Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
 
-> Note
+> [!Note]
 >
 > If you plan on completing additional modules in this learning path, you can skip this task until you have finished all the modules you intend to complete.
 
