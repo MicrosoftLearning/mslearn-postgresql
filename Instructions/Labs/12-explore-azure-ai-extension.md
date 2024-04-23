@@ -1,7 +1,7 @@
 ---
 lab:
-  title: 'Explore the Azure AI Extension'
-  module: 'Build AI apps with Azure Database for PostgreSQL'
+    title: 'Explore the Azure AI Extension'
+    module: 'Build AI apps with Azure Database for PostgreSQL'
 ---
 
 # Explore the Azure AI Extension
