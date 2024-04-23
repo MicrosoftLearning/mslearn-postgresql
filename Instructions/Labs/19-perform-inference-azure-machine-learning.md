@@ -345,4 +345,4 @@ Once you have completed this exercise, delete the Azure resources you created. Y
 
     ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/11-resource-group-delete.png)
 
-4. In the confirmation dialog, enter the name of the resource group you are deleting to confirm and then select **Delete**.
+4. In the confirmation dialog, enter the resource group name you are deleting to confirm and then select **Delete**.

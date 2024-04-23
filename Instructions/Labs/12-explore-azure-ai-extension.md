@@ -1,7 +1,7 @@
 ---
 lab:
-    title: 'Explore the Azure AI Extension'
-    module: 'Build AI apps with Azure Database for PostgreSQL'
+  title: 'Explore the Azure AI Extension'
+  module: 'Build AI apps with Azure Database for PostgreSQL'
 ---
 
 # Explore the Azure AI Extension
@@ -46,13 +46,13 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     RG_NAME=rg-learn-postgresql-ai-$REGION
     ```
 
-    The final command randomly generates a password for the PostgreSQL admin login. Make sure you copy it to a safe place so that you can use it later to connect to your PostgreSQL flexible server.
+    The final command randomly generates a password for the PostgreSQL admin login. Copy it to a safe place to use later when connecting to your PostgreSQL flexible server.
 
     ```bash
     a=()
     for i in {a..z} {A..Z} {0..9}; 
-       do
-       a[$RANDOM]=$i
+        do
+        a[$RANDOM]=$i
     done
     ADMIN_PASSWORD=$(IFS=; echo "${a[*]::18}")
     echo "Your randomly generated PostgreSQL admin user's password is:"
@@ -89,14 +89,13 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
         {"code": "ResourceKindRequireAcceptTerms", "message": "This subscription cannot create TextAnalytics until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal and trying again.}
         ```
 
-        To resolve this error, you must create your first Language resource from the Azure portal so you can review and acknowledge the terms and conditions. You can do so here: <https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics>. Create it under any new resource group with some random valid name, also assign some random valid name to the Language service you-re deploying.After that, because you agreed upon the Responsible AI terms for the whole subscription, you can create subsequent Language resources using any deployment tool (for example, SDK, CLI, or ARM template) under the same Azure subscription. Therefore, once you have created that first resource throught the portal, you can simply delete it, and rerun the command to execute the Bicep deployment script.
-
+        To resolve this error, you must create your first Language resource from the Azure portal so you can review and acknowledge the terms and conditions. You can do so here: <https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics>. Create it under any new resource group with some random valid name, and assign some random valid name to the language service you're deploying. After that, because you agreed upon the Responsible AI terms for the whole subscription, you can create subsequent Language resources using any deployment tool (for example, SDK, CLI, or ARM template) under the same Azure subscription. Therefore, once you have created that first resource through the portal, you can delete it and rerun the command to execute the Bicep deployment script.
 
     - If you previously ran the Bicep deployment script for this learning path and subsequently deleted the resources, you may receive an error message like the following if you are attempting to rerun the script within 48 hours of deleting the resources:
 
         ```bash
         {"code": "InvalidTemplateDeployment", "message": "The template deployment 'deploy' is not valid according to the validation procedure. The tracking id is '4e87a33d-a0ac-4aec-88d8-177b04c1d752'. See inner errors for details."}
-    
+
         Inner Errors:
         {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/{accountName}' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
         ```
@@ -137,26 +136,26 @@ Before you explore the `azure_ai` extension, add a couple of tables to the `rent
 
     ```sql
     DROP TABLE IF EXISTS listings;
-
+    
     CREATE TABLE listings (
-        id int,
-        name varchar(100),
-        description text,
-        property_type varchar(25),
-        room_type varchar(30),
-        price numeric,
-        weekly_price numeric
+      id int,
+      name varchar(100),
+      description text,
+      property_type varchar(25),
+      room_type varchar(30),
+      price numeric,
+      weekly_price numeric
     );
     ```
 
     ```sql
     DROP TABLE IF EXISTS reviews;
-
+    
     CREATE TABLE reviews (
-        id int,
-        listing_id int, 
-        date date,
-        comments text
+      id int,
+      listing_id int, 
+      date date,
+      comments text
     );
     ```
 
@@ -189,9 +188,9 @@ Before using the `azure_ai` extension, you must install it into your database an
     The command displays the list of extensions on the server's _allowlist_. If everything was correctly installed, your output must include `azure_ai` and `vector`, like this:
 
     ```sql
-     azure.extensions 
+     azure.extensions 
     ------------------
-     azure_ai,vector
+     azure_ai,vector
     ```
 
     Before an extension can be installed and used in Azure Database for PostgreSQL - Flexible Server, it must be added to the server's _allowlist_, as described in [how to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
@@ -202,7 +201,7 @@ Before using the `azure_ai` extension, you must install it into your database an
     CREATE EXTENSION IF NOT EXISTS azure_ai;
     ```
 
-    `CREATE EXTENSION` loads a new extension into the database by running its script file. This typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
+    `CREATE EXTENSION` loads a new extension into the database by running its script file. This script typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
 
 ## Review the objects contained within the `azure_ai` extension
 
@@ -222,12 +221,12 @@ Reviewing the objects within the `azure_ai` extension can help you better unders
 
     The meta-command output shows the `azure_ai` extension creates four schemas, multiple user-defined functions (UDFs), several composite types in the database, and the `azure_ai.settings` table. Other than the schemas, all object names are preceded by the schema to which they belong. Schemas are used to group related functions and types the extension adds into buckets. The table below lists the schemas added by the extension and provides a brief description of each:
 
-    | Schema            | Description                                                                                            |
+    | Schema      | Description                                              |
     | ----------------- | ------------------------------------------------------------------------------------------------------ |
-    | `azure_ai`        | The principal schema where the configuration table and UDFs for interacting with the extension reside. |
-    | `azure_openai`    | Contains the UDFs that enable calling an Azure OpenAI endpoint.                                        |
-    | `azure_cognitive` | Provides UDFs and composite types related to integrating the database with Azure AI Services.          |
-    | `azure_ml`        | Includes the UDFs for integrating Azure Machine Learning (ML) services.                                |
+    | `azure_ai`    | The principal schema where the configuration table and UDFs for interacting with the extension reside. |
+    | `azure_openai`  | Contains the UDFs that enable calling an Azure OpenAI endpoint.                    |
+    | `azure_cognitive` | Provides UDFs and composite types related to integrating the database with Azure AI Services.     |
+    | `azure_ml`    | Includes the UDFs for integrating Azure Machine Learning (ML) services.                |
 
 ### Explore the Azure AI schema
 
@@ -242,12 +241,12 @@ The `azure_ai` schema provides the framework for directly interacting with Azure
     The output of the command should be a table similar to this:
 
     ```sql
-                                List of functions
-      Schema  |    Name     | Result data type | Argument data types  | Type 
+                  List of functions
+     Schema |  Name  | Result data type | Argument data types | Type 
     ----------+-------------+------------------+----------------------+------
-     azure_ai | get_setting | text             | key text             | func
-     azure_ai | set_setting | void             | key text, value text | func
-     azure_ai | version     | text             |                      | func
+     azure_ai | get_setting | text      | key text      | func
+     azure_ai | set_setting | void      | key text, value text | func
+     azure_ai | version  | text      |           | func
     ```
 
     The `set_setting()` function lets you set the endpoint and key of your Azure AI and ML services so that the extension can connect to them. It accepts a **key** and the **value** to assign to it. The `azure_ai.get_setting()` function provides a way to retrieve the values you set with the `set_setting()` function. It accepts the **key** of the setting you want to view and returns the value assigned to it. For both methods, the key must be one of the following:
@@ -302,23 +301,23 @@ The `azure_openai` schema provides the ability to integrate the creation of vect
 
     The output shows the two overloads of the `azure_openai.create_embeddings()` function, allowing you to review the differences between the two versions of the function and the types they return. The `Argument data types` property in the output reveals the list of arguments the two function overloads expect:
 
-    | Argument        | Type               | Default | Description                                                                                                                    |
+    | Argument    | Type       | Default | Description                                                          |
     | --------------- | ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-    | deployment_name | `text`             |         | Name of the deployment in Azure OpenAI Studio that contains the `text-embedding-ada-002` model.                               |
-    | input           | `text` or `text[]` |         | Input text (or array of text) for which embeddings are created.                                                                |
-    | batch_size      | `integer`          | 100     | Only for the overload expecting an input of `text[]`. Specifies the number of records to process at a time.                    |
-    | timeout_ms      | `integer`          | 3600000 | Timeout in milliseconds after which the operation is stopped.                                                                  |
-    | throw_on_error  | `boolean`          | true    | Flag indicating whether the function should, on error, throw an exception resulting in a rollback of the wrapping transaction. |
-    | max_attempts    | `integer`          | 1       | Number of times to retry the call to Azure OpenAI service in the event of a failure.                                           |
-    | retry_delay_ms  | `integer`          | 1000    | Amount of time, in milliseconds, to wait before attempting to retry calling the Azure OpenAI service endpoint.                 |
+    | deployment_name | `text`      |    | Name of the deployment in Azure OpenAI Studio that contains the `text-embedding-ada-002` model.               |
+    | input     | `text` or `text[]` |    | Input text (or array of text) for which embeddings are created.                                |
+    | batch_size   | `integer`     | 100  | Only for the overload expecting an input of `text[]`. Specifies the number of records to process at a time.          |
+    | timeout_ms   | `integer`     | 3600000 | Timeout in milliseconds after which the operation is stopped.                                 |
+    | throw_on_error | `boolean`     | true  | Flag indicating whether the function should, on error, throw an exception resulting in a rollback of the wrapping transaction. |
+    | max_attempts  | `integer`     | 1   | Number of times to retry the call to Azure OpenAI service in the event of a failure.                     |
+    | retry_delay_ms | `integer`     | 1000  | Amount of time, in milliseconds, to wait before attempting to retry calling the Azure OpenAI service endpoint.        |
 
 2. To provide a simplified example of using the function, run the following query, which creates a vector embedding for the `description` field in the `listings` table. The `deployment_name` parameter in the function is set to `embedding`, which is the name of the deployment of the `text-embedding-ada-002` model in your Azure OpenAI service (it was created with that name by the Bicep deployment script):
 
     ```sql
     SELECT
-        id,
-        name,
-        azure_openai.create_embeddings('embedding', description) AS vector
+      id,
+      name,
+      azure_openai.create_embeddings('embedding', description) AS vector
     FROM listings
     LIMIT 1;
     ```
@@ -326,9 +325,9 @@ The `azure_openai` schema provides the ability to integrate the creation of vect
     The output looks similar to this:
 
     ```sql
-    id |             name              |                            vector
-    ---+-------------------------------+------------------------------------------------------------
-    1  | Stylish One-Bedroom Apartment | {0.020068742,0.00022734122,0.0018286322,-0.0064167166,...}
+     id |      name       |              vector
+    ----+-------------------------------+------------------------------------------------------------
+      1 | Stylish One-Bedroom Apartment | {0.020068742,0.00022734122,0.0018286322,-0.0064167166,...}
     ```
 
     For brevity, the vector embeddings are abbreviated in the above output.
@@ -357,14 +356,14 @@ The `azure_cognitive` schema provides the framework for directly interacting wit
 
 3. Repeat the above command, replacing the `analyze_sentiment` function name with each of the following function names, to inspect all of the available functions in the schema:
 
-    - `detect_language`
-    - `extract_key_phrases`
-    - `linked_entities`
-    - `recognize_entities`
-    - `recognize_pii_entities`
-    - `summarize_abstractive`
-    - `summarize_extractive`
-    - `translate`
+   - `detect_language`
+   - `extract_key_phrases`
+   - `linked_entities`
+   - `recognize_entities`
+   - `recognize_pii_entities`
+   - `summarize_abstractive`
+   - `summarize_extractive`
+   - `translate`
 
     For each function, inspect the various forms of the function and their expected inputs and resulting data types.
 
@@ -383,13 +382,13 @@ The `azure_cognitive` schema provides the framework for directly interacting wit
     The output of that command should look similar to the following:
 
     ```sql
-                     Composite type "azure_cognitive.sentiment_analysis_result"
-         Column     |       Type       | Collation | Nullable | Default | Storage  | Description 
+             Composite type "azure_cognitive.sentiment_analysis_result"
+       Column  |   Type   | Collation | Nullable | Default | Storage | Description 
     ----------------+------------------+-----------+----------+---------+----------+-------------
-     sentiment      | text             |           |          |         | extended | 
-     positive_score | double precision |           |          |         | plain    | 
-     neutral_score  | double precision |           |          |         | plain    | 
-     negative_score | double precision |           |          |         | plain    |
+     sentiment   | text      |     |     |    | extended | 
+     positive_score | double precision |     |     |    | plain  | 
+     neutral_score | double precision |     |     |    | plain  | 
+     negative_score | double precision |     |     |    | plain  |
     ```
 
     The `azure_cognitive.sentiment_analysis_result` is a composite type containing the sentiment predictions of the input text. It includes the sentiment, which can be positive, negative, neutral, or mixed, and the scores for positive, neutral, and negative aspects found in the text. The scores are represented as real numbers between 0 and 1. For example, in (neutral, 0.26, 0.64, 0.09), the sentiment is neutral, with a positive score of 0.26, neutral of 0.64, and negative at 0.09.
@@ -412,9 +411,9 @@ The `azure_cognitive` schema provides the framework for directly interacting wit
 
     ```sql
     SELECT
-        id,
-        comments,
-        azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment
+      id,
+      comments,
+      azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment
     FROM reviews
     WHERE id IN (1, 3);
     ```
@@ -423,7 +422,7 @@ The `azure_cognitive` schema provides the framework for directly interacting wit
 
 ## Inspect the Azure ML schema
 
-The `azure_ml` schema allows functions to connect to Azure ML services directly from your database.
+The `azure_ml` schema lets functions connect to Azure ML services directly from your database.
 
 1. To review the functions defined in a schema, you can use the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC). To view the functions in the `azure_ml` schema, run:
 
@@ -433,32 +432,19 @@ The `azure_ml` schema allows functions to connect to Azure ML services directly 
 
     In the output, observe there are two functions defined in this schema, `azure_ml.inference()` and `azure_ml.invoke()`, the details of which are displayed below:
 
-    TODO: Get verification that the `invoke` function is replacing `inference` and update this section accordingly.
-
     ```sql
-                                List of functions
+                  List of functions
     -----------------------------------------------------------------------------------------------------------
-    Schema              | azure_ml
-    Name                | inference
-    Result data type    | jsonb
+    Schema       | azure_ml
+    Name        | inference
+    Result data type  | jsonb
     Argument data types | input_data jsonb, deployment_name text DEFAULT NULL::text, timeout_ms integer DEFAULT NULL::integer, throw_on_error boolean DEFAULT true, max_attempts integer DEFAULT 1, retry_delay_ms integer DEFAULT 1000
-    Type                | func
+    Type        | func
     ```
 
-    The `inference()` function uses a trained machine learning model to make predictions or generate outputs based on new, unseen data.
+    The `inference()` function uses a trained machine learning model to predict or generate outputs based on new, unseen data.
 
-    ```sql
-    -----------------------------------------------------------------------------------------------------------
-    Schema              | azure_ml
-    Name                | invoke
-    Result data type    | jsonb
-    Argument data types | input_data jsonb, deployment_name text DEFAULT NULL::text, timeout_ms integer DEFAULT NULL::integer, throw_on_error boolean DEFAULT true, max_attempts integer DEFAULT 1, retry_delay_ms integer DEFAULT 1000
-    Type                | func
-    ```
-
-    The `invoke()` function uses a trained machine learning model to make predictions or generate outputs based on new, unseen data.
-
-    You can connect to an Azure ML deployed endpoint in the same way you connected to your Azure OpenAI and Azure AI Services endpoints by providing an endpoint and key. Interacting with Azure ML requires having a trained and deployed model, so it is out of scope for this exercise, and you are not setting up that connection to try it out here.
+    By providing an endpoint and key, you can connect to an Azure ML deployed endpoint like you connected to your Azure OpenAI and Azure AI Services endpoints. Interacting with Azure ML requires having a trained and deployed model, so it is out of scope for this exercise, and you are not setting up that connection to try it out here.
 
 ## Clean up
 
@@ -478,4 +464,4 @@ Once you have completed this exercise, delete the Azure resources you created. Y
 
     ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/12-resource-group-delete.png)
 
-4. In the confirmation dialog, enter the name of the resource group you are deleting to confirm and then select **Delete**.
+4. In the confirmation dialog, enter the resource group name you are deleting to confirm and then select **Delete**.

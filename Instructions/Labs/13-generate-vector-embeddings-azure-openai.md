@@ -1,4 +1,4 @@
-To perform semantic search, we need to generate embedding vectors from a model, then use a vector database to store and query those embeddings. Here, you'll set up a database, populate it with sample data, and run semantic searches against those listings.
+To perform semantic searches, you must first generate embedding vectors from a model, store them in a vector database, and then query the embeddings. You'll set up a database here, populate it with sample data, and run semantic searches against those listings.
 
 DIAGRAM:
 
