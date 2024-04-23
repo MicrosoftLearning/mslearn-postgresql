@@ -6,9 +6,9 @@ lab:
 
 # Translate Text with Azure AI Translator
 
-As the lead developer for Margie's Travel, you have been asked to assist in an internationalization effort. Today, all of the rental listings for the company's short-term rentals service are in the English language. You want to translate these listings into a variety of languages without extensive development effort. All of your data is hosted in Azure Database for PostgreSQL - Flexible Server, and you would like to take advantage of Azure AI Services to perform translation.
+As the lead developer for Margie's Travel, you have been asked to assist in an internationalization effort. Today, all rental listings for the company's short-term rental service are in English. You want to translate these listings into a variety of languages without extensive development effort. All of your data is hosted in Azure Database for PostgreSQL - Flexible Server, and you would like to use Azure AI Services to perform translation.
 
-In this exercise, you will translate English-language text into a variety of languages using the Azure AI Translator service via Azure Database for PostgreSQL - Flexible Server.
+In this exercise, you will translate English-language text into various languages using the Azure AI Translator service via Azure Database for PostgreSQL - Flexible Server.
 
 ## Before you start
 
@@ -20,7 +20,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
 
 > [!Note]
 >
-> If you are doing multiple modules in this learning path, you should delete the resources you created in the prior modules and then follow these instructions.
+> If you are doing multiple modules in this learning path, delete the resources you created in the prior modules and then follow these instructions.
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/).
 
@@ -34,7 +34,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     git clone https://github.com/MicrosoftLearning/mslearn-postgresql.git
     ```
 
-    If you have already cloned this GitHub repo in a prior module, it will still be available to you and you may receive the following error message:
+    If you have already cloned this GitHub repo in a prior module, it will still be available to you, and you may receive the following error message:
 
     ```bash
     fatal: destination path 'mslearn-postgresql' already exists and is not an empty directory.
@@ -56,7 +56,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     RG_NAME=rg-learn-postgresql-ai-$REGION
     ```
 
-    The final command randomly generates a password for the PostgreSQL admin login. Make sure you copy it to a safe place so that you can use it later to connect to your PostgreSQL flexible server.
+    The final command randomly generates a password for the PostgreSQL admin login. Make sure you copy it to a safe place to use later to connect to your PostgreSQL flexible server.
 
     ```bash
     a=()
@@ -87,7 +87,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-translate.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
     ```
 
-    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server and Azure AI Translator service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter) and creating a database named `rentals` on the server. Note that the Bicep file is different from the other modules in this learning path.
+    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server and Azure AI Translator service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter) and creating a database named `rentals` on the server. **Note that the Bicep file differs from the other modules in this learning path.**
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
@@ -99,7 +99,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
         {"code": "ResourceKindRequireAcceptTerms", "message": "This subscription cannot create TextTranslation until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal and trying again.}
         ```
 
-        To resolve this error, you must create your first Language resource from the Azure portal so you can review and acknowledge the terms and conditions. You can do so here: <https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics>. Create it under any new resource group with some random valid name, also assign some random valid name to the Language service you-re deploying.After that, because you agreed upon the Responsible AI terms for the whole subscription, you can create subsequent Language resources using any deployment tool (for example, SDK, CLI, or ARM template) under the same Azure subscription. Therefore, once you have created that first resource through the portal, you can simply delete it, and rerun the command to execute the Bicep deployment script.
+        To resolve this error, you must create your first Language resource from the Azure portal so you can review and acknowledge the terms and conditions. You can do so here: <https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics>. Create it under any new resource group with some random valid name, and assign some random valid name to the Language service you're deploying. After that, because you agreed upon the Responsible AI terms for the whole subscription, you can create subsequent Language resources using any deployment tool (for example, SDK, CLI, or ARM template) under the same Azure subscription. Therefore, once you have created that first resource through the portal, you can delete it and rerun the command to execute the Bicep deployment script.
 
     - If you previously ran the Bicep deployment script for this learning path and subsequently deleted the resources, you may receive an error message like the following if you are attempting to rerun the script within 48 hours of deleting the resources:
 
@@ -107,7 +107,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
         {"code": "InvalidTemplateDeployment", "message": "The template deployment 'deploy' is not valid according to the validation procedure. The tracking id is '4e87a33d-a0ac-4aec-88d8-177b04c1d752'. See inner errors for details."}
     
         Inner Errors:
-        {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/oai-learn-eastus-{accountName}' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
+        {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
         ```
 
         If you receive this message, modify the `azure deployment group create` command above to set the `restore` parameter equal to `true` and rerun it.
@@ -115,7 +115,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and rerun the Bicep deployment script.
 
         ```bash
-        {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus2/providers/Microsoft.Resources/deployments/deploy","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.DBforPostgreSQL/flexibleServers/psql-learn-eastus2-{accountName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
+        {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus2/providers/Microsoft.Resources/deployments/deploy","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{accountName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
         ```
 
 8. Close the Cloud Shell pane once your resource deployment is complete.
@@ -140,7 +140,7 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 ## Populate the database with listings data
 
-In order to translate listings, you will need to have English-language listings data available. If you have not created the `listings` table in the `rentals` database in a prior module, follow these instructions to create the table.
+You need to have English-language listings data available in order to translate them. If you have not created the `listings` table in the `rentals` database in a prior module, follow these instructions to create it.
 
 1. Run the following commands to create the `listings` table for storing rental property listing data:
 
@@ -166,7 +166,7 @@ In order to translate listings, you will need to have English-language listings 
 
 ## Create additional tables for translation
 
-You have the `listings` data in place, but you will need two additional tables in order to perform translation.
+You have the `listings` data in place but need two additional tables to perform translation.
 
 1. Run the following commands to create the `languages` and `listing_translations` tables.
 
@@ -212,9 +212,9 @@ Before using the `azure_ai` extension, you must install it into your database an
     The command displays the list of extensions on the server's _allowlist_. If everything was correctly installed, your output must include `azure_ai` and `vector`, like this:
 
     ```sql
-     azure.extensions 
+     azure.extensions 
     ------------------
-     azure_ai,vector
+     azure_ai,vector
     ```
 
     Before an extension can be installed and used in Azure Database for PostgreSQL flexible server, it must be added to the server's _allowlist_, as described in [how to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
@@ -225,15 +225,15 @@ Before using the `azure_ai` extension, you must install it into your database an
     CREATE EXTENSION IF NOT EXISTS azure_ai;
     ```
 
-    `CREATE EXTENSION` loads a new extension into the database by running its script file. This typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
+    `CREATE EXTENSION` loads a new extension into the database by running its script file. This script typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
 
-3. You will then need to use the `azure_ai.set_setting()` function to configure the connection to your Azure AI Translator service. Using the same browser tab where your Cloud Shell is open, minimize or restore the Cloud Shell pane, then navigate to your Azure AI Translator resource in the [Azure portal](https://portal.azure.com/). Once you are on the Azure AI Translator resource page, in the resource menu, under the **Resource Management** section, select **Keys and Endpoint**, then copy one of the available keys, your region, and your Document Translation endpoint.
+3. You must then use the `azure_ai.set_setting()` function to configure the connection to your Azure AI Translator service. Using the same browser tab where your Cloud Shell is open, minimize or restore the Cloud Shell pane, then navigate to your Azure AI Translator resource in the [Azure portal](https://portal.azure.com/). Once you are on the Azure AI Translator resource page, in the resource menu, under the **Resource Management** section, select **Keys and Endpoint**, then copy one of the available keys, your region, and your Document Translation endpoint.
 
     ![Screenshot of the Azure AI Translator service's Keys and Endpoints page is displayed, with the KEY 1, Region, and Document Translation endpoint copy buttons highlighted by red boxes.](media/18-azure-ai-translator-keys-and-endpoint.png)
 
     You can use either `KEY 1` or `KEY 2`. Always having two keys allows you to securely rotate and regenerate keys without causing service disruption.
 
-4. Configure the `azure_cognitive` settings to point to your AI Translator endpoint, subscription key, and region. The value for `azure_cognitive.endpoint` will be your service's Document Translation URL. The value for `azure_cognitive.subscription_key` will be the value of Key 1 or Key 2. The value for `azure_cognitive.region` will be the Azure AI Translator instance's region.
+4. Configure the `azure_cognitive` settings to point to your AI Translator endpoint, subscription key, and region. The value for `azure_cognitive.endpoint` will be your service's Document Translation URL. The value for `azure_cognitive.subscription_key` will be Key 1 or Key 2. The value for `azure_cognitive.region` will be the Azure AI Translator instance's region.
 
     ```sql
     SELECT azure_ai.set_setting('azure_cognitive.endpoint','https://<YOUR_ENDPOINT>.cognitiveservices.azure.com/');
@@ -243,7 +243,7 @@ Before using the `azure_ai` extension, you must install it into your database an
 
 ## Create a stored procedure to translate listings data
 
-In order to populate the language translation table, you will create a stored procedure to load data in batches.
+To populate the language translation table, you will create a stored procedure to load data in batches.
 
 1. Run the following command at the `psql` prompt to create a new stored procedure named `translate_listing_descriptions`.
 
@@ -276,9 +276,9 @@ In order to populate the language translation table, you will create a stored pr
     CALL translate_listing_descriptions(10);
     ```
 
-    This call will take on average one second per rental listing to translate into five languages, so each run should take approximately 10 seconds. The command output should be `CALL`, indicating that the stored procedure call succeeded.
+    This call will take approximately one second per rental listing to translate into five languages, so each run should take approximately 10 seconds. The command output should be `CALL`, indicating that the stored procedure call succeeded.
 
-3. Call the stored procedure four more times, for a total of five times that you have called this procedure. That will generate translations for every listing in the table.
+3. Call the stored procedure four more times, for five times that you have called this procedure. That will generate translations for every listing in the table.
 
 4. Run the following script to get the count of listing translations.
 
@@ -312,7 +312,7 @@ You have a stored procedure to translate existing listings, but your internation
     $$;
     ```
 
-    This stored procedure will insert a row into the `listings` table. Then, it will perform translation of the description for each language in the `languages` table and insert these translations into the `listing_translations` table.
+    This stored procedure will insert a row into the `listings` table. Then, it will translate the description for each language in the `languages` table and insert these translations into the `listing_translations` table.
 
 2. Execute the stored procedure using the following SQL command:
 
@@ -331,16 +331,16 @@ You have a stored procedure to translate existing listings, but your internation
     WHERE l.name = 'A Beautiful Home';
     ```
 
-    The call should return five rows, with values looking similar to the following table.
+    The call should return five rows, with values similar to the following table.
 
     ```sql
-     id  | listing_id | language_code |                     description                      
+     id  | listing_id | language_code |                    description                     
     -----+------------+---------------+------------------------------------------------------
-     126 |          2 | de            | Dies ist ein schönes Haus in einer großartigen Lage.
-     127 |          2 | zh-Hans       | 这是一个美丽的家，地理位置优越。
-     128 |          2 | hi            | यह एक महान स्थान में एक सुंदर घर है।
-     129 |          2 | hu            | Ez egy gyönyörű otthon egy nagyszerű helyen.
-     130 |          2 | sw            | Hii ni nyumba nzuri katika eneo kubwa.
+     126 |          2 | de            | Dies ist ein schönes Haus in einer großartigen Lage.
+     127 |          2 | zh-Hans       | 这是一个美丽的家，地理位置优越。
+     128 |          2 | hi            | यह एक महान स्थान में एक सुंदर घर है।
+     129 |          2 | hu            | Ez egy gyönyörű otthon egy nagyszerű helyen.
+     130 |          2 | sw            | Hii ni nyumba nzuri katika eneo kubwa.
     ```
 
 ## Clean up

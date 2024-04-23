@@ -6,7 +6,7 @@ lab:
 
 # Perform Extractive and Abstractive Summarization
 
-The rental property app maintained by Margie's Travel provides a way for property managers to provide a description of rental listings. Many of the descriptions in the system are long, providing many details about the rental property, its neighborhood, and local attractions, stores, and other amenities. A feature that has been requested as you implement new AI-powered capabilities for the app is using generative AI to create concise summaries of these descriptions, making it easier for your users to quickly review properties. In this exercise, you use the `azure_ai` extension in Azure Database For PostgreSQL - Flexible Server to perform abstractive and extractive summarization on rental property descriptions and compare the resulting summaries.
+The rental property app maintained by Margie's Travel provides a way for property managers to describe rental listings. Many of the descriptions in the system are long, giving many details about the rental property, its neighborhood, and local attractions, stores, and other amenities. A feature that has been requested as you implement new AI-powered capabilities for the app is using generative AI to create concise summaries of these descriptions, making it easier for your users to review properties quickly. In this exercise, you use the `azure_ai` extension in Azure Database For PostgreSQL - Flexible Server to perform abstractive and extractive summarization on rental property descriptions and compare the resulting summaries.
 
 ## Before you start
 
@@ -192,9 +192,9 @@ Before using the `azure_ai` extension, you must install it into your database an
     The command displays the list of extensions on the server's _allowlist_. If everything was correctly installed, your output must include `azure_ai` and `vector`, like this:
 
     ```sql
-     azure.extensions 
+     azure.extensions 
     ------------------
-     azure_ai,vector
+     azure_ai,vector
     ```
 
     Before an extension can be installed and used in Azure Database for PostgreSQL - Flexible Server, it must be added to the server's _allowlist_, as described in [how to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
@@ -205,7 +205,7 @@ Before using the `azure_ai` extension, you must install it into your database an
     CREATE EXTENSION IF NOT EXISTS azure_ai;
     ```
 
-    `CREATE EXTENSION` loads a new extension into the database by running its script file. This typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
+    `CREATE EXTENSION` loads a new extension into the database by running its script file. This script typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
 
 ## Connect Your Azure AI Services Account
 
@@ -217,7 +217,7 @@ The Azure AI services integrations included in the `azure_cognitive` schema of t
 
     > [!Note]
     >
-    > If you received the message `NOTICE:  extension "azure_ai" already exists, skipping CREATE EXTENSION` when installing the `azure_ai` extension above and have previously configured the extension with your Language service endpoint and key, you can use the `azure_ai.get_setting()` function to confirm those settings are correct, and then skip step 2 if they are.
+    > If you received the message `NOTICE: extension "azure_ai" already exists, skipping CREATE EXTENSION` when installing the `azure_ai` extension above and have previously configured the extension with your Language service endpoint and key, you can use the `azure_ai.get_setting()` function to confirm those settings are correct, and then skip step 2 if they are.
 
 2. Copy your endpoint and access key values, then in the commands below, replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Run the commands from the `psql` command prompt in the Cloud Shell to add your values to the `azure_ai.settings` table.
 
@@ -231,7 +231,7 @@ The Azure AI services integrations included in the `azure_cognitive` schema of t
 
 ## Review the Summarization Capabilities of the Extension
 
-In this task, you review the two summarization functions available in the `azure_cognitive` schema.
+In this task, you review the two summarization functions in the `azure_cognitive` schema.
 
 1. For the remainder of this exercise, you work exclusively in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the Cloud Shell pane.
 
@@ -243,7 +243,7 @@ In this task, you review the two summarization functions available in the `azure
     \x auto
     ```
 
-3. The text summarization of the `azure_ai` extension are found within the `azure_cognitive` schema. For extractive summarization, use the `summarize_extractive()` function. Use the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC) to examine the function by running:
+3. The text summarization functions of the `azure_ai` extension are found within the `azure_cognitive` schema. For extractive summarization, use the `summarize_extractive()` function. Use the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC) to examine the function by running:
 
     ```sql
     \df azure_cognitive.summarize_extractive
@@ -258,7 +258,7 @@ In this task, you review the two summarization functions available in the `azure
     | text | `text` or `text[]` || The text(s) for which summaries should be generated. |
     | language_text | `text` or `text[]` || Language code (or array of language codes) representing the language of the text to summarize. Review the [list of supported languages](https://learn.microsoft.com/azure/ai-services/language-service/summarization/language-support) to retrieve the necessary language codes. |
     | sentence_count | `integer` | 3 | The number of summary sentences to generate. |
-    | sort_by | `text` | 'offset' | The sort order for the generated summary sentences. Acceptable values are "offset" and "rank," with offset representing the start position of each extracted sentence within the original content and rank being an AI generated indicator or how relevant a sentence is determined to be to the main idea of the content. |
+    | sort_by | `text` | 'offset' | The sort order for the generated summary sentences. Acceptable values are "offset" and "rank," with offset representing the start position of each extracted sentence within the original content and rank being an AI-generated indicator of how relevant a sentence is to the main idea of the content. |
     | batch_size | `integer` | 25 | Only for the two overload expecting an input of `text[]`. Specifies the number of records to process at a time. |
     | disable_service_logs | `boolean` | false | Flag indicating whether to turn off service logs. |
     | timeout_ms | `integer` | NULL | Timeout in milliseconds after which the operation is stopped. |
@@ -268,7 +268,7 @@ In this task, you review the two summarization functions available in the `azure
 
 4. Repeat the above step, but this time run the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC) for the `azure_cognitive.summarize_abstractive()` function and review the output.
 
-    The two functions have similar signatures, although `summarize_abstractive()` does not have the `sort_by` parameter, and it returns an array of `text` versus the array of `azure_cognitive.sentence` composite types returned by the `summarize_extractive()` function. This has to do with the way the two different methods generate summaries. Extractive summarization identifies the most important sentences within the text it is summarizing, ranks them, and then returns those as the summary. Abstractive summarization, on the other hand, uses generative AI to create new, original sentences that summarize the key points of the text.
+    The two functions have similar signatures, although `summarize_abstractive()` does not have the `sort_by` parameter, and it returns an array of `text` versus the array of `azure_cognitive.sentence` composite types returned by the `summarize_extractive()` function. This disparity has to do with the way the two different methods generate summaries. Extractive summarization identifies the most critical sentences within the text it is summarizing, ranks them, and then returns those as the summary. On the other hand, Abstractive summarization uses generative AI to create new, original sentences that summarize the text's key points.
 
 5. It is also imperative to understand the structure of the data type that a function returns so you can correctly handle the output in your queries. To inspect the `azure_cognitive.sentence` type returned by the `summarize_extractive()` function, run:
 
@@ -276,7 +276,7 @@ In this task, you review the two summarization functions available in the `azure
     \dT+ azure_cognitive.sentence
     ```
 
-6. The output of the above command reveals the `sentence` type is a `tuple`. To examine the structure of that `tuple` and review at the columns contained within the `sentence` composite type, execute:
+6. The output of the above command reveals the `sentence` type is a `tuple`. To examine the structure of that `tuple` and review the columns contained within the `sentence` composite type, execute:
 
     ```sql
     \d+ azure_cognitive.sentence
@@ -286,13 +286,13 @@ In this task, you review the two summarization functions available in the `azure
 
     ```sql
                             Composite type "azure_cognitive.sentence"
-       Column   |       Type       | Collation | Nullable | Default | Storage  | Description 
+        Column  |     Type         | Collation | Nullable | Default | Storage  | Description 
     ------------+------------------+-----------+----------+---------+----------+-------------
-     text       | text             |           |          |         | extended | 
-     rank_score | double precision |           |          |         | plain    |
+     text       | text             |           |           |        | extended | 
+     rank_score | double precision |           |           |        | plain    |
     ```
 
-    The `azure_cognitive.sentence` is a composite type containing the text of an extractive sentence and a rank score for each sentence, indicating how relevant the sentence is to the text's main topic. Document summarization ranks extracted sentences, and you can determine whether they're returned in the order they appear, or according to their rank.
+    The `azure_cognitive.sentence` is a composite type containing the text of an extractive sentence and a rank score for each sentence, indicating how relevant the sentence is to the text's main topic. Document summarization ranks extracted sentences, and you can determine whether they're returned in the order they appear or according to their rank.
 
 ## Create Summaries for Property Descriptions
 
@@ -310,9 +310,9 @@ In this task, you use the `summarize_extractive()` and `summarize_abstractive()`
     WHERE id IN (1, 2);
     ```
 
-    Compare the two sentences in the `extractive_summary` field in the output to the original `description`, noting that the sentences are not original, but simply extracted from the `description`. The numeric values listed after each sentence are the rank score assigned by the Language service.
+    Compare the two sentences in the `extractive_summary` field in the output to the original `description`, noting that the sentences are not original, but extracted from the `description`. The numeric values listed after each sentence are the rank score assigned by the Language service.
 
-2. Next, perform abstractive summarization on the same records:
+2. Next, perform abstractive summarization on the identical records:
 
     ```sql
     SELECT
@@ -329,7 +329,7 @@ In this task, you use the `summarize_extractive()` and `summarize_abstractive()`
     If you receive an error similar to the following, you chose a region that does not support abstractive summarization when creating your Azure environment:
 
     ```bash
-    ERROR:  azure_cognitive.summarize_abstractive: InvalidRequest: Invalid Request.
+    ERROR: azure_cognitive.summarize_abstractive: InvalidRequest: Invalid Request.
 
     InvalidParameterValue: Job task: 'AbstractiveSummarization-task' failed with validation errors: ['Invalid Request.']
 
@@ -349,7 +349,7 @@ In this task, you use the `summarize_extractive()` and `summarize_abstractive()`
     WHERE id IN (1, 2);
     ```
 
-    By placing the generated summaries side-by-side, it is easy to compare the quality of the summaries generated by each of the methods. For the Margie's Travel application, abstractive summarization appears to be the better option, providing concise summaries that deliver high-quality information in a natural and readable manner. The extractive summaries, while providing some details, are more disjointed, and do not deliver the same value as the original content created by abstractive summarization.
+    By placing the generated summaries side-by-side, it is easy to compare the quality of the summaries generated by each method. For the Margie's Travel application, abstractive summarization is the better option, providing concise summaries that deliver high-quality information in a natural and readable manner. While giving some details, the extractive summaries are more disjointed and offer less value than the original content created by abstractive summarization.
 
 ## Store Description Summary in the Database
 
@@ -378,7 +378,7 @@ In this task, you use the `summarize_extractive()` and `summarize_abstractive()`
     WHERE l.id = s.id;
     ```
 
-    The update statement uses two common table expressions (CTEs) to perform work on the data prior to update the `listings` table with summaries. The first CTE (`batch_cte`) sends all of the `description` values from the `listings` table to the Language service for abstractive summaries to be generated. It does this in batches of 25 records at a time. The second CTE (`summary_cte`) using the ordinal position of the summaries returned by the `summarize_abstractive()` function to assign each summary an `id` that corresponds to the record the `description` came from in the `listings` table. It also uses the `ARRAY_TO_STRING` function to pull the generated summaries out of the text array (`text[]`) return value and convert it into a simple string. Finally, the `UPDATE` statement writes the summary into the `listings` table for the associated listing.
+    The update statement uses two common table expressions (CTEs) to work on the data before updating the `listings` table with summaries. The first CTE (`batch_cte`) sends all the `description` values from the `listings` table to the Language service to generate abstractive summaries. It does this in batches of 25 records at a time. The second CTE (`summary_cte`) uses the ordinal position of the summaries returned by the `summarize_abstractive()` function to assign each summary an `id` corresponding to the record the `description` came from in the `listings` table. It also uses the `ARRAY_TO_STRING` function to pull the generated summaries out of the text array (`text[]`) return value and convert it into a simple string. Finally, the `UPDATE` statement writes the summary into the `listings` table for the associated listing.
 
 3. As a last step, run a query to view the summaries written into the `listings` table:
 
@@ -394,9 +394,9 @@ In this task, you use the `summarize_extractive()` and `summarize_abstractive()`
 
 ## Generate an AI summary of reviews for a listing
 
-For the Margie's Travel app, it may also be useful to display a summary of all reviews for a property to help users quickly assess the overall gist of reviews.
+For the Margie's Travel app, displaying a summary of all reviews for a property helps users quickly assess the overall gist of reviews.
 
-1. Run the following query, which combines all reviews for a listing into a single string, and then generates abstractive summarization over that string:
+1. Run the following query, which combines all reviews for a listing into a single string and then generates abstractive summarization over that string:
 
     ```sql
     SELECT unnest(azure_cognitive.summarize_abstractive(reviews_combined, 'en')) AS review_summary

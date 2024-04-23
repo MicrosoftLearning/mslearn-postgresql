@@ -166,9 +166,9 @@ Before using the `azure_ai` extension, you must install it into your database an
     The command displays the list of extensions on the server's _allowlist_. If everything was correctly installed, your output must include `azure_ai` and `vector`, like this:
 
     ```sql
-     azure.extensions 
+     azure.extensions 
     ------------------
-     azure_ai,vector
+     azure_ai,vector
     ```
 
     Before an extension can be installed and used in Azure Database for PostgreSQL - Flexible Server, it must be added to the server's _allowlist_, as described in [how to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
@@ -179,7 +179,7 @@ Before using the `azure_ai` extension, you must install it into your database an
     CREATE EXTENSION IF NOT EXISTS azure_ai;
     ```
 
-    `CREATE EXTENSION` loads a new extension into the database by running its script file. This typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
+    `CREATE EXTENSION` loads a new extension into the database by running its script file. This script typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
 
 ## Connect Your Azure AI Services Account
 
@@ -191,7 +191,7 @@ The Azure AI services integrations included in the `azure_cognitive` schema of t
 
     > [!Note]
     >
-    > If you received the message `NOTICE:  extension "azure_ai" already exists, skipping CREATE EXTENSION` when installing the `azure_ai` extension above and have previously configured the extension with your Language service endpoint and key, you can use the `azure_ai.get_setting()` function to confirm those settings are correct, and then skip step 2 if they are.
+    > If you received the message `NOTICE: extension "azure_ai" already exists, skipping CREATE EXTENSION` when installing the `azure_ai` extension above and have previously configured the extension with your Language service endpoint and key, you can use the `azure_ai.get_setting()` function to confirm those settings are correct, and then skip step 2 if they are.
 
 2. Copy your endpoint and access key values, then in the commands below, replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Run the commands from the `psql` command prompt in the Cloud Shell to add your values to the `azure_ai.settings` table.
 
@@ -253,13 +253,13 @@ In this task, you use the `azure_cognitive.analyze_sentiment()` function to eval
     The output of that command should look similar to the following:
 
     ```sql
-                     Composite type "azure_cognitive.sentiment_analysis_result"
-         Column     |       Type       | Collation | Nullable | Default | Storage  | Description 
+                     Composite type "azure_cognitive.sentiment_analysis_result"
+         Column     |     Type         | Collation | Nullable | Default | Storage  | Description 
     ----------------+------------------+-----------+----------+---------+----------+-------------
-     sentiment      | text             |           |          |         | extended | 
-     positive_score | double precision |           |          |         | plain    | 
-     neutral_score  | double precision |           |          |         | plain    | 
-     negative_score | double precision |           |          |         | plain    |
+     sentiment      | text             |           |          |         | extended | 
+     positive_score | double precision |           |          |         | plain    | 
+     neutral_score  | double precision |           |          |         | plain    | 
+     negative_score | double precision |           |          |         | plain    |
     ```
 
     The `azure_cognitive.sentiment_analysis_result` is a composite type containing the sentiment predictions of the input text. It includes the sentiment, which can be positive, negative, neutral, or mixed, and the scores for positive, neutral, and negative aspects found in the text. The scores are represented as real numbers between 0 and 1. For example, in (neutral, 0.26, 0.64, 0.09), the sentiment is neutral, with a positive score of 0.26, neutral of 0.64, and negative at 0.09.
@@ -281,7 +281,7 @@ In this task, you use the `azure_cognitive.analyze_sentiment()` function to eval
 
     > [!Note]
     >
-    > Using the `analyze_sentiment()` function inline allows you to quickly analyze the text's sentiment within your queries. While this works well for a small number of records, it may not be ideal for analyzing the sentiment of a large number of records or updating all the records in a table that may contain tens of thousands of reviews or more.
+    > Using the `analyze_sentiment()` function inline lets you quickly analyze the text's sentiment within your queries. While this works well for a small number of records, it may not be ideal for analyzing the sentiment of a large number of records or updating all the records in a table that may contain tens of thousands of reviews or more.
 
 2. Another approach that can be useful for longer reviews is to analyze the sentiment of each sentence within it. To do this, use the overload of the `analyze_sentiment()` function, which accepts an array of text.
 
@@ -292,7 +292,7 @@ In this task, you use the `azure_cognitive.analyze_sentiment()` function to eval
     WHERE id = 1;
     ```
 
-    In the above query, you used the `STRING_TO_ARRAY` function from PostgreSQL. Additionally, the `ARRAY_REMOVE` function was used to remove any array elements that are empty strings, as these will cause errors with the `analyze_sentiment()` function.
+    In the above query, you used PostgreSQL's `STRING_TO_ARRAY` function. Additionally, the `ARRAY_REMOVE` function was used to remove any array elements that are empty strings, as these will cause errors with the `analyze_sentiment()` function.
 
     The output from the query allows you to get a better understanding of the `mixed` sentiment assigned to the overall review. The sentences are a mixture of positive, neutral, and negative sentiments.
 
@@ -318,7 +318,7 @@ In this task, you use the `azure_cognitive.analyze_sentiment()` function to eval
 
 ## Store Sentiment in the Reviews Table
 
-For the rental property recommendation system you are building for Margie's Travel, you want to store sentiment ratings in the database so you do not have to make calls and incur costs every time sentiment assessments are requested. Performing sentiment analysis on the fly can be great for small numbers of records or analyzing data in near-real time. Still, for your stored reviews, adding the sentiment data into the database for use in your application makes sense. To do this, you want to alter the `reviews` table to add columns for storing the sentiment assessment and the positive, neutral, and negative scores.
+For the rental property recommendation system you are building for Margie's Travel, you want to store sentiment ratings in the database so you do not have to make calls and incur costs every time sentiment assessments are requested. Performing sentiment analysis on the fly can be great for small numbers of records or analyzing data in near-real time. Still, adding the sentiment data into the database for use in your application makes sense for your stored reviews. To do this, you want to alter the `reviews` table to add columns for storing the sentiment assessment and the positive, neutral, and negative scores.
 
 1. Run the following query to update the `reviews` table so it can store sentiment details:
 
@@ -346,7 +346,7 @@ For the rental property recommendation system you are building for Margie's Trav
     WHERE r.id = cte.id;
     ```
 
-    Executing this query takes a long time! This is because the comments for every review in the table are sent individually to the Language service's endpoint for analysis. Sending records in batches is a more efficient approach when dealing with a large number of records.
+    Executing this query takes a long time because the comments for every review in the table are sent individually to the Language service's endpoint for analysis. Sending records in batches is more efficient when dealing with many records.
 
 3. Let's run the query below to perform the same update action, but this time send comments from the `reviews` table in batches of 10 (this is the maximum batch size allowed) and evaluate the difference in performance.
 

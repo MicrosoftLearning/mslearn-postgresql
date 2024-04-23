@@ -34,7 +34,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     git clone https://github.com/MicrosoftLearning/mslearn-postgresql.git
     ```
 
-    If you have already cloned this GitHub repo in a prior module, it will still be available to you and you may receive the following error message:
+    If you have already cloned this GitHub repo in a prior module, it will still be available to you, and you may receive the following error message:
 
     ```bash
     fatal: destination path 'mslearn-postgresql' already exists and is not an empty directory.
@@ -56,7 +56,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     RG_NAME=rg-learn-postgresql-ai-$REGION
     ```
 
-    The final command randomly generates a password for the PostgreSQL admin login. Make sure you copy it to a safe place so that you can use it later to connect to your PostgreSQL flexible server.
+    The final command randomly generates a password for the PostgreSQL admin login. Make sure you copy it to a safe place to use later to connect to your PostgreSQL flexible server.
 
     ```bash
     a=()
@@ -87,7 +87,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-azure-machine-learning.bicep" --parameters adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
     ```
 
-    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server and an Azure Machine Learning workspace. In order to instantiate the Azure Machine Learning workspace, the deployment script will also create all pre-requisite services for Azure Machine Learning, including an Azure Blob Storage account, an Azure Key Vault, an Azure Container Repository, an Azure Log Analytics Workspace, and an instance of Azure Application Insights. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter) and creating a database named `rentals` on the server. Note that the Bicep file is different from the other modules in this learning path.
+    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server and an Azure Machine Learning workspace. The deployment script will also create all pre-requisite services for instantiating an Azure Machine Learning workspace, including an Azure Blob Storage account, an Azure Key Vault, an Azure Container Repository, an Azure Log Analytics Workspace, and an instance of Azure Application Insights. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter) and creating a database named `rentals` on the server. **Note that the Bicep file differs from the other modules in this learning path.**
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
@@ -96,14 +96,14 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and rerun the Bicep deployment script.
 
         ```bash
-        {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus2/providers/Microsoft.Resources/deployments/deploy","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.DBforPostgreSQL/flexibleServers/psql-learn-eastus2-{accountName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
+        {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus2/providers/Microsoft.Resources/deployments/deploy","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{accountName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
         ```
 
 8. Close the Cloud Shell pane once your resource deployment is complete.
 
 ## Deploy an Azure Machine Learning model
 
-The first step is to deploy a model to Azure Machine Learning. An example of a model trained on a set of listings data is available in the repository, and you will use this model in your PostgreSQL integration.
+The first step is to deploy a model to Azure Machine Learning. The repository contains an example of a model trained on a set of listing data, which you will use in your PostgreSQL integration.
 
 1. Download the `mlflow-model.zip` file from [the mslearn-postgresql repository](../../Allfiles/Labs/Shared/mlflow-model.zip). Extract the files from this into a folder called **mlflow-model**.
 
@@ -113,7 +113,7 @@ The first step is to deploy a model to Azure Machine Learning. An example of a m
 
     ![Screenshot of Azure Machine Learning with the Launch studio button highlighted by a red box.](media/19-aml-launch-studio.png)
 
-4. Select the **Workspaces** menu option and then choose your newly created Azure Machine Learning workspace.
+4. Select the **Workspaces** menu option and choose your newly created Azure Machine Learning workspace.
 
     ![Screenshot of Azure Machine Learning Studio with the Workspaces menu option and the Azure Machine Learning workspace highlighted by red boxes.](media/19-aml-workspace.png)
 
@@ -123,17 +123,17 @@ The first step is to deploy a model to Azure Machine Learning. An example of a m
 
 6. In the **Upload model** menu, set the model type to **MLflow**. Then, choose **Browse** and navigate to your **mlflow-model** folder, uploading the assets. After that, select the **Next** button to continue.
 
-    ![Screenshot of the Upload model menu page. A red box surrounds the MLflow model type, the Browse button, and the Next button.](media/19-aml-register-upload-model.png)
+    ![Screenshot of the Upload model menu page. A red box surrounds the MLflow model type, Browse, and Next buttons.](media/19-aml-register-upload-model.png)
 
 7. Name the model **RentalListings** and then select the **Next** button.
 
     ![Screenshot of the Model settings screen with the value of RentalListings entered into the Name field. Red highlighting boxes surround the Name text box and Next button.](media/19-aml-register-model-settings.png)
 
-8. Select the **Register** button to complete model registration. This will take you back to the **Models** page. Select the newly created model.
+8. Select the **Register** button to complete model registration. This action will take you back to the **Models** page. Select the newly created model.
 
     > [!Note]
     >
-    > If you do not see a model, select the **Refresh** menu option button to reload the page. You should see the **RentalListings** model after that.
+    > If you do not see a model, select the **Refresh** menu option button to reload the page. After that, you should see the **RentalListings** model.
 
 9. Select the **Deploy** button option and create a new **Real-time endpoint**.
 
@@ -141,37 +141,37 @@ The first step is to deploy a model to Azure Machine Learning. An example of a m
 
 10. On the deployment fly-out menu, set the **Virtual machine** to something like **Standard_DS2_v2** and the **Instance count** to 1. Select the **Deploy** button. Deployment may take several minutes to complete, as the deployment process includes provisioning a virtual machine and deploying the model as a Docker container.
 
-    ![Screenshot of the deployment fly-out menu. The Virtual machine is Standard_DS2_v2 and Instance count is 1. Red boxes highlight the Virtual machine drop-down, Instance count textbox, and Deploy button.](media/19-aml-automl-deploy-endpoint.png)
+    ![Screenshot of the deployment fly-out menu. The Virtual machine is Standard_DS2_v2, and the Instance count is 1. Red boxes highlight the Virtual machine drop-down, Instance count textbox, and Deploy button.](media/19-aml-automl-deploy-endpoint.png)
 
 11. After the endpoint deploys, navigate to the **Consume** tab and copy the REST endpoint and primary key so you can use them in the next section.
 
     ![Screenshot of the endpoint Consume tab. Red boxes highlight the copy buttons for the REST endpoint and primary authentication key.](media/19-aml-automl-endpoint-consume.png)
 
-12. In order to test that your endpoint is running correctly, you can use the **Test** tab on your endpoint. Then, paste in the following block, replacing any input that currently exists. Select the **Test** button and you should see a JSON output containing an array with a single decimal value, indicating the number of US dollars you should expect this particular property to earn for a single night of rental.
+12. To test that your endpoint is running correctly, you can use the **Test** tab on your endpoint. Then, paste in the following block, replacing any input that currently exists. Select the **Test** button, and you should see a JSON output containing an array with a single decimal value indicating the number of US dollars you should expect this particular property to earn for a single night of rental.
 
     ```json
     {
-      "input_data": {
-        "columns": [
-          "host_is_superhost",
-          "host_has_profile_pic",
-          "host_identity_verified",
-          "neighbourhood_group_cleansed",
-          "zipcode",
-          "property_type",
-          "room_type",
-          "accommodates",
-          "bathrooms",
-          "bedrooms",
-          "beds"
-        ],
-        "index": [0],
-        "data": [["0", "0", "0", "Central Area", "98122", "House", "Entire home/apt", 4, 1.5, 3, 3]]
-      }
+        "input_data": {
+            "columns": [
+                "host_is_superhost",
+                "host_has_profile_pic",
+                "host_identity_verified",
+                "neighbourhood_group_cleansed",
+                "zipcode",
+                "property_type",
+                "room_type",
+                "accommodates",
+                "bathrooms",
+                "bedrooms",
+                "beds"
+            ],
+            "index": [0],
+            "data": [["0", "0", "0", "Central Area", "98122", "House", "Entire home/apt", 4, 1.5, 3, 3]]
+        }
     }
     ```
 
-    ![Screenshot of the endpoint Test tab. The Input box contains a sample call and the jsonOutput box contains the estimated value. The Test button is highlighted with a red box.](media/19-aml-automl-endpoint-test.png)
+    ![Screenshot of the endpoint Test tab. The Input box contains a sample call, and the jsonOutput box contains the estimated value. The Test button is highlighted with a red box.](media/19-aml-automl-endpoint-test.png)
 
 ## Connect to your database using psql in the Azure Cloud Shell
 
@@ -204,9 +204,9 @@ Before using the `azure_ai` extension, you must install it into your database an
     The command displays the list of extensions on the server's _allowlist_. If everything was correctly installed, your output must include `azure_ai` and `vector`, like this:
 
     ```sql
-     azure.extensions 
+     azure.extensions 
     ------------------
-     azure_ai,vector
+     azure_ai,vector
     ```
 
     Before an extension can be installed and used in Azure Database for PostgreSQL flexible server, it must be added to the server's _allowlist_, as described in [how to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
@@ -217,17 +217,21 @@ Before using the `azure_ai` extension, you must install it into your database an
     CREATE EXTENSION IF NOT EXISTS azure_ai;
     ```
 
-    `CREATE EXTENSION` loads a new extension into the database by running its script file. This typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
+    `CREATE EXTENSION` loads a new extension into the database by running its script file. This script typically creates new SQL objects such as functions, data types, and schemas. An error is thrown if an extension of the same name already exists. Adding `IF NOT EXISTS` allows the command to execute without throwing an error if it is already installed.
 
-3. You will then need to use the `azure_ai.set_setting()` function to configure the connection to your Azure Machine Learning deployed endpoint. Configure the `azure_ml` settings to point to your deployed endpoint and its key. The value for `azure_ml.scoring_endpoint` will be your endpoint's REST URL. The value for `azure_ml.endpoint_key` will be the value of Key 1 or Key 2.
+3. You must then use the `azure_ai.set_setting()` function to configure the connection to your Azure Machine Learning deployed endpoint. Configure the `azure_ml` settings to point to your deployed endpoint and its key. The value for `azure_ml.scoring_endpoint` will be your endpoint's REST URL. The value for `azure_ml.endpoint_key` will be the value of Key 1 or Key 2.
 
     ```sql
     SELECT azure_ai.set_setting('azure_ml.scoring_endpoint','https://<YOUR_ENDPOINT>.<YOUR_REGION>.inference.ml.azure.com/score');
+    ```
+
+    ```sql
     SELECT azure_ai.set_setting('azure_ml.endpoint_key', '<YOUR_KEY>');
+    ```
 
 ## Create a table containing listings to price
 
-You will need one table in order to store short-term rental listings that you would like to price.
+You will need one table to store short-term rental listings you want to price.
 
 1. Run the following command in the `rentals` database to create a new `listings_to_price` table.
 
@@ -248,7 +252,7 @@ You will need one table in order to store short-term rental listings that you wo
     );
     ```
 
-2. Next, run the following command in the `rentals` database to insert some new rental listing data.
+2. Next, run the following command in the `rentals` database to insert new rental listing data.
 
     ```sql
     INSERT INTO listings_to_price(host_is_superhost, host_has_profile_pic, host_identity_verified,
@@ -262,11 +266,11 @@ You will need one table in order to store short-term rental listings that you wo
         (0, 0, 0, 'Capitol Hill', '98122', 'House', 'Entire home/apt', 4, 1.5, 3, 3);
     ```
 
-    This will insert 5 rows of new listing data.
+    This command inserts five rows of new listing data.
 
 ## Create a function to translate listings data
 
-In order to populate the language translation table, you will create a stored procedure to load data in batches.
+To populate the language translation table, you will create a stored procedure to load data in batches.
 
 1. Run the following command at the `psql` prompt to create a new function named `price_listing`.
 
@@ -282,17 +286,17 @@ In order to populate the language translation table, you will create a stored pr
         {
             "input_data": {
                 "columns": [
-                "host_is_superhost",
-                "host_has_profile_pic",
-                "host_identity_verified",
-                "neighbourhood_group_cleansed",
-                "zipcode",
-                "property_type",
-                "room_type",
-                "accommodates",
-                "bathrooms",
-                "bedrooms",
-                "beds"
+                    "host_is_superhost",
+                    "host_has_profile_pic",
+                    "host_identity_verified",
+                    "neighbourhood_group_cleansed",
+                    "zipcode",
+                    "property_type",
+                    "room_type",
+                    "accommodates",
+                    "bathrooms",
+                    "bedrooms",
+                    "beds"
                 ],
                 "index": [0],
                 "data": [["' || host_is_superhost || '", "' || host_has_profile_pic || '", "' || host_identity_verified || '", "' ||
@@ -305,7 +309,7 @@ In order to populate the language translation table, you will create a stored pr
 
     > [!Note]
     >
-    > The deployment name is, by default, a combination of the model name (**rentallistings**) and the version number (**1**). If you deploy a new version of the model and use the default deployment name, the new deployment name would be called **rentallistings-2**.
+    > By default, the deployment name is a combination of the model name (**rentallistings**) and the version number (**1**). If you deploy a new version of the model and use the default deployment name, the new deployment name would be **rentallistings-2**.
 
 2. Execute the function using the following SQL command:
 
@@ -313,7 +317,7 @@ In order to populate the language translation table, you will create a stored pr
     SELECT * FROM price_listing(0, 0, 0, 'Central Area', '98122', 'House', 'Entire home/apt', 4, 1.5, 3, 3);
     ```
 
-    This will return a nightly rental price estimate in decimal format.
+    This query returns a nightly rental price estimate in decimal format.
 
 3. Call the function for each row in the `listings_to_price` table using the following SQL command:
 
@@ -325,7 +329,7 @@ In order to populate the language translation table, you will create a stored pr
             l2p.accommodates, l2p.bathrooms, l2p.bedrooms, l2p.beds) expected_price;
     ```
 
-    This will return five rows, one for each row in `listings_to_price`. It will include all of the columns in the `listings_to_price` table and the result of the `price_listing()` function as `expected_price`.
+    This query returns five rows, one for each row in `listings_to_price`. It will include all of the columns in the `listings_to_price` table and the result of the `price_listing()` function as `expected_price`.
 
 ## Clean up
 
