@@ -91,6 +91,27 @@ The result will be something like:
 (20 rows)
 ```
 
+To see the function runtime, make sure `track_functions` is enabled in the Server Parameters section on the Azure Portal (you can use `PL` or `ALL`):
+
+![A screenshot of the Server Parameters configuration section showing the track_functions](media/14-track-functions.png)
+
+Then you can query the function statistics table:
+
+```postgresql
+SELECT * FROM pg_stat_user_functions WHERE funcname = 'recommend_listing';
+```
+
+The result should be something like:
+
+```
+ funcid | schemaname |     funcname      | calls | total_time | self_time 
+--------+------------+-------------------+-------+------------+-----------
+  28753 | public     | recommend_listing |     1 |    268.357 |   268.357
+(1 row)
+```
+
+Note that we obtained the sample listing's embedding, and performed the semantic search against thousands of documents, all in ~270ms.
+
 ## Check your work
 
 1. Make sure the function exists with the correct signature:
