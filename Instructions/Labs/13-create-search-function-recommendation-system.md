@@ -37,7 +37,7 @@ BEGIN
     ); 
 
     queryEmbedding := (
-      azure_openai.create_embeddings('embedding-ada-002', sampleListingText)
+      azure_openai.create_embeddings('embedding', sampleListingText)
     );
 
     RETURN QUERY  

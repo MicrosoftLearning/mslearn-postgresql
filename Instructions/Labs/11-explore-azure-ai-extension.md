@@ -304,7 +304,7 @@ The `azure_openai` schema provides the ability to integrate the creation of vect
 
     | Argument        | Type               | Default | Description                                                                                                                    |
     | --------------- | ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-    | deployment_name | `text`             |         | Name of the deployment in Azure OpenAI Studio that contains the `text-embeddings-ada-002` model.                               |
+    | deployment_name | `text`             |         | Name of the deployment in Azure OpenAI Studio that contains the `text-embedding-ada-002` model.                               |
     | input           | `text` or `text[]` |         | Input text (or array of text) for which embeddings are created.                                                                |
     | batch_size      | `integer`          | 100     | Only for the overload expecting an input of `text[]`. Specifies the number of records to process at a time.                    |
     | timeout_ms      | `integer`          | 3600000 | Timeout in milliseconds after which the operation is stopped.                                                                  |
