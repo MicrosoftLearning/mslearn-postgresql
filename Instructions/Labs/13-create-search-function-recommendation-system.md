@@ -15,7 +15,7 @@ This unit assumes you have completed the steps in the previous exercise: generat
 
 ## Create the recommendation function
 
-
+The recommendation function takes a `sampleListingId`, and returns the `numResults` most similar other listings. To do so, it creates an embedding of the sample listing's name and description, then runs semantic search of that query vector against the listing embeddings.
 
 ```postgresql
 CREATE FUNCTION
@@ -37,7 +37,7 @@ BEGIN
     ); 
 
     queryEmbedding := (
-      azure_openai.create_embeddings('embedding', sampleListingText)
+      azure_openai.create_embeddings('embedding', sampleListingText, max_attempts => 5, retry_delay_ms => 500)
     );
 
     RETURN QUERY  
@@ -53,17 +53,17 @@ END $$
 LANGUAGE plpgsql; 
 ```
 
-A more complete example (more columns etc) in the docs here: https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-recommendation-system
+See the [Recommendation System](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-recommendation-system) example for more ways to customize this function, for example combining several text columns into an embedding vector.
 
 ## Query the recommendation function
 
-
+To query the recommendation function, pass it a listing ID and number of recommendations to make.
 
 ```postgresql
 select out_listingName, out_score from recommend_listing( (SELECT id from listings limit 1), 20); -- search for 20 listing recommendations closest to a listing
 ```
 
-Result
+The result will be something like:
 
 ```
            out_listingname           |  out_score  
@@ -93,6 +93,22 @@ Result
 
 ## Check your work
 
-1. Make sure the function exists with the correct signature
-2. Make sure you can query it
+1. Make sure the function exists with the correct signature:
+
+   ```postgresql
+   \df recommend_listing
+   ```
+
+   You should see the following:
+
+   ```
+    public | recommend_listing | TABLE(out_listingname text, out_listingdescription text, out_score real) | samplelistingid integer, numre
+   sults integer | func
+   ```
+
+2. Make sure you can query it. This should return results:
+
+   ```postgresql
+   select out_listingName, out_score from recommend_listing( (SELECT id from listings limit 1), 20); -- search for 20 listing recommendations closest to a listing
+   ```
 
