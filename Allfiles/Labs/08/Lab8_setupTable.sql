@@ -1,10 +1,20 @@
-write summary text here
+-- Lab8_setupTable
+-- Version 1.0.1  22-April-2024
+/*********************************************************************************
+NOTE: You should not have to use this file at all - it is just here if you have 
+downloaded this file individually.
+*********************************************************************************/
 
--- Create Schema: production
+
+/*********************************************************************************
+Create Schema: production
+*********************************************************************************/
 DROP SCHEMA IF EXISTS production CASCADE;
 CREATE SCHEMA production;
 
--- Create Table: production.workorder
+/*********************************************************************************
+Create Table: production.workorder
+*********************************************************************************/
 
 DROP TABLE IF EXISTS production.workorder;
 CREATE TABLE production.workorder
@@ -24,8 +34,12 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE production.workorder
-    OWNER to pgAdmin;
+ALTER TABLE production.workorder OWNER to pgAdmin;
 
+/*********************************************************************************
+You do need to insert the data from 
 
---Insert data here
+mslearn-postgresql/Allfiles/Labs/08/Lab8_workorder.csv
+
+*********************************************************************************/
+

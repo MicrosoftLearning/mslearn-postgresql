@@ -97,9 +97,25 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
         {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.Resources/deployments/{deploymentName}","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{serverName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
         ```
 
-8. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
+8. Close the Cloud Shell pane once your resource deployment is complete.
 
-    [![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.]](media/08-azure-cloud-shell-pane-maximize.png)
+## Connect to your database using psql in the Azure Cloud Shell
+
+In this task, you connect to the `adventureworks` database on your Azure Database for PostgreSQL server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
+
+1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL flexible server.
+
+2. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `adventureworks` database.
+
+    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the adventureworks database are highlighted by red boxes.](media/08-postgresql-adventureworks-database-connect.png)
+
+3. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** login.
+
+    Once logged in, the `psql` prompt for the `adventureworks` database is displayed.
+
+4. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
+
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/08-azure-cloud-shell-pane-maximize.png)
 
 ### Populate the database with data
 
@@ -128,18 +144,18 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     )
     TABLESPACE pg_default;
     
-    ALTER TABLE production.workorder
-        OWNER to pgAdmin;
+    ALTER TABLE production.workorder OWNER to pgAdmin;
     ```
 
 1. Next, use the `COPY` command to load data from CSV files into the table you created above. Start by running the following command to populate the `production.workorder` table:
 
     ```sql
-    \COPY listings FROM 'mslearn-postgresql/Allfiles/Labs/08/Lab8_workorder.csv' CSV HEADER
+    \COPY production.workorder FROM 'mslearn-postgresql/Allfiles/Labs/08/Lab8_workorder.csv' CSV HEADER
     ```
 
-    The command output should be `COPY 50`, indicating that 50 rows were written into the table from the CSV file.
+    The command output should be `COPY 72591`, indicating that 72591 rows were written into the table from the CSV file.
 
+1. Close the Cloud Shell pane once the data has loaded
 
 ### Connect to the database with Azure Data Studio
 
@@ -159,30 +175,29 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 ## Task 1: Investigate default locking behavior
 
 1. Open Azure Data Studio.
-1. Either navigate to the folder with your exercise script files, or download the **Lab8_setupTable.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/08).
-1. Select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/08/Lab8_setupTable** and **Open**. Run the script.
 1. Expand **Databases**, right-click **adventureworks** and select **New Query**.
     [!Screenshot of adventureworks database highlighting New Query context menu item](media/08-new-query.png)
 
-1. Repeat the previous step to create another query tab. You should now have a query tab with a name beginning **SQL_Query_1** and another query tab with a name beginning **SQL_Query_2**.
+1. Got to **File** and **New Query**. You should now have a query tab with a name beginning **SQL_Query_1** and another query tab with a name beginning **SQL_Query_2**.
 1. Select the **SQLQuery_1** tab, type the following query and select **Run**.
 
     ```sql
-    SELECT * FROM production.workorder;
+    SELECT * FROM production.workorder
+    ORDER BY scrappedqty DESC;
     ```
 
-1. Notice that the **stockedqty** value for the first row is **15**.
+1. Notice that the **scrappedqty** value for the first row is **673**.
 1. Select the **SQLQuery_2** tab, type the following query and select **Run**.
 
     ```sql
     BEGIN TRANSACTION;
     UPDATE production.workorder
-        SET stockedqty=stockedqty+1
+        SET scrappedqty=scrappedqty+1;
     ```
 
 1. Notice that the second query begins a transaction, but doesn't commit the transaction.
 1. Return to **SQLQuery_1** and run the query again.
-1. Notice that the **stockedqty** value for the first row is still **15**. The query is using a snapshot of the data and isn't seeing the updates from the other transaction.
+1. Notice that the **stockedqty** value for the first row is still **673**. The query is using a snapshot of the data and isn't seeing the updates from the other transaction.
 1. Select the **SQLQuery_2** tab, delete the existing query, type the following query and select **Run**.
 
     ```sql
@@ -197,7 +212,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     BEGIN TRANSACTION;
     LOCK TABLE production.workorder IN ACCESS EXCLUSIVE MODE;
     UPDATE production.workorder
-        SET stockedqty=stockedqty+1
+        SET scrappedqty=scrappedqty+1;
     ```
 
 1. Notice that the second query begins a transaction, but doesn't commit the transaction.
