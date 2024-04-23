@@ -112,6 +112,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 1. In **User name**, type **pgAdmin**.
 1. In **Password**, type enter the randomly generated password for the **pgAdmin** login you generated
 1. Select **Remember password**.
+1. Click **Connect**
 
 ## Task 1: Explore the vacuum process in PostgreSQL
 

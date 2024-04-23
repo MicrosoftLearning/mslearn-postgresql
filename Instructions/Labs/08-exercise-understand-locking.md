@@ -97,7 +97,49 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
         {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.Resources/deployments/{deploymentName}","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{serverName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
         ```
 
-8. Close the Cloud Shell pane once your resource deployment is complete.
+8. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
+
+    [![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.]](media/08-azure-cloud-shell-pane-maximize.png)
+
+### Populate the database with data
+
+1. You need to create a table within the database and populate it with sample data so you have information to work with as you review locking in this exercise.
+1. Run the following command to create the `production.workorder` table for loading in data:
+
+    ```sql
+    DROP SCHEMA IF EXISTS production CASCADE;
+    CREATE SCHEMA production;
+    
+    DROP TABLE IF EXISTS production.workorder;
+    CREATE TABLE production.workorder
+    (
+        workorderid integer NOT NULL,
+        productid integer NOT NULL,
+        orderqty integer NOT NULL,
+        scrappedqty smallint NOT NULL,
+        startdate timestamp without time zone NOT NULL,
+        enddate timestamp without time zone,
+        duedate timestamp without time zone NOT NULL,
+        scrapreasonid smallint,
+        modifieddate timestamp without time zone NOT NULL DEFAULT now()
+    )
+    WITH (
+        OIDS = FALSE
+    )
+    TABLESPACE pg_default;
+    
+    ALTER TABLE production.workorder
+        OWNER to pgAdmin;
+    ```
+
+1. Next, use the `COPY` command to load data from CSV files into the table you created above. Start by running the following command to populate the `production.workorder` table:
+
+    ```sql
+    \COPY listings FROM 'mslearn-postgresql/Allfiles/Labs/08/Lab8_workorder.csv' CSV HEADER
+    ```
+
+    The command output should be `COPY 50`, indicating that 50 rows were written into the table from the CSV file.
+
 
 ### Connect to the database with Azure Data Studio
 
@@ -112,6 +154,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 1. In **User name**, type **pgAdmin**.
 1. In **Password**, type enter the randomly generated password for the **pgAdmin** login you generated
 1. Select **Remember password**.
+1. Click **Connect**
 
 ## Task 1: Investigate default locking behavior
 
