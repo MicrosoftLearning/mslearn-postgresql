@@ -11,7 +11,7 @@ By the end of this exercise, you'll have an Azure Database for PostgreSQL flexib
 ## Prerequisites & setup
 
 1. An Azure subscription - [Create one for free](https://azure.microsoft.com/free/cognitive-services?azure-portal=true).
-2. Access granted to Azure OpenAI in the desired Azure subscription. Currently, access to this service is granted only by application. You can apply for access to Azure OpenAI by completing the form at https://aka.ms/oai/access.
+2. Access granted to Azure OpenAI in the desired Azure subscription. Currently, access to this service is granted only by application. You can apply for access to Azure OpenAI by completing the form at <https://aka.ms/oai/access>.
 3. An Azure OpenAI resource with a deployment named `embedding` using the model `text-embedding-ada-002` (Version 2). This model is currently only available in [certain regions](https://learn.microsoft.com/azure/ai-services/openai/concepts/models#model-summary-table-and-region-availability). If you do not have a resource, the process for creating one is documented in the [Azure OpenAI resource deployment guide](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource).
 4. An Azure Database for PostgreSQL Flexible Server instance in your Azure subscription. If you do not have a resource, use either the [Azure portal](https://learn.microsoft.com/azure/postgresql/flexible-server/quickstart-create-server-portal) or the [Azure CLI](https://learn.microsoft.com/azure/postgresql/flexible-server/quickstart-create-server-cli) guide for creating one.
 
@@ -50,13 +50,13 @@ To store and query vectors, and to generate embeddings, you need to allow-list a
 
 2. To enable the `vector` extension, run the following SQL command. For detailed instructions, read [How to enable and use `pgvector` on Azure Database for PostgreSQL - Flexible Server](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension).
 
-   ```postgresql
+   ```sql
    CREATE EXTENSION vector;
    ```
 
 3. To enable the `azure_ai` extension, run the following SQL command. You'll need the endpoint and API key for the Azure OpenAI resource. For detailed instructions, read [Enable the `azure_ai` extension](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension).
 
-   ```postgresql
+   ```sql
    CREATE EXTENSION azure_ai;
    SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<endpoint>.openai.azure.com');
    SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
@@ -82,7 +82,7 @@ The full `listings` sample table has 92 columns<!-- (TODO link to listings.csv) 
 
    This creates an empty table.
 
-   ```
+   ```sql
    # SELECT * from listings;
     id | name | description
    ----+------+-------------
@@ -93,13 +93,13 @@ The full `listings` sample table has 92 columns<!-- (TODO link to listings.csv) 
 
    In the `psql` prompt, run:
 
-   ```postgresql
+   ```sql
    \copy listings(id, name, description) FROM '/path/to/listings-reduced.csv' DELIMITER ',' CSV HEADER
    ```
 
    You should get a confirmation that 3,818 rows were copied. You can double-check the table row count:
 
-   ```
+   ```sql
    # SELECT COUNT(*) FROM listings;
     count
    -------
@@ -111,11 +111,11 @@ The full `listings` sample table has 92 columns<!-- (TODO link to listings.csv) 
 >
 > If you're running `psql` from the Cloud Shell, you can upload the CSV file to your shell's file system by clicking the *Upload file* toolbar button. The file is uploaded to the home directory.
 >
-> ![Cloud Shell toolbar highlighting the upload button](media/12-uploadfile.png)
+> ![Cloud Shell toolbar highlighting the upload button](media/13-uploadfile.png)
 >
 > If you didn't change the context directory of the shell before running `psql`, you should still be positioned in the home directory so you can refer to the file without a path qualifier.
 >
-> ```postgresql
+> ```sql
 > \copy listings(id, name, description) FROM 'listings-reduced.csv' DELIMITER ',' CSV HEADER
 > ```
 
@@ -131,13 +131,13 @@ Now that we have some sample data, it's time to generate and store the embedding
 
    The `text-embedding-ada-002` model is configured to return 1,536 dimensioins, so use that for the vector column size.
 
-   ```postgresql
+   ```sql
    ALTER TABLE listings ADD COLUMN listing_vector vector(1536);
    ```
 
 1. Generate an embedding vector for the description of each listing, by calling Azure OpenAI through the create_embeddings user defined function, which is implemented by the azure_ai extension:
 
-   ```postgresql
+   ```sql
    UPDATE listings
    SET listing_vector = azure_openai.create_embeddings('embedding', description, max_attempts => 5, retry_delay_ms => 500)
    WHERE listing_vector IS NULL;
@@ -153,7 +153,7 @@ Now that we have some sample data, it's time to generate and store the embedding
 
    You will get a result similar to this, but with 1536 vector columns:
 
-   ```
+   ```sql
    postgres=> SELECT listing_vector FROM listings LIMIT 1;
    -[ RECORD 1 ]--+------ ...
    listing_vector | [-0.0018742813,-0.04530062,0.055145424, ... ]
@@ -165,26 +165,26 @@ Now that you have listings data augmented with embedding vectors, it's time to r
 
 1. Generate the embedding for the query string.
 
-   ```postgresql
+   ```sql
    SELECT azure_openai.create_embeddings('embedding', 'bright natural light');
    ```
 
    You will get a result like this:
 
-   ```
+   ```sql
    -[ RECORD 1 ]-----+-- ...
    create_embeddings | {-0.0020871465,-0.002830255,0.030923981, ...}
    ```
 
 1. Use the embedding in a cosine search (`<=>` represents cosine distance operation), fetching the top 10 most similar listings to the query.
 
-   ```postgresql
+   ```sql
    SELECT id, name FROM listings ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 10;
    ```
 
    You'll get a result similar to this. Results may vary, as embedding vectors are not guaranteed to be deterministic:
 
-   ```
+   ```sql
        id    |                name                 
    ----------+-------------------------------------
      6796336 | A duplex near U district!
@@ -202,18 +202,17 @@ Now that you have listings data augmented with embedding vectors, it's time to r
 
 1. You may also project the `description` column, to be able to read the text of the matching rows whose description were semantically similar. For example, this query returns the best match:
 
-   ```postgresql
+   ```sql
    SELECT id, description FROM listings ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 1;
    ```
 
    Which prints something like:
 
-   ```
+   ```sql
       id    | description
    ---------+------------
     6796336 | This is a great place to live for summer because you get a lot of sunlight at the living room. A huge living room space with comfy couch and one ceiling window and glass windows around the living room.
    ```
-   
 
 To intuitively understand semantic search, observe that the description doesn't actually contain the terms "bright" or "natural". But it does highlight "summer" & "sunlight", "windows", and a "ceiling window".
 
@@ -223,13 +222,13 @@ After performing the above steps, the `listings` table contains sample data from
 
 1. Confirm the listings table has 4 columns: `id`, `name`, `description`, and `listing_vector`.
 
-   ```postgresql
+   ```sql
    \d listings
    ```
 
    It should print something like:
 
-   ```
+   ```sql
                             Table "public.listings"
         Column     |          Type          | Collation | Nullable | Default 
    ----------------+------------------------+-----------+----------+---------
@@ -243,13 +242,13 @@ After performing the above steps, the `listings` table contains sample data from
 
 1. Confirm that at least one row has a populated listing_vector column.
 
-   ```postgresql
+   ```sql
    SELECT COUNT(*) > 0 FROM listings WHERE listing_vector IS NOT NULL;
    ```
 
    The result must show a `t`, meaning true. An indication that there's at least one row with embeddings of its corresponding description column:
 
-   ```
+   ```sql
     ?column? 
    ----------
     t
@@ -258,13 +257,13 @@ After performing the above steps, the `listings` table contains sample data from
 
    Confirm the embedding vector has 1536 dimensions:
 
-   ```postgresql
+   ```sql
    SELECT vector_dims(listing_vector) FROM listings WHERE listing_vector IS NOT NULL LIMIT 1;
    ```
 
    Yielding:
 
-   ```
+   ```sql
     vector_dims 
    -------------
            1536
@@ -275,13 +274,13 @@ After performing the above steps, the `listings` table contains sample data from
 
    Use the embedding in a cosine search, fetching the top 10 most similar listings to the query.
 
-   ```postgresql
+   ```sql
    SELECT id, name FROM listings ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 10;
    ```
 
    You'll get a result like this, depending on which rows were assigned embedding vectors:
 
-   ```
+   ```sql
       id   |                name                 
    --------+-------------------------------------
     315120 | Large, comfy, light, garden studio
@@ -296,4 +295,3 @@ After performing the above steps, the `listings` table contains sample data from
     180939 | Central District Green GardenStudio
    (10 rows)
    ```
-

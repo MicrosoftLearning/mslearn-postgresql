@@ -59,13 +59,13 @@ See the [Recommendation System](https://learn.microsoft.com/en-us/azure/postgres
 
 To query the recommendation function, pass it a listing ID and number of recommendations to make.
 
-```postgresql
+```sql
 select out_listingName, out_score from recommend_listing( (SELECT id from listings limit 1), 20); -- search for 20 listing recommendations closest to a listing
 ```
 
 The result will be something like:
 
-```
+```sql
            out_listingname           |  out_score  
 -------------------------------------+-------------
  Sweet Seattle Urban Homestead 2 Bdr | 0.012512862
@@ -95,20 +95,19 @@ The result will be something like:
 
 1. Make sure the function exists with the correct signature:
 
-   ```postgresql
+   ```sql
    \df recommend_listing
    ```
 
    You should see the following:
 
-   ```
+   ```sql
     public | recommend_listing | TABLE(out_listingname text, out_listingdescription text, out_score real) | samplelistingid integer, numre
    sults integer | func
    ```
 
 2. Make sure you can query it. This should return results:
 
-   ```postgresql
+   ```sql
    select out_listingName, out_score from recommend_listing( (SELECT id from listings limit 1), 20); -- search for 20 listing recommendations closest to a listing
    ```
-

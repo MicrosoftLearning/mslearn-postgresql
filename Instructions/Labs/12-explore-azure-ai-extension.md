@@ -24,7 +24,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 2. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/11-portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/12-portal-toolbar-cloud-shell.png)
 
 3. At the Cloud Shell prompt, enter the following to clone the GitHub repo containing exercise resources:
 
@@ -119,7 +119,7 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 2. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `rentals` database.
 
-    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](media/11-postgresql-rentals-database-connect.png)
+    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](media/12-postgresql-rentals-database-connect.png)
 
 3. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** login.
 
@@ -127,7 +127,7 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 4. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
 
-    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/11-azure-cloud-shell-pane-maximize.png)
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/12-azure-cloud-shell-pane-maximize.png)
 
 ## Populate the database with sample data
 
@@ -267,7 +267,7 @@ The `azure_ai` schema provides the framework for directly interacting with Azure
 
 2. To demonstrate how you use the `azure_ai.set_setting()` and `azure_ai.get_setting()` functions, configure the connection to your Azure OpenAI account. Using the same browser tab where your Cloud Shell is open, minimize or restore the Cloud Shell pane, then navigate to your Azure OpenAI resource in the [Azure portal](https://portal.azure.com/). Once you are on the Azure OpenAI resource page, in the resource menu, under the **Resource Management** section, select **Keys and Endpoint**, then copy your endpoint and one of the available keys.
 
-    ![Screenshot of the Azure OpenAI service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/11-azure-openai-keys-and-endpoints.png)
+    ![Screenshot of the Azure OpenAI service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/12-azure-openai-keys-and-endpoints.png)
 
     You can use either `KEY 1` or `KEY 2`. Always having two keys allows you to securely rotate and regenerate keys without causing service disruption.
 
@@ -396,7 +396,7 @@ The `azure_cognitive` schema provides the framework for directly interacting wit
 
 6. As with the `azure_openai` functions, to successfully make calls against Azure AI Services using the `azure_ai` extension, you must provide the endpoint and a key for your Azure AI Language service. Using the same browser tab where the Cloud Shell is open, minimize or restore the Cloud Shell pane, and then navigate to your Language service resource in the [Azure portal](https://portal.azure.com/). In the resource menu, under the **Resource Management** section, select **Keys and Endpoint**.
 
-    ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/11-azure-language-service-keys-and-endpoints.png)
+    ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/12-azure-language-service-keys-and-endpoints.png)
 
 7. Copy your endpoint and access key values, and replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Maximize the Cloud Shell again, and run the commands from the `psql` command prompt in the Cloud Shell to add your values to the configuration table.
 
@@ -470,12 +470,12 @@ Once you have completed this exercise, delete the Azure resources you created. Y
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
 
-    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/11-azure-portal-home-azure-services-resource-groups.png)
+    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/12-azure-portal-home-azure-services-resource-groups.png)
 
 2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select your resource group from the list.
 
 3. On the **Overview** page of your resource group, select **Delete resource group**.
 
-    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/11-resource-group-delete.png)
+    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/12-resource-group-delete.png)
 
 4. In the confirmation dialog, enter the name of the resource group you are deleting to confirm and then select **Delete**.
