@@ -1,7 +1,7 @@
 @description('Location for all resources.')
 param location string = resourceGroup().location
 
-@description('Unique name for the Azure Database for PostgreSQL Flexible Server.')
+@description('Unique name for the Azure Database for PostgreSQL.')
 param serverName string = 'psql-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
 
 @description('The version of PostgreSQL to use.')
@@ -22,7 +22,7 @@ param translatorServiceName string = 'trn-learn-${resourceGroup().location}-${un
 @description('Restore the service instead of creating a new instance. This is useful if you previously soft-delted the service and want to restore it. If you are restoring a service, set this to true. Otherwise, leave this as false.')
 param restore bool = false
 
-@description('Creates a PostgreSQL Flexible Server.')
+@description('Creates an Azure Database for PostgreSQL.')
 resource postgreSQLFlexibleServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
   name: serverName
   location: location

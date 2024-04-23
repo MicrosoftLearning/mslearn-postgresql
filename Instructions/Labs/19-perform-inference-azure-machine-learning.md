@@ -6,7 +6,7 @@ lab:
 
 # Perform Inference using Azure Machine Learning
 
-As the lead developer for Margie's Travel (MT), you have been asked to help develop a feature estimating nightly rental prices for short-term rentals. You have collected some historical data as a text file and would like to use this to train a simple regression model in Azure Machine Learning. Then, you would like to use that model against data you have hosted in Azure Database for PostgreSQL - Flexible Server.
+As the lead developer for Margie's Travel (MT), you have been asked to help develop a feature estimating nightly rental prices for short-term rentals. You have collected some historical data as a text file and would like to use this to train a simple regression model in Azure Machine Learning. Then, you would like to use that model against data you have hosted in an Azure Database for PostgreSQL flexible server database.
 
 In this exercise, you will deploy a model created using Azure Machine Learning's Automated machine learning functionality. Then, you will use that deployed model to estimate nightly sale prices for short-term rental properties.
 
@@ -175,7 +175,7 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 
 ## Connect to your database using psql in the Azure Cloud Shell
 
-In this task, you connect to the `rentals` database on your Azure Database for PostgreSQL server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
+In this task, you connect to the `rentals` database on your Azure Database for PostgreSQL flexible server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
 
 1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL flexible server.
 

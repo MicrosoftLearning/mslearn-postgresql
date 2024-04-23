@@ -6,7 +6,7 @@ lab:
 
 # Explore the Azure AI Extension
 
-As the lead developer for Margie's Travel, you have been tasked with building an AI-powered application to provide your customers with intelligent recommendations on rental properties. You want to learn more about the `azure_ai` extension for Azure Database for PostgreSQL and how it can help you integrate the power of Generative AI (GenAI) into your app. In this exercise, you explore the `azure_ai` extension and its functionality by installing it in an Azure Database for PostgreSQL - Flexible Server database and examining its capabilities for integrating Azure AI and ML services.
+As the lead developer for Margie's Travel, you have been tasked with building an AI-powered application to provide your customers with intelligent recommendations on rental properties. You want to learn more about the `azure_ai` extension for Azure Database for PostgreSQL and how it can help you integrate the power of Generative AI (GenAI) into your app. In this exercise, you explore the `azure_ai` extension and its functionality by installing it in an Azure Database for PostgreSQL flexible server database and examining its capabilities for integrating Azure AI and ML services.
 
 ## Before you start
 
@@ -77,7 +77,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
     ```
 
-    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL - Flexible Server, Azure OpenAI, and an Azure AI Language service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter), creating a database named `rentals` on the server, and adding a deployment named `embedding` using the `text-embedding-ada-002` model to your Azure OpenAI service. Note that the Bicep file is shared by all modules in this learning path, so you may only use some of the deployed resources in some exercises.
+    The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL flexible server, Azure OpenAI, and an Azure AI Language service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the azure.extensions server parameter), creating a database named `rentals` on the server, and adding a deployment named `embedding` using the `text-embedding-ada-002` model to your Azure OpenAI service. Note that the Bicep file is shared by all modules in this learning path, so you may only use some of the deployed resources in some exercises.
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
@@ -112,7 +112,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 ## Connect to your database using psql in the Azure Cloud Shell
 
-In this task, you connect to the `rentals` database on your Azure Database for PostgreSQL server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
+In this task, you connect to the `rentals` database on your Azure Database for PostgreSQL flexible server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
 
 1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL flexible server.
 
@@ -193,7 +193,7 @@ Before using the `azure_ai` extension, you must install it into your database an
      azure_ai,vector
     ```
 
-    Before an extension can be installed and used in Azure Database for PostgreSQL - Flexible Server, it must be added to the server's _allowlist_, as described in [how to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
+    Before an extension can be installed and used in an Azure Database for PostgreSQL flexible server database, it must be added to the server's _allowlist_, as described in [how to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
 
 2. Now, you are ready to install the `azure_ai` extension using the [CREATE EXTENSION](https://www.postgresql.org/docs/current/sql-createextension.html) command.
 
@@ -262,7 +262,7 @@ The `azure_ai` schema provides the framework for directly interacting with Azure
 
     > Important
     >
-    > Because the connection information for Azure AI services, including API keys, is stored in a configuration table in the database, the `azure_ai` extension defines a role called `azure_ai_settings_manager` to ensure this information is protected and accessible only to users who have been assigned that role. This role enables reading and writing of settings related to the extension. Only members of the `azure_ai_settings_manager` role can invoke the `azure_ai.get_setting()` and `azure_ai.set_setting()` functions. In Azure Database for PostgreSQL - Flexible Server, all admin users (those with the `azure_pg_admin` role assigned) are also assigned the `azure_ai_settings_manager` role.
+    > Because the connection information for Azure AI services, including API keys, is stored in a configuration table in the database, the `azure_ai` extension defines a role called `azure_ai_settings_manager` to ensure this information is protected and accessible only to users who have been assigned that role. This role enables reading and writing of settings related to the extension. Only members of the `azure_ai_settings_manager` role can invoke the `azure_ai.get_setting()` and `azure_ai.set_setting()` functions. In an Azure Database for PostgreSQL flexible server, all admin users (those with the `azure_pg_admin` role assigned) are also assigned the `azure_ai_settings_manager` role.
 
 2. To demonstrate how you use the `azure_ai.set_setting()` and `azure_ai.get_setting()` functions, configure the connection to your Azure OpenAI account. Using the same browser tab where your Cloud Shell is open, minimize or restore the Cloud Shell pane, then navigate to your Azure OpenAI resource in the [Azure portal](https://portal.azure.com/). Once you are on the Azure OpenAI resource page, in the resource menu, under the **Resource Management** section, select **Keys and Endpoint**, then copy your endpoint and one of the available keys.
 

@@ -1,7 +1,7 @@
 @description('Location for all resources.')
 param location string = resourceGroup().location
 
-@description('Unique name for the Azure Database for PostgreSQL Flexible Server.')
+@description('Unique name for the Azure Database for PostgreSQL.')
 param serverName string = 'psql-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
 
 @description('The version of PostgreSQL to use.')

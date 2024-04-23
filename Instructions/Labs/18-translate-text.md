@@ -6,9 +6,9 @@ lab:
 
 # Translate Text with Azure AI Translator
 
-As the lead developer for Margie's Travel, you have been asked to assist in an internationalization effort. Today, all rental listings for the company's short-term rental service are in English. You want to translate these listings into a variety of languages without extensive development effort. All of your data is hosted in Azure Database for PostgreSQL - Flexible Server, and you would like to use Azure AI Services to perform translation.
+As the lead developer for Margie's Travel, you have been asked to assist in an internationalization effort. Today, all rental listings for the company's short-term rental service are in English. You want to translate these listings into a variety of languages without extensive development effort. All of your data is hosted in an Azure Database for PostgreSQL flexible server, and you would like to use Azure AI Services to perform translation.
 
-In this exercise, you will translate English-language text into various languages using the Azure AI Translator service via Azure Database for PostgreSQL - Flexible Server.
+In this exercise, you will translate English-language text into various languages using the Azure AI Translator service via an Azure Database for PostgreSQL flexible server database.
 
 ## Before you start
 
