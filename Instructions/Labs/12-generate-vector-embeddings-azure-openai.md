@@ -32,7 +32,9 @@ psql sslmode=require
 
 If you're using Cloud Shell, it already knows who you are (ie you're already authenticated with your Azure credentials in that session of the shell). Otherwise, you can run `az login` from a command line, as described [here](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli-interactively) to fetch the access token for your user.
 
-**Suggestion**: You may wish to save the script provided above inside a file, to authenticate new sessions quickly. Make sure you use the `az account` command in the script, not the actual password.
+> [!Tip]
+>
+> You may wish to save the script provided above inside a file, to authenticate new sessions quickly. Make sure you use the `az account` command in the script, not the actual password. Then, `source setup.sh` (if you called it `setup.sh`) will set the environment variables.
 
 If you're authenticating to PostgreSQL with a user and its corresponding password, you can connect using the following command (it will prompt you for the password):
 
@@ -105,9 +107,17 @@ The full `listings` sample table has 92 columns<!-- (TODO link to listings.csv) 
    (1 row)
    ```
 
-**Suggestion**: If you're running psql from the Cloud Shell, you can upload the CSV file to the file system of that shell, by using the *Upload file* button in the shell toolbar. The file is uploaded to the home directory. If you didn't change the context directory of the shell, since you started the shell, you should still be positioned in the home directory and, therefore, referring to the upload copy of `listings-reduced.csv` doesn't need a path qualifier.
-
-![Cloud Shell toolbar highlighting the upload button](media/12-uploadfile.png)
+> [!Tip]
+>
+> If you're running `psql` from the Cloud Shell, you can upload the CSV file to your shell's file system by clicking the *Upload file* toolbar button. The file is uploaded to the home directory.
+>
+> ![Cloud Shell toolbar highlighting the upload button](media/12-uploadfile.png)
+>
+> If you didn't change the context directory of the shell before running `psql`, you should still be positioned in the home directory so you can refer to the file without a path qualifier.
+>
+> ```postgresql
+> \copy listings(id, name, description) FROM 'listings-reduced.csv' DELIMITER ',' CSV HEADER
+> ```
 
 To reset your sample data, you can execute `DROP TABLE listings`, and repeat all steps from [Load the sample data](#load-the-sample-data).
 
@@ -129,18 +139,11 @@ Now that we have some sample data, it's time to generate and store the embedding
 
    ```postgresql
    UPDATE listings
-   SET listing_vector = azure_openai.create_embeddings('<embedding-ada-002>', description)
+   SET listing_vector = azure_openai.create_embeddings('embedding', description, max_attempts => 5, retry_delay_ms => 500)
    WHERE listing_vector IS NULL;
    ```
 
-   Note that the active quotas may not allow updating all ~4k rows in a single call. In that case, you may run this query to generate 100 embeddings. To have the embedding generated for the description of all listings, run the query multiple times. Running it once is enough for this module.
-
-   ```postgresql
-   UPDATE listings
-   SET listing_vector = azure_openai.create_embeddings('<embedding-ada-002>', description)
-   FROM (SELECT id FROM listings WHERE listing_vector IS NULL ORDER BY id LIMIT 100) subset
-   WHERE listings.id = subset.id;
-   ```
+   Note that this may take several minutes depending on available quota.
 
 1. See an example vector by running this query:
 
@@ -163,7 +166,7 @@ Now that you have listings data augmented with embedding vectors, it's time to r
 1. Generate the embedding for the query string.
 
    ```postgresql
-   postgres=> SELECT azure_openai.create_embeddings('embedding-ada-002', 'bright natural light');
+   SELECT azure_openai.create_embeddings('embedding', 'bright natural light');
    ```
 
    You will get a result like this:
@@ -175,44 +178,44 @@ Now that you have listings data augmented with embedding vectors, it's time to r
 
 1. Use the embedding in a cosine search (`<=>` represents cosine distance operation), fetching the top 10 most similar listings to the query.
 
-   ```
-   SELECT id, name FROM listings ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding-ada-002', 'bright natural light')::vector LIMIT 10;
+   ```postgresql
+   SELECT id, name FROM listings ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 10;
    ```
 
-   You'll get a result similar to this. Results may vary, depending on which rows were assigned embedding vectors, and what were the exact values the embeddings model produced for any given description:
+   You'll get a result similar to this. Results may vary, as embedding vectors are not guaranteed to be deterministic:
 
    ```
-      id   |                name                 
-   --------+-------------------------------------
-    315120 | Large, comfy, light, garden studio
-    429453 | Sunny Bedroom #2 w/View: Wallingfrd
-     17951 | West Seattle, The Starlight Studio
-     48848 | green suite seattle - dog friendly
-    116221 | Modern, Light-Filled Fremont Flat
-    206781 | Bright & Spacious Studio
-    356566 | Sunny Bedroom w/View: Wallingford
-      9419 | Golden Sun vintage warm/sunny
-    136480 | Bright Cheery Room in Seattle House
-    180939 | Central District Green GardenStudio
+       id    |                name                 
+   ----------+-------------------------------------
+     6796336 | A duplex near U district!
+     7635966 | Modern Capitol Hill Apartment
+     7011200 | Bright 1 bd w deck. Great location
+     8099917 | The Ravenna Apartment
+    10211928 | Charming Ravenna Bungalow
+      692671 | Sun Drenched Ballard Apartment
+     7574864 | Modern Greenlake Getaway
+     7807658 | Top Floor Corner Apt-Downtown View
+    10265391 | Art filled, quiet, walkable Seattle
+     5578943 | Madrona Studio w/Private Entrance
    (10 rows)
    ```
 
 1. You may also project the `description` column, to be able to read the text of the matching rows whose description were semantically similar. For example, this query returns the best match:
 
-   ```
-   SELECT id, name, description FROM listings ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding-ada-002', 'bright natural light')::vector LIMIT 1;
+   ```postgresql
+   SELECT id, description FROM listings ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 1;
    ```
 
    Which prints something like:
 
    ```
-      id   |                name                | description
-   --------+------------------------------------+------------
-    315120 | Large, comfy, light, garden studio | Wonderfully appointed, spacious, light, and a true respite for you to enjoy! We've had the pleasure of furnishing it with a combination of antiques and modern furniture, paintings and art-work, and pretty cool tchotchkes of all sorts. A visual feast! This large studio apartment is spacious, light, and fully, beautifully, furnished. Extremely comfy queen bed with additional air beds available. Garden setting with private, warm, sunny southwest entrance via a tree and bush-lined path. Another east-facing garden path leads to the large shared deck, complete with stream and a beautiful koi pond. Apartment has two large skylights (one giving you a view of the stars when in bed!) and the extremely capacious bathroom has yet a third - as well as a full tub, should you want that relaxing feature. Beautiful, private garden view from the large south-facing window as well as from the French doors. Antique and modern furniture, French chandelier; dining table with chairs. Fresh blueberries, raspbe
-   (1 row)
+      id    | description
+   ---------+------------
+    6796336 | This is a great place to live for summer because you get a lot of sunlight at the living room. A huge living room space with comfy couch and one ceiling window and glass windows around the living room.
    ```
+   
 
-   To intuitively understand semantic search, observe that the description doesn't actually contain the terms "bright" or "natural". But it does describe the apartment as "light", "sunny", and featuring "skylights".
+To intuitively understand semantic search, observe that the description doesn't actually contain the terms "bright" or "natural". But it does highlight "summer" & "sunlight", "windows", and a "ceiling window".
 
 ## Check your work
 
@@ -255,7 +258,7 @@ After performing the above steps, the `listings` table contains sample data from
 
    Confirm the embedding vector has 1536 dimensions:
 
-   ```
+   ```postgresql
    SELECT vector_dims(listing_vector) FROM listings WHERE listing_vector IS NOT NULL LIMIT 1;
    ```
 
@@ -272,8 +275,8 @@ After performing the above steps, the `listings` table contains sample data from
 
    Use the embedding in a cosine search, fetching the top 10 most similar listings to the query.
 
-   ```
-   SELECT id, name FROM listings ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding-ada-002', 'bright natural light')::vector LIMIT 10;
+   ```postgresql
+   SELECT id, name FROM listings ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 10;
    ```
 
    You'll get a result like this, depending on which rows were assigned embedding vectors:
