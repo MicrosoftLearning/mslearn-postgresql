@@ -1,46 +1,130 @@
 To perform semantic searches, you must first generate embedding vectors from a model, store them in a vector database, and then query the embeddings. You'll set up a database here, populate it with sample data, and run semantic searches against those listings.
 
-DIAGRAM:
-
-- Sample data CSV --> database table in a flexible server
-- description column from the sample --> OpenAI API & back into vector column
-- query text, through OpenAI into vector, then arrow to document vectors showing the `<=>` distance operator
-
 By the end of this exercise, you'll have an Azure Database for PostgreSQL flexible server instance with the `vector` and `azure_ai` extensions enabled. You'll generate embeddings for the [Seattle Airbnb Open Data](https://www.kaggle.com/datasets/airbnb/seattle?select=listings.csv) dataset's `listings` table. You'll also run semantic searches against these listings by generating a query's embedding vector and performing a vector cosine distance search.
 
-## Prerequisites & setup
+## Before you start
 
-1. An Azure subscription - [Create one for free](https://azure.microsoft.com/free/cognitive-services?azure-portal=true).
-2. Access granted to Azure OpenAI in the desired Azure subscription. Currently, access to this service is granted only by application. You can apply for access to Azure OpenAI by completing the form at <https://aka.ms/oai/access>.
-3. An Azure OpenAI resource with a deployment named `embedding` using the model `text-embedding-ada-002` (Version 2). This model is currently only available in [certain regions](https://learn.microsoft.com/azure/ai-services/openai/concepts/models#model-summary-table-and-region-availability). If you do not have a resource, the process for creating one is documented in the [Azure OpenAI resource deployment guide](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource).
-4. An Azure Database for PostgreSQL Flexible Server instance in your Azure subscription. If you do not have a resource, use either the [Azure portal](https://learn.microsoft.com/azure/postgresql/flexible-server/quickstart-create-server-portal) or the [Azure CLI](https://learn.microsoft.com/azure/postgresql/flexible-server/quickstart-create-server-cli) guide for creating one.
+You need an [Azure subscription](https://azure.microsoft.com/free) with administrative rights, and you must be approved for Azure OpenAI access in that subscription. If you need Azure OpenAI access, apply at the [Azure OpenAI limited access](https://learn.microsoft.com/legal/cognitive-services/openai/limited-access) page.
 
-## Open a database connection
+### Deploy resources into your Azure subscription
 
-If you're using Microsoft Entra authentication, you can connect using `psql` with an access token. For detailed instructions, read [Authenticate with Microsoft Entra ID](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-configure-sign-in-azure-ad-authentication#authenticate-with-microsoft-entra-id).
+This step guides you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
 
-Example with Bash:
-
-```bash
-export PGHOST=<your db server>
-export PGUSER=<your user email>
-export PGPORT=5432
-export PGDATABASE=<your db name>
-export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query "[accessToken]" -o tsv)
-psql sslmode=require
-```
-
-If you're using Cloud Shell, it already knows who you are (ie you're already authenticated with your Azure credentials in that session of the shell). Otherwise, you can run `az login` from a command line, as described [here](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli-interactively) to fetch the access token for your user.
-
-> [!Tip]
+> [!Note]
 >
-> You may wish to save the script provided above inside a file, to authenticate new sessions quickly. Make sure you use the `az account` command in the script, not the actual password. Then, `source setup.sh` (if you called it `setup.sh`) will set the environment variables.
+> If you are doing multiple modules in this learning path, you can share the Azure environment between them. In that case, you only need to complete this resource deployment step once.
 
-If you're authenticating to PostgreSQL with a user and its corresponding password, you can connect using the following command (it will prompt you for the password):
+1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/).
 
-```bash
-psql --host=<postgresql_server_fqdn> --port=5432 --username=<database_user> --dbname=<database_name>
-```
+2. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
+
+   ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/13-portal-toolbar-cloud-shell.png)
+
+3. At the Cloud Shell prompt, enter the following to clone the GitHub repo containing exercise resources:
+
+   ```bash
+   git clone https://github.com/MicrosoftLearning/mslearn-postgresql.git
+   ```
+
+4. Next, you run three commands to define variables to reduce redundant typing when using Azure CLI commands to create Azure resources. The variables represent the name to assign to your resource group (`RG_NAME`), the Azure region (`REGION`) into which resources will be deployed, and a randomly generated password for the PostgreSQL administrator login (`ADMIN_PASSWORD`).
+
+   In the first command, the region assigned to the corresponding variable is `eastus`, but you can also replace it with a location of your preference. However, if replacing the default, you must select another [Azure region that supports abstractive summarization](https://learn.microsoft.com/azure/ai-services/language-service/summarization/region-support) to ensure you can complete all of the tasks in the modules in this learning path.
+
+   ```bash
+   REGION=eastus
+   ```
+
+   The following command assigns the name to be used for the resource group that will house all the resources used in this exercise. The resource group name assigned to the corresponding variable is `rg-learn-postgresql-ai-$REGION`, where `$REGION` is the location you specified above. However, you can change it to any other resource group name that suits your preference.
+
+   ```bash
+   RG_NAME=rg-learn-postgresql-ai-$REGION
+   ```
+
+   The final command randomly generates a password for the PostgreSQL admin login. **Make sure you copy it** to a safe place to use later to connect to your PostgreSQL flexible server.
+
+   ```bash
+   a=()
+   for i in {a..z} {A..Z} {0..9}; 
+      do
+      a[$RANDOM]=$i
+   done
+   ADMIN_PASSWORD=$(IFS=; echo "${a[*]::18}")
+   echo "Your randomly generated PostgreSQL admin user's password is:"
+   echo $ADMIN_PASSWORD
+   ```
+
+5. If you have access to more than one Azure subscription, and your default subscription is not the one in which you want to create the resource group and other resources for this exercise, run this command to set the appropriate subscription, replacing the `<subscriptionName|subscriptionId>` token with either the name or ID of the subscription you want to use:
+
+   ```azurecli
+   az account set --subscription <subscriptionName|subscriptionId>
+   ```
+
+6. Run the following Azure CLI command to create your resource group:
+
+   ```azurecli
+   az group create --name $RG_NAME --location $REGION
+   ```
+
+7. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
+
+   ```azurecli
+   az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
+   ```
+
+   The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed include an Azure Database for PostgreSQL - Flexible Server, Azure OpenAI, and an Azure AI Language service. The Bicep script also performs some configuration steps, such as adding the `azure_ai` and `vector` extensions to the PostgreSQL server's _allowlist_ (via the `azure.extensions` server parameter), creating a database named `rentals` on the server, and adding a deployment named `embedding` using the `text-embedding-ada-002` model to your Azure OpenAI service. Note that the Bicep file is shared by all modules in this learning path, so you may only use some of the deployed resources in some exercises.
+
+   The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
+
+   You may encounter a few errors when running the Bicep deployment script. The most common messages and the steps to resolve them are:
+
+   - If you have not previously created an Azure AI Services resource, you may receive a message that the Responsible AI terms have not been read and accepted in your subscription:
+
+     ```bash
+     {"code": "ResourceKindRequireAcceptTerms", "message": "This subscription cannot create TextAnalytics until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal and trying again.}
+     ```
+
+     To resolve this error, run this command to create a Language service in your resource group and accept the Responsible AI terms for your subscription. Once the resource is created, you can rerun the command to execute the Bicep deployment script.
+
+     ```bash
+     az cognitiveservices account create --name lang-temp-$region-$ADMIN_PASSWORD --resource-group $RG_NAME --kind TextAnalytics --sku F0 --location $REGION --yes
+     ```
+
+   - If you previously ran the Bicep deployment script for this learning path and subsequently deleted the resources, you may receive an error message like the following if you are attempting to rerun the script within 48 hours of deleting the resources:
+
+     ```bash
+     {"code": "InvalidTemplateDeployment", "message": "The template deployment 'deploy' is not valid according to the validation procedure. The tracking id is '4e87a33d-a0ac-4aec-88d8-177b04c1d752'. See inner errors for details."}
+     
+     Inner Errors:
+     {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/oai-learn-eastus-gvg3papkkkimy' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
+     ```
+
+     If you receive this message, modify the `azure deployment group create` command above to set the `restore` parameter equal to `true` and rerun it.
+
+   - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and try rerunning the Bicep deployment script.
+
+     ```bash
+     {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus2/providers/Microsoft.Resources/deployments/deploy","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.DBforPostgreSQL/flexibleServers/psql-learn-eastus2-gvg3papkkkimy","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
+     ```
+
+8. Close the Cloud Shell pane once your resource deployment is complete.
+
+## Connect to your database using psql in the Azure Cloud Shell
+
+In this task, you connect to the `rentals` database on your Azure Database for PostgreSQL server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
+
+1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL - Flexible Server.
+
+2. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `rentals` database.
+
+   ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](media/13-postgresql-rentals-database-connect.png)
+
+3. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** login.
+
+   Once logged in, the `psql` prompt for the `rentals` database is displayed.
+
+4. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
+
+   ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/13-azure-cloud-shell-pane-maximize.png)
 
 ## Setup: Configure extensions
 
@@ -62,66 +146,54 @@ To store and query vectors, and to generate embeddings, you need to allow-list a
    SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
    ```
 
-## Load the sample data
+## Populate the database with sample data
 
-First, let's load the [Seattle Airbnb Open Data dataset's `listings` table](https://www.kaggle.com/datasets/airbnb/seattle?select=listings.csv) into the Azure Database for PostgreSQL flexible server instance.
+Before you explore the `azure_ai` extension, add a couple of tables to the `rentals` database and populate them with sample data so you have information to work with as you review the extension's functionality.
 
-The full `listings` sample table has 92 columns<!-- (TODO link to listings.csv) -->. To simplify, we'll only import three: `id`, `name`, and `description`. <!-- This data is stored in (TODO link to listings-reduced.csv). -->
+1. Run the following commands to create the `listings` and `reviews` tables for storing rental property listing and customer review data:
 
-1. Create the `listings` table in your database.
-
-   In the `psql` prompt, run:
-
-    ```sql
+   ```sql
+   DROP TABLE IF EXISTS listings;
+   
    CREATE TABLE listings (
-       id INT PRIMARY KEY,
-       name VARCHAR(255) NOT NULL,
-       description TEXT NOT NULL
+     id int,
+     name varchar(100),
+     description text,
+     property_type varchar(25),
+     room_type varchar(30),
+     price numeric,
+     weekly_price numeric
    );
-    ```
-
-   This creates an empty table.
-
-   ```sql
-   # SELECT * from listings;
-    id | name | description
-   ----+------+-------------
-   (0 rows)
    ```
 
-2. Import the `listings.csv` file.
-
-   In the `psql` prompt, run:
-
    ```sql
-   \copy listings(id, name, description) FROM '/path/to/listings-reduced.csv' DELIMITER ',' CSV HEADER
+   DROP TABLE IF EXISTS reviews;
+   
+   CREATE TABLE reviews (
+     id int,
+     listing_id int, 
+     date date,
+     comments text
+   );
    ```
 
-   You should get a confirmation that 3,818 rows were copied. You can double-check the table row count:
+2. Next, use the `COPY` command to load data from CSV files into each table you created above. Start by running the following command to populate the `listings` table:
 
    ```sql
-   # SELECT COUNT(*) FROM listings;
-    count
-   -------
-     3818
-   (1 row)
+   \COPY listings FROM 'mslearn-postgresql/Allfiles/Labs/Shared/listings.csv' CSV HEADER
    ```
 
-> [!Tip]
->
-> If you're running `psql` from the Cloud Shell, you can upload the CSV file to your shell's file system by clicking the *Upload file* toolbar button. The file is uploaded to the home directory.
->
-> ![Cloud Shell toolbar highlighting the upload button](media/13-uploadfile.png)
->
-> If you didn't change the context directory of the shell before running `psql`, you should still be positioned in the home directory so you can refer to the file without a path qualifier.
->
-> ```sql
-> \copy listings(id, name, description) FROM 'listings-reduced.csv' DELIMITER ',' CSV HEADER
-> ```
+   The command output should be `COPY 50`, indicating that 50 rows were written into the table from the CSV file.
 
-To reset your sample data, you can execute `DROP TABLE listings`, and repeat all steps from [Load the sample data](#load-the-sample-data).
+3. Finally, run the command below to load customer reviews into the `reviews` table:
 
-To learn more about the `\copy` command used in the previous step, refer to [psql's copy meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMANDS-COPY). To learn about the differences between psql's meta-command `\copy` (client side) and `copy` (server side) command, refer to [COPY command](https://www.postgresql.org/docs/current/sql-copy.html#NOTES).
+   ```sql
+   \COPY reviews FROM 'mslearn-postgresql/Allfiles/Labs/Shared/reviews.csv' CSV HEADER
+   ```
+
+   The command output should be `COPY 354`, indicating that 354 rows were written into the table from the CSV file.
+
+To reset your sample data, you can execute `DROP TABLE listings`, and repeat these steps.
 
 ## Create and store embedding vectors
 
@@ -129,7 +201,7 @@ Now that we have some sample data, it's time to generate and store the embedding
 
 1. Add the embedding vector column.
 
-   The `text-embedding-ada-002` model is configured to return 1,536 dimensioins, so use that for the vector column size.
+   The `text-embedding-ada-002` model is configured to return 1,536 dimensions, so use that for the vector column size.
 
    ```sql
    ALTER TABLE listings ADD COLUMN listing_vector vector(1536);
