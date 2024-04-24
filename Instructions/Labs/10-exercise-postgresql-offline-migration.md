@@ -1,6 +1,6 @@
 ---
 lab:
-    title: 'Online PostgreSQL Database Migration'
+    title: 'Offline PostgreSQL Database Migration'
     module: 'Migrate to Azure Database for PostgreSQL Flexible Server'
 ---
 
