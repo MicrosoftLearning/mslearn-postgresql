@@ -1,9 +1,9 @@
 ---
-uid: learn.wwl.understand-concurrency-postgresql.exercise-understand-locking
-title: Exercise: Understand locking
-description: Exercise: Understand locking
-durationInMinutes: 15
+lab:
+    title: 'Understand locking'
+    module: 'Understand concurrency in PostgreSQL'
 ---
+
 > [!IMPORTANT]
 > You need your own Azure subscription to complete the exercises in this module. If you don't have an Azure subscription, you can set up a free trial account at [Build in the cloud with an Azure free account](https://azure.microsoft.com/free/).
 
