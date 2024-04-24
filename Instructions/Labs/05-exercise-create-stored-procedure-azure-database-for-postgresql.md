@@ -3,6 +3,7 @@ lab:
     title: 'Create a stored procedure in Azure Database for PostgreSQL'
     module: 'Procedures and functions in PostgreSQL'
 ---
+
 > [!IMPORTANT]
 > You need your own Azure subscription to complete this exercise. If you do not have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).
 
