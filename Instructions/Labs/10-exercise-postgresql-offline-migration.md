@@ -1,8 +1,7 @@
 ---
-uid: learn.wwl.exercise-offline-postgresql-database-migration
-title: Exercise – Online PostgreSQL Database Migration
-description: Exercise – Online PostgreSQL Database Migration
-durationInMinutes: 20
+lab:
+    title: 'Online PostgreSQL Database Migration'
+    module: 'Migrate to Azure Database for PostgreSQL Flexible Server'
 ---
 
 In this exercise, you'll create an Azure Database for PostgreSQL flexible server and perform an offline database migration from an on-premises PostgreSQL server using the Migration feature within the Azure Database for PostgreSQL Flexible Server.
