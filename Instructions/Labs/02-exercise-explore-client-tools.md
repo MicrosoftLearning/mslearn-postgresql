@@ -4,7 +4,7 @@ title: Exercise - Explore PostgreSQL with Azure Data Studio
 description: Exercise - Explore PostgreSQL with Azure Data Studio
 durationInMinutes: 15
 ---
-In this exercise you will download and install Azure Data studio, and then connect to the Azure Database for PostgreSQL server you created in Module 1. If you already have Azure Data Studio installed on your machine you can jump ahead to Connect to Azure Database for PostrgreSQL flexible server.
+In this exercise you will download and install Azure Data studio. If you already have Azure Data Studio installed on your machine you can jump ahead to Connect to Azure Database for PostrgreSQL flexible server.
 
 > [!IMPORTANT]
 > You need your own Azure subscription to complete this exercise. If you do not have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).
