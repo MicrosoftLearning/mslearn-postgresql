@@ -1,7 +1,7 @@
 ---
 lab:
     title: 'Perform Inference using Azure Machine Learning'
-    module: 'Build AI apps with Azure Database for PostgreSQL'
+    module: 'Use Azure Machine Learning Inferencing with Azure Database for PostgreSQL'
 ---
 
 # Perform Inference using Azure Machine Learning

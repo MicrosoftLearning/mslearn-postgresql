@@ -1,7 +1,7 @@
 ---
 lab:
     title: 'Analyze Sentiment'
-    module: 'Build AI apps with Azure Database for PostgreSQL'
+    module: 'Perform Sentiment Analysis and Opinion Mining using Azure Database for PostgreSQL'
 ---
 
 # Analyze Sentiment

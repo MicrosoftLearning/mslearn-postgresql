@@ -1,7 +1,7 @@
 ---
 lab:
     title: 'Translate Text with Azure AI Translator'
-    module: 'Build AI apps with Azure Database for PostgreSQL'
+    module: 'Translate Text using the Azure AI Translator and Azure Database for PostgreSQL'
 ---
 
 # Translate Text with Azure AI Translator

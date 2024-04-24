@@ -1,7 +1,7 @@
 ---
 lab:
     title: 'Generate vector embeddings with Azure OpenAI'
-    module: 'Build AI apps with Azure Database for PostgreSQL'
+    module: 'Enable Semantic Search with Azure Database for PostgreSQL'
 ---
 
 # Generate vector embeddings with Azure OpenAI

@@ -1,7 +1,7 @@
 ---
 lab:
     title: 'Create a search function for a recommendation system'
-    module: 'Build AI apps with Azure Database for PostgreSQL'
+    module: 'Enable Semantic Search with Azure Database for PostgreSQL'
 ---
 
 # Create a search function for a recommendation system

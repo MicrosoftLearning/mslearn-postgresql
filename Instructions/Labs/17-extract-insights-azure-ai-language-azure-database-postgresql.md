@@ -1,7 +1,7 @@
 ---
 lab:
-    title: 'Extract insights using the Azure AI Language service with Azure Database for PostgreSQL'
-    module: 'Build AI apps with Azure Database for PostgreSQL'
+    title: 'Extract insights using the Azure AI Language'
+    module: 'Extract insights using the Azure AI Language service with Azure Database for PostgreSQL'
 ---
 
 # Extract insights using the Azure AI Language service with Azure Database for PostgreSQL

@@ -1,7 +1,7 @@
 ---
 lab:
     title: 'Perform Extractive and Abstractive Summarization'
-    module: 'Build AI apps with Azure Database for PostgreSQL'
+    module: 'Summarize data using Azure AI Services and Azure Database for PostgreSQL'
 ---
 
 # Perform Extractive and Abstractive Summarization
