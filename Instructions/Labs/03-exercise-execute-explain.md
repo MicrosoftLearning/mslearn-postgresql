@@ -1,8 +1,7 @@
 ---
-uid: learn.wwl.understand-postgresql-query-process.exercise-execute-explain
-title: Exercise - Execute the EXPLAIN statement
-description: Exercise - Execute the EXPLAIN statement
-durationInMinutes: 5
+lab:
+    title: 'Execute the EXPLAIN statement'
+    module: 'Understand PostgreSQL query processing '
 ---
 > [!IMPORTANT]
 > You need your own Azure subscription to complete this exercise. If you do not have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).
