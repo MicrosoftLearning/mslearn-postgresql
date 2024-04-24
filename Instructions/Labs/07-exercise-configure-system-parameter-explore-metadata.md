@@ -1,9 +1,9 @@
 ---
-uid: learn.wwl.configure-and-manage-postgresql.exercise-configure-system-parameter-explore-metadata
-title: Exercise - Configure system parameters and explore metedata with system catalogs and views
-description: Exercise - Configure system parameters and explore metedata with system catalogs and views
-durationInMinutes: 30
+lab:
+    title: 'Configure and manage Azure Database for PostgreSQL Server'
+    module: 'Explore PostgreSQL architecture'
 ---
+
 > [!IMPORTANT]
 > You need your own Azure subscription to complete the exercises in this module. If you don't have an Azure subscription, you can set up a free trial account at [Build in the cloud with an Azure free account](https://azure.microsoft.com/free/).
 
