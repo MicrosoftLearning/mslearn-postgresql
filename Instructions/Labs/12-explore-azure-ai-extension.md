@@ -427,7 +427,7 @@ The `azure_ml` schema lets functions connect to Azure ML services directly from 
 1. To review the functions defined in a schema, you can use the [`\df` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC). To view the functions in the `azure_ml` schema, run:
 
     ```sql
-    \df azure_ai.*
+    \df azure_ml.*
     ```
 
     In the output, observe there are two functions defined in this schema, `azure_ml.inference()` and `azure_ml.invoke()`, the details of which are displayed below:
