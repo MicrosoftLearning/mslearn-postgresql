@@ -134,6 +134,26 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
     ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/14-azure-cloud-shell-pane-maximize.png)
 
+## Setup: Configure extensions
+
+To store and query vectors, and to generate embeddings, you need to allow-list and enable two extensions for Azure Database for PostgreSQL Flexible Server: `vector` and `azure_ai`.
+
+1. To allow-list both extensions, add `vector` and `azure_ai` to the server parameter `azure.extensions`, as per the instructions provided in [How to use PostgreSQL extensions](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
+
+2. Run the following SQL command to enable the `vector` extension. For detailed instructions, read [How to enable and use `pgvector` on Azure Database for PostgreSQL - Flexible Server](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension).
+
+    ```sql
+    CREATE EXTENSION vector;
+    ```
+
+3. To enable the `azure_ai` extension, run the following SQL command. You'll need the endpoint and API key for the Azure OpenAI resource. For detailed instructions, read [Enable the `azure_ai` extension](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension).
+
+    ```sql
+    CREATE EXTENSION azure_ai;
+    SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<endpoint>.openai.azure.com');
+    SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
+    ```
+
 ## Populate the database with sample data
 
 Before you explore the `azure_ai` extension, add a couple of tables to the `rentals` database and populate them with sample data so you have information to work with as you review the extension's functionality.
@@ -161,6 +181,42 @@ Before you explore the `azure_ai` extension, add a couple of tables to the `rent
     ```
 
     The command output should be `COPY 50`, indicating that 50 rows were written into the table from the CSV file.
+
+## Create and store embedding vectors
+
+Now that we have some sample data, it's time to generate and store the embedding vectors. The `azure_ai` extension makes calling the Azure OpenAI embedding API easy.
+
+1. Add the embedding vector column.
+
+    The `text-embedding-ada-002` model is configured to return 1,536 dimensions, so use that for the vector column size.
+
+    ```sql
+    ALTER TABLE listings ADD COLUMN listing_vector vector(1536);
+    ```
+
+1. Generate an embedding vector for the description of each listing by calling Azure OpenAI through the create_embeddings user-defined function, which is implemented by the azure_ai extension:
+
+    ```sql
+    UPDATE listings
+    SET listing_vector = azure_openai.create_embeddings('embedding', description, max_attempts => 5, retry_delay_ms => 500)
+    WHERE listing_vector IS NULL;
+    ```
+
+    Note that this may take several minutes, depending on the available quota.
+
+1. See an example vector by running this query:
+
+    ```sql
+    SELECT listing_vector FROM listings LIMIT 1;
+    ```
+
+    You will get a result similar to this, but with 1536 vector columns:
+
+    ```sql
+    postgres=> SELECT listing_vector FROM listings LIMIT 1;
+    -[ RECORD 1 ]--+------ ...
+    listing_vector | [-0.0018742813,-0.04530062,0.055145424, ... ]
+    ```
 
 ## Create the recommendation function
 

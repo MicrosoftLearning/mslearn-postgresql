@@ -370,7 +370,7 @@ In this task, you use the `summarize_extractive()` and `summarize_abstractive()`
         SELECT
             ROW_NUMBER() OVER () AS id,
             ARRAY_TO_STRING(summary, ',') AS summary
-        FROM cte
+        FROM batch_cte
     )
     UPDATE listings AS l
     SET summary = s.summary
