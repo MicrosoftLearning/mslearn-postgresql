@@ -1,17 +1,22 @@
 ---
-lab:
-    title: 'Configure permissions in Azure Database for PostgreSQL'
-    module: 'Secure Azure Database for PostgreSQL '
+uid: learn.wwl.secure-azure-database-for-postgresql.exercise-configure-permissions
+title: Exercise - Configure permissions in Azure Database for PostgreSQL
+description: Exercise - Configure permissions in Azure Database for PostgreSQL
+durationInMinutes: 25
 ---
 
+# Configure permissions in Azure Database for PostgreSQL
+
 In this lab exercises, you'll assign RBAC roles to control access to Azure Database for PostgreSQL resources and PostgreSQL GRANTS to control access to database operations.
+
+## Before you start
 
 > [!IMPORTANT]
 > You need your own Azure subscription to complete this exercise. If you do not have an Azure subscription, create an [Azure free trial](https://azure.microsoft.com/free).
 
 To complete these exercises, you need to install a PostgreSQL server that is connected to Microsoft Entra ID - formerly Azure Active Directory
 
-## Create a Resource Group
+### Create a Resource Group
 
 > [!NOTE]
 > You can use an existing resource group but creating a separate resource group will make it easier to delete everything after you have finished all the exercises.
@@ -47,7 +52,7 @@ To complete these exercises, you need to install a PostgreSQL server that is con
     1. Under Firewall rules, select **+ Add current client IP address**, to add your current IP address as a firewall rule. You can optionally name this firewall rule to something meaningful. Also add **Add 0.0.0.0 - 255.255.255.255** and click **Continue**
 1. Select **Review + create**. Review your settings, then select **Create** to create your Azure Database for PostgreSQL Flexible server. When the deployment is complete, select **Go to resource** ready for the next step.
 
-## Create the zoo database
+### Create the zoo database
 
 1. Either navigate to the folder with your exercise script files, or download the **Lab2_ZooDb.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/02).
 1. Open Azure Data Studio if it is not already open.
@@ -65,14 +70,14 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. The **Ready to Install** dialog box is displayed. Review your settings. Select **Back** to make changes or select **Install**.
 1. The **Completing the Azure Data Studio Setup Wizard** dialog box is displayed. Select **Finish**. Azure Data Studio starts.
 
-## Install the PostgreSQL extension
+### Install the PostgreSQL extension
 
 1. Open Azure Data Studio if it is not already open.
 1. From the left menu, select **Extensions** to display the Extensions panel.
 1. In the search bar, enter **PostgreSQL**. The PostgreSQL extension for Azure Data Studio icon is displayed.
 1. Select **Install**. The extension installs.
 
-## Connect to Azure Database for PostgreSQL flexible server
+### Connect to Azure Database for PostgreSQL flexible server
 
 1. Open Azure Data Studio if it is not already open.
 1. From the left menu, select **Connections**.
@@ -85,7 +90,6 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. The remaining fields are optional.
 1. Select **Connect**. You are connected to the Azure Database for PostgreSQL server.
 1. A list of the server databases is displayed. This includes system databases, and user databases.
-
 
 ## Create a new user account in Azure Active Directory
 
@@ -101,7 +105,7 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
     > [!TIP]
     > When the user is created, make a note of the full **User principal name** so that you can use it later to log in.
 
-## Assign the Reader role
+### Assign the Reader role
 
 1. In the Azure portal, select **All resources** and then select your Azure Database for PostgreSQL resource.
 1. Select **Access control (IAM)** and then select **Role assignments**. Holly Rees doesn't appear in the list.
@@ -110,7 +114,7 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. Choose **+ Select members**, add **Holly Rees** to the list of members and then select **Next**.
 1. Select **Review + Assign**.
 
-## Test the Reader role
+### Test the Reader role
 
 1. In the top-right of the Azure portal, select your user account and then select **Sign out**.
 1. Sign in as the new user, with the user principal name that you noted and the password **w0rd_01_Pa$$**. Replace the default password if you're prompted to and make a note of the new one.
@@ -118,7 +122,7 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. In the portal home page, select **All resources** and then select your Azure Database for PostgreSQL resource.
 1. Select **Stop**. An error is displayed, because the Reader role enables you to see the resource but not change it.
 
-## Assign the Contributor role
+### Assign the Contributor role
 
 1. In the top-right of the Azure portal, select Holly's user account and then select **Sign out**.
 1. Sign in using your original Owner account.

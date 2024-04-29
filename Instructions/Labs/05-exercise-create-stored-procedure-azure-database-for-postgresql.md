@@ -1,8 +1,15 @@
 ---
-lab:
-    title: 'Create a stored procedure in Azure Database for PostgreSQL'
-    module: 'Procedures and functions in PostgreSQL'
+uid: learn.wwl.explore-procedures-functions-postgesql.exercise-create-stored-procedure-azure-database-for-postgresql
+title: Exercise - Create a stored procedure in Azure Database for PostgreSQL
+description: Exercise - Create a stored procedure in Azure Database for PostgreSQL
+durationInMinutes: 15
 ---
+
+# Create a stored procedure in Azure Database for PostgreSQL
+
+In this exercise you will create a stored procedure.
+
+## Before you start
 
 > [!IMPORTANT]
 > You need your own Azure subscription to complete this exercise. If you do not have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).

@@ -1,8 +1,16 @@
 ---
-lab:
-    title: 'Execute the EXPLAIN statement'
-    module: 'Understand PostgreSQL query processing '
+uid: learn.wwl.understand-postgresql-query-process.exercise-execute-explain
+title: Exercise - Execute the EXPLAIN statement
+description: Exercise - Execute the EXPLAIN statement
+durationInMinutes: 5
 ---
+
+# Execute the EXPLAIN statement
+
+In this exercise, you look at the EXPLAIN function and how it can display the execution plan that the PostgreSQL planner generates for a supplied statement.
+
+## Before you start
+
 > [!IMPORTANT]
 > You need your own Azure subscription to complete this exercise. If you do not have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).
 
