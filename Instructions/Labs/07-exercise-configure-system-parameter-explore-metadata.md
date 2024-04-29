@@ -4,6 +4,12 @@ lab:
     module: 'Explore PostgreSQL architecture'
 ---
 
+# Configure system parameters and explore metedata with system catalogs and views
+
+In this exercise you will look at system parameters and metadata in PostgreSQL.
+
+## Before you start
+
 > [!IMPORTANT]
 > You need your own Azure subscription to complete the exercises in this module. If you don't have an Azure subscription, you can set up a free trial account at [Build in the cloud with an Azure free account](https://azure.microsoft.com/free/).
 

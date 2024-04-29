@@ -4,7 +4,11 @@ lab:
     module: 'Understand write-ahead logging'
 ---
 
+# List table changes with logical decoding
+
 In this exercise you'll configure logical replication, which is native to PostgreSQL. You will create two servers, which act as publisher and subscriber. Data in the zoodb will be replicated between them.
+
+## Before you start
 
 > [!IMPORTANT]
 > You need your own Azure subscription to complete this exercise. If you don't have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).

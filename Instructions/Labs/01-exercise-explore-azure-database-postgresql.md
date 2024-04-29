@@ -4,12 +4,16 @@ lab:
     module: 'Explore PostgreSQL architecture'
 ---
 
+#  Explore Azure Database for PostgreSQL
+
 In this exercise, you'll create an Azure Database for PostgreSQL flexible server and configure the backup retention period.
+
+## Before you start
 
 > [!IMPORTANT]
 > You need your own Azure subscription to complete this exercise. If you don't have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).
 
-## Create a Resource Group
+### Create a Resource Group
 
 > [!NOTE]
 > You can use an existing resource group but creating a separate resource group will make it easier to delete everything after you have finished all the exercises.
@@ -22,10 +26,10 @@ In this exercise, you'll create an Azure Database for PostgreSQL flexible server
 3. Check that the correct subscription is displayed, then enter the Resource group name as **rg-PostgreSQL_Flexi**. Select a **Region**.
 4. Select **Review + create**. Then select **Create**.
 
-## Create an Azure Database for PostgreSQL flexible server
+### Create an Azure Database for PostgreSQL flexible server
 
-1. Under Azure services, select **+ Create a resource**. 
-    1. In **Search the Market Place**, type **azure database for postgresql flexible server**, choose **Azure Database for PostgreSQL Flexible Server** and click **Create**.
+1. Under Azure services, select **+ Create a resource**.
+    1. In **Search the Market Place**, type **azure database for postgresql flexible server**, choose **Azure Database for PostgreSQL flexible server** and click **Create**.
 1. On the Flexible server **Basics** tab, enter each field as follows:
     1. Subscription - your subscription.
     1. Resource group - **rg-PostgreSQL_Flexi**.

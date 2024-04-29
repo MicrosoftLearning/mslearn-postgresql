@@ -4,6 +4,12 @@ lab:
     module: 'Tune queries in Azure Database for PostgreSQL'
 ---
 
+# Assess query performance using Query Store
+
+In this exercise, learn how to query performance metrics using the Query Store in Azure Database for PostgreSQL.
+
+## Before you start
+
 > [!IMPORTANT]
 > You need your own Azure subscription to complete the exercises in this module. If you don't have an Azure subscription, you can set up a free trial account at [Build in the cloud with an Azure free account](https://azure.microsoft.com/free/).
 
