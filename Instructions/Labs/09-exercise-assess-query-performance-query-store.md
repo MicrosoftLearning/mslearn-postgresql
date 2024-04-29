@@ -1,8 +1,7 @@
 ---
-uid: learn.wwl.tune-queries-azure-database-for-postgresql.exercise-assess-query-performance-query-store
-title: Exercise: Assess query performance using Query Store
-description: Exercise: Assess query performance using Query Store
-durationInMinutes: 20
+lab:
+    title: 'Assess query performance using Query Store'
+    module: 'Tune queries in Azure Database for PostgreSQL'
 ---
 
 # Assess query performance using Query Store

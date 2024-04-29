@@ -1,8 +1,7 @@
 ---
-uid: learn.wwl.explore-procedures-functions-postgesql.exercise-create-stored-procedure-azure-database-for-postgresql
-title: Exercise - Create a stored procedure in Azure Database for PostgreSQL
-description: Exercise - Create a stored procedure in Azure Database for PostgreSQL
-durationInMinutes: 15
+lab:
+    title: 'Create a stored procedure in Azure Database for PostgreSQL'
+    module: 'Procedures and functions in PostgreSQL'
 ---
 
 # Create a stored procedure in Azure Database for PostgreSQL

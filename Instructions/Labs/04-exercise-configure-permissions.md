@@ -1,8 +1,7 @@
 ---
-uid: learn.wwl.secure-azure-database-for-postgresql.exercise-configure-permissions
-title: Exercise - Configure permissions in Azure Database for PostgreSQL
-description: Exercise - Configure permissions in Azure Database for PostgreSQL
-durationInMinutes: 25
+lab:
+    title: 'Configure permissions in Azure Database for PostgreSQL'
+    module: 'Secure Azure Database for PostgreSQL'
 ---
 
 # Configure permissions in Azure Database for PostgreSQL

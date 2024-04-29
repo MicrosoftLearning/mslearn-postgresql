@@ -1,8 +1,7 @@
 ---
-uid: learn.wwl.exercise-offline-postgresql-database-migration
-title: Exercise – Offline PostgreSQL Database Migration
-description: Exercise – Offline PostgreSQL Database Migration
-durationInMinutes: 20
+lab:
+    title: 'Offline PostgreSQL Database Migration'
+    module: 'Migrate to Azure Database for PostgreSQL Flexible Server'
 ---
 
 # Offline PostgreSQL Database Migration

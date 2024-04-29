@@ -1,8 +1,7 @@
 ---
-uid: learn.wwl.understand-write-ahead-logging.exercise-list-table-changes-logical-decode
-title: Exercise - List table changes with logical decoding
-description: Exercise - List table changes with logical decoding
-durationInMinutes: 30
+lab:
+    title: 'List table changes with logical decoding'
+    module: 'Understand write-ahead logging'
 ---
 
 # List table changes with logical decoding

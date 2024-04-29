@@ -1,8 +1,7 @@
 ---
-uid: learn.wwl.understand-concurrency-postgresql.exercise-understand-locking
-title: Exercise: Understand locking
-description: Exercise: Understand locking
-durationInMinutes: 15
+lab:
+    title: 'Understand locking'
+    module: 'Understand concurrency in PostgreSQL'
 ---
 
 # Understand locking

@@ -1,8 +1,7 @@
 ---
-uid: learn.wwl.exercise-online-postgresql-database-migration
-title: Exercise – Online PostgreSQL Database Migration
-description: Exercise – Online PostgreSQL Database Migration
-durationInMinutes: 20
+lab:
+    title: 'Online PostgreSQL Database Migration'
+    module: 'Migrate to Azure Database for PostgreSQL Flexible Server'
 ---
 
 # Online PostgreSQL Database Migration

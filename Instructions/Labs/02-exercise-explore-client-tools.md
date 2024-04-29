@@ -1,8 +1,7 @@
 ---
-uid: learn.wwl.understand-client-server-communication-postgresql.exercise-explore-client-tools
-title: Exercise - Explore PostgreSQL with client tools
-description: Exercise - Explore PostgreSQL with client tools
-durationInMinutes: 15
+lab:
+    title: 'Explore PostgreSQL with client tools'
+    module: 'Understand client-server communication in PostgreSQL'
 ---
 
 # Explore PostgreSQL with client tools

@@ -1,8 +1,7 @@
 ---
-uid: learn.wwl.explore-postgresql-architecture.exercise-explore-azure-database-for-postgresql
-title: Exercise – Explore Azure Database for PostgreSQL
-description: Exercise – Explore Azure Database for PostgreSQL
-durationInMinutes: 20
+lab:
+    title: 'Explore Azure Database for PostgreSQL'
+    module: 'Explore PostgreSQL architecture'
 ---
 
 #  Explore Azure Database for PostgreSQL
