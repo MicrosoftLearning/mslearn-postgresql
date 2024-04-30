@@ -74,7 +74,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 7. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
 
     ```azurecli
-    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD databaseName=zoodb
+    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
     ```
 
     The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed are an Azure Database for PostgreSQL - Flexible Server. The bicep script also creates a database - which can be configured on the commandline as a parameter.
@@ -183,30 +183,36 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 ## Install the PostgreSQL extension
 
 1. Open Azure Data Studio if it is not already open.
-1. From the left menu, select **Extensions** to display the Extensions panel.
-1. In the search bar, enter **PostgreSQL**. The PostgreSQL extension for Azure Data Studio icon is displayed.
-    [!Screenshot of the PostgreSQL extension for Azure Data Studio](media/02-postgresql-extension.png)
-1. Select **Install**. The extension installs.
+2. From the left menu, select **Extensions** to display the Extensions panel.
+3. In the search bar, enter **PostgreSQL**. The PostgreSQL extension for Azure Data Studio icon is displayed.
+   
+![Screenshot of the PostgreSQL extension for Azure Data Studio](media/02-postgresql-extension.png)
+   
+4. Select **Install**. The extension installs.
 
 ## Connect to Azure Database for PostgreSQL flexible server
 
 1. Open Azure Data Studio if it is not already open.
-1. From the left menu, select **Connections**.
-[!Screenshot showing the Connections in Azure Data Studio](media/02-connections.png)
-1. Select **New Connection**.
-[Screenshot of creating a new connection in Azure Data Studio](media/02-create-connection.png)
-1. Under **Connection Details**, in **Connection type** select **PostgreSQL** from the drop-down list.
-1. In **Server name**, enter the full server name as it appears on the Azure portal.
-1. In **Authentication type**, leave Password.
-1. In User name and Password, enter the user name **pgAdmin** and password **the random admin password** you created above
-1. Select [ x ] Remember password.
-1. The remaining fields are optional.
-1. Select **Connect**. You are connected to the Azure Database for PostgreSQL server.
-1. A list of the server databases is displayed. This includes system databases, and user databases.
+2. From the left menu, select **Connections**.
+   
+![Screenshot showing the Connections in Azure Data Studio](media/02-connections.png)
+
+3. Select **New Connection**.
+   
+![Screenshot of creating a new connection in Azure Data Studio](media/02-create-connection.png)
+
+4. Under **Connection Details**, in **Connection type** select **PostgreSQL** from the drop-down list.
+5. In **Server name**, enter the full server name as it appears on the Azure portal.
+6. In **Authentication type**, leave Password.
+7. In User name and Password, enter the user name **pgAdmin** and password **the random admin password** you created above
+8. Select [ x ] Remember password.
+9. The remaining fields are optional.
+10. Select **Connect**. You are connected to the Azure Database for PostgreSQL server.
+11. A list of the server databases is displayed. This includes system databases, and user databases.
 
 ## Create the zoo database
 
-1. Either navigate to the folder with your exercise script files, or download the **Lab2_ZooDb.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/02).
+1. Either navigate to the folder with your exercise script files, or download the **Lab2_ZooDb.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/tree/main/Allfiles/Labs/02).
 1. Open Azure Data Studio if it is not already open.
 1. Select **File**, **Open file** and navigate to the folder where you saved the script. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**. If a trust warning is displayed select **Open**.
 1. Run the script. The zoodb database is created.
