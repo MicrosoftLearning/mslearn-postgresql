@@ -107,15 +107,25 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 8. Close the Cloud Shell pane once your resource deployment is complete.
 
-## Create a test database for migration
+## Create a database for migration
 
-The AdventureWorks sample database for PostgreSQL can be found [here](../dbBackup/) for download and can be used for this migration exercise. You can restore the database from the tar file using the following command and supplying the values for your specific server details.
+Now we need to setup the database which you will migrate to the Azure Database for PostgreSQL Flexible Server. This step needs to be completed on your source PostgreSQL Server instance, this instance will need to be accessible to the Azure Database for PostgreSQL Flexible Server in order to complete this lab.
+
+First of all we need to create an empty database which we will create a table and then load it with data. Firs of all you will need to download the Lab10_setupTable.sql and Lab10_workorder.csv files from the repository [here](./resources/). Once you have these file we can create the database using the following command, replace the vlaues for host, port, and username as required for your instance of PostgreSQL.
 
 ```bash
-
-pg_restore.exe --verbose --clean --no-acl --no-owner --host=<<Servename>> --port=<<Instance Port>> --username=<<Username>> --dbname=adventureworks "<Path to file>\adventureworks.tar"
-
+psql --host=localhost --port=5432 --username=pgadmin --command="CREATE DATABASE adventureworks;"
 ```
+
+Now we can create the table and load the data into it using the following commands.
+
+```bash
+psql --host=localhost --port=5432 --username=pgadmin --command="CREATE DATABASE adventureworks;"
+
+psql --host=localhost --port=5432 --username=postgres --dbname=adventureworks --command="\COPY production.workorder FROM 'Lab10_workorder.csv' CSV HEADER"
+```
+
+The command output should be `COPY 72591`, indicating that 72591 rows were written into the table from the CSV file.
 
 ## Pre-Migration
 
@@ -125,7 +135,6 @@ Prior to starting the offline migration of the database from the source server, 
     1. Superuser roles are not supported on Azure Database for PostgreSQL so any users with these privileges should have them removed before migration.
 
 ```bash
-
 pg_dumpall --globals-only -U <<username>> -f <<filename>>.sql
 
 ```
@@ -133,18 +142,17 @@ pg_dumpall --globals-only -U <<username>> -f <<filename>>.sql
 1. Match server parameter values from the source server on the target server.
 1. Disable High Availability and Read Replicas on the target.
 
-> [!NOTE]
-> Before starting the (offline) migration activity it is important to stop all workload on the source database so that it is in the same state on the new server after it is migrated to avoid data loss.
-
-## Create Database Migration
+## Create Database Migration Project in Azure Database for PostgreSQL Flexible Server
 
 1. Select **Migration** from the menu on the left of the flexible server blade.
+    [![Azure Database for PostgreSQL Flexible Server migration option.]](./media/10-pgflex-migation.png)
 1. Click on the **+ Create** option at the top of the **Migration** blade.
 1. On the **Setup** tab, enter each field as follows:
     1. Migration name - Migration-AdventureWorks.
     1. Source server type - On-premise Server.
     1. Migration option - Validate and Migrate.
     1. Select **Next: Connect to source >**.
+    [![Setup offline database migration for Azure Database for PostgreSQL Flexible Server.]](./media/10-pgflex-migation-setup.png)
 1. On the **Connect to source** tab, enter each field as follows:
     1. Server name - The name of your server that you are using as the source.
     1. Port - The port that your instance of PostgreSQL is using on your source server (default of 5432).
@@ -153,12 +161,14 @@ pg_dumpall --globals-only -U <<username>> -f <<filename>>.sql
     1. SSL mode - Prefer.
     1. Click on the **Connect to source** option to validate the connectivity details provided.
     1. Click on the **Next: Select migration target** button to progress.
+    [![Setup source connection for Azure Database for PostgreSQL Flexible Server migration.]](./media/10-pgflex-migation-source.png)
 1. The connectivity details should be automatically completed for the target server we are migrating to.
     1. Provide the password for the demo user we specified when creating the flexible server earlier.
         1. In the password filed - Pa$$w0rd.
     1. Click on the **Connect to target** option to validate the connectivity details provided.
     1. Click on the **Next : Select database(s) for migration >** button to progress.
 1. On the **Select database(s) for migration** tab, select the databases from the source server you want to migrate to the flexible server.
+    [![Select database(s) for Azure Database for PostgreSQL Flexible Server migration.]](./media/10-pgflex-migation-dbSelection.png)
 1. Click on the **Next : Summary >** button to progress and review the data provided.
 1. On the **Summary** tab review the information and then click the **Start Validation and Migration** button to start the migration to the flexible server.
 1. On the **Migration** tab you can monitor the migration progress by using the **Refresh** button in the top menu of the tab to view the progress through the validation and migration process.
