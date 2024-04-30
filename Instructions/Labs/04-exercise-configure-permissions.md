@@ -94,7 +94,7 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. At the top-left, select **New user** and then select **Create new user**.
 1. In the **New user** page, enter these details and then select **Create**:
     - **User principal name:** HollyRees
-    - **Disaply Name:** Holly Rees
+    - **Display Name:** Holly Rees
     - **Password:** Untick **Auto-generate password** and then type **w0rd_01_Pa$$**.
     - Click **Review + create**
 
@@ -124,7 +124,7 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. Sign in using your original Owner account.
 1. Navigate to your Azure Database for PostgreSQL resource, and then select **Access Control (IAM)**.
 1. Select **+ Add** and then select **Add role assignment**.
-1. Choose **Privileged administraotr roles**
+1. Choose **Privileged administrator roles**
 1. Select the **Contributor** role, and then select **Next**.
 1. Add **Holly Rees** to the list of members and then select **Next**.
 1. Select **Review + Assign**.
