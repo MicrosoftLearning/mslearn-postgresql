@@ -16,7 +16,7 @@ Repopulate zoodb so we start with clean data
 CALL repopulate_zoo();
 
 
-*****************************************
+/*****************************************
 Create a table valued function
 *********************************************************************************/
 
