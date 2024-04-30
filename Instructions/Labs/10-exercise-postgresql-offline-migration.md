@@ -79,7 +79,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 7. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
 
     ```azurecli
-    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-postgresql-server.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
+    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-postgresql-server.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD databaseName=adventureworks
     ```
 
     The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resource deployed is an Azure Database for PostgreSQL - Flexible Server.
@@ -111,7 +111,8 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 Now we need to setup the database which you will migrate to the Azure Database for PostgreSQL Flexible Server. This step needs to be completed on your source PostgreSQL Server instance, this instance will need to be accessible to the Azure Database for PostgreSQL Flexible Server in order to complete this lab.
 
-First of all we need to create an empty database which we will create a table and then load it with data. Firs of all you will need to download the Lab10_setupTable.sql and Lab10_workorder.csv files from the repository [here](./resources/). Once you have these file we can create the database using the following command, replace the vlaues for host, port, and username as required for your instance of PostgreSQL.
+First of all we need to create an empty database which we will create a table and then load it with data. Firs of all you will need to download the Lab10_setupTable.sql and Lab10_workorder.csv files from the repository [here](https://github.com/MicrosoftLearning/mslearn-postgresql/tree/main/Allfiles/Labs/10) to C:\.
+Once you have these file we can create the database using the following command, replace the values for host, port, and username as required for your instance of PostgreSQL.
 
 ```bash
 psql --host=localhost --port=5432 --username=pgadmin --command="CREATE DATABASE adventureworks;"
@@ -121,8 +122,36 @@ Now we can create the table and load the data into it using the following comman
 
 ```bash
 psql --host=localhost --port=5432 --username=pgadmin --command="CREATE DATABASE adventureworks;"
+```
 
-psql --host=localhost --port=5432 --username=postgres --dbname=adventureworks --command="\COPY production.workorder FROM 'Lab10_workorder.csv' CSV HEADER"
+Run the following command to create the `production.workorder` table for loading in data:
+
+```sql
+    DROP SCHEMA IF EXISTS production CASCADE;
+    CREATE SCHEMA production;
+    
+    DROP TABLE IF EXISTS production.workorder;
+    CREATE TABLE production.workorder
+    (
+        workorderid integer NOT NULL,
+        productid integer NOT NULL,
+        orderqty integer NOT NULL,
+        scrappedqty smallint NOT NULL,
+        startdate timestamp without time zone NOT NULL,
+        enddate timestamp without time zone,
+        duedate timestamp without time zone NOT NULL,
+        scrapreasonid smallint,
+        modifieddate timestamp without time zone NOT NULL DEFAULT now()
+    )
+    WITH (
+        OIDS = FALSE
+    )
+    TABLESPACE pg_default;
+    ALTER TABLE production.workorder OWNER to pgAdmin;
+```
+
+```sql
+psql --host=localhost --port=5432 --username=postgres --dbname=adventureworks --command="\COPY production.workorder FROM 'C:\Lab10_workorder.csv' CSV HEADER"
 ```
 
 The command output should be `COPY 72591`, indicating that 72591 rows were written into the table from the CSV file.
@@ -136,7 +165,6 @@ Prior to starting the offline migration of the database from the source server, 
 
 ```bash
 pg_dumpall --globals-only -U <<username>> -f <<filename>>.sql
-
 ```
 
 1. Match server parameter values from the source server on the target server.
