@@ -82,7 +82,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 7. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
 
     ```azurecli
-    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-postgresql-server.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
+    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-postgresql-server.bicep" --parameters adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
     ```
 
     The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resource deployed is an Azure Database for PostgreSQL - Flexible Server.
@@ -90,17 +90,6 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
     You may encounter a few errors when running the Bicep deployment script. The most common messages and the steps to resolve them are:
-
-    - If you previously ran the Bicep deployment script for this learning path and subsequently deleted the resources, you may receive an error message like the following if you are attempting to rerun the script within 48 hours of deleting the resources:
-
-        ```bash
-        {"code": "InvalidTemplateDeployment", "message": "The template deployment 'deploy' is not valid according to the validation procedure. The tracking id is '4e87a33d-a0ac-4aec-88d8-177b04c1d752'. See inner errors for details."}
-    
-        Inner Errors:
-        {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/{accountName}' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
-        ```
-
-        If you receive this message, modify the `azure deployment group create` command above to set the `restore` parameter equal to `true` and rerun it.
 
     - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and rerun the Bicep deployment script.
 

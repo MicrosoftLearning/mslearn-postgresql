@@ -77,7 +77,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 7. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
 
     ```azurecli
-    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-postgresql-server.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD databaseName=adventureworks
+    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-postgresql-server.bicep" --parameters adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD databaseName=adventureworks
     ```
 
     The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed are an Azure Database for PostgreSQL - Flexible Server. The bicep script also creates a database - which can be configured on the commandline as a parameter.
@@ -85,17 +85,6 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
     You may encounter a few errors when running the Bicep deployment script. The most common messages and the steps to resolve them are:
-
-    - If you previously ran the Bicep deployment script for this learning path and subsequently deleted the resources, you may receive an error message like the following if you are attempting to rerun the script within 48 hours of deleting the resources:
-
-        ```bash
-        {"code": "InvalidTemplateDeployment", "message": "The template deployment 'deploy' is not valid according to the validation procedure. The tracking id is '4e87a33d-a0ac-4aec-88d8-177b04c1d752'. See inner errors for details."}
-    
-        Inner Errors:
-        {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/{accountName}' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
-        ```
-
-        If you receive this message, modify the `azure deployment group create` command above to set the `restore` parameter equal to `true` and rerun it.
 
     - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and rerun the Bicep deployment script.
 
@@ -122,10 +111,11 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 ### Create tables within the database
 
-1. Either navigate to the folder with your exercise script files, or download the **Lab8_setupTables.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/08).
+1. Either navigate to the folder with your exercise script files, or download the **Lab8_setupTables.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/tree/main/Allfiles/Labs/08).
 1. Select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/08/Lab8_setupTables** and **Open**. Run the script.
 1. Expand **Databases**, right-click **adventureworks** and select **New Query**.
-    [!Screenshot of adventureworks database highlighting New Query context menu item](media/09-new-query.png)
+   
+    ![Screenshot of adventureworks database highlighting New Query context menu item](media/09-new-query.png)
 
 1. Select the **SQLQuery_1** tab, type the following query and select **Run**.
 
@@ -141,17 +131,21 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 1. Navigate to the **pg_qs.query_capture_mode** setting.
 1. Select **TOP**.
 
-   [!Screenshot of settings to turn Query Store on](media/09-settings-turn-query-store-on.png)
+   ![Screenshot of settings to turn Query Store on](media/09-settings-turn-query-store-on.png)
 
-1. Navigate to **p g m s_wait_sampling.query_capture_mode**, select **ALL**, and select **Save**.
-    [Screenshot of settings to turn p g m s_wait_sampling.query_capture_mode on](media/09-query-capture-mode.png)
+1. Navigate to **pgms_wait_sampling.query_capture_mode**, select **ALL**, and select **Save**.
+   
+    ![Screenshot of settings to turn p g m s_wait_sampling.query_capture_mode on](media/09-query-capture-mode.png)
+   
 1. Wait for the server parameters to update.
 
 ## View pg_stat data
 
 1. Start Azure Data Studio.
 1. Select **Connect**.
-    [!Screenshot showing Connect icon](media/09-connect.png)
+   
+    ![Screenshot showing Connect icon](media/09-connect.png)
+   
 1. Select your PostgreSQL server and select **Connect**.
 1. Type each of the following query and select **Run**.
 
@@ -169,7 +163,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 1. Select the **azure_sys** database.
 
-    [!Screenshot of the database selector](media/09-database-selector.png)
+    ![Screenshot of the database selector](media/09-database-selector.png)
 
 1. Type each of the following queries and select **Run**.
 

@@ -77,7 +77,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 7. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
 
     ```azurecli
-    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-postgresql-server.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD databaseName=zoodb
+    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-postgresql-server.bicep" --parameters adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
     ```
 
     The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resources deployed are an Azure Database for PostgreSQL - Flexible Server. The bicep script also creates a database - which can be configured on the commandline as a parameter.
@@ -123,7 +123,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 ## Task 1: Explore the vacuum process in PostgreSQL
 
 1. Open Azure Data Studio.
-1. Either navigate to the folder with your exercise script files, or download the **Lab7_vacuum.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/07).
+1. Either navigate to the folder with your exercise script files, or download the **Lab7_vacuum.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/tree/main/Allfiles/Labs/07).
 1. Select File, **Open File**, and select **Lab7_vacuum.sql**.Connect to your Azure Database for PostgreSQL flexible server.
 1. Highlight and run the section **Check zoodb database is selected**. If necessary, make zoodb the current database using the drop-down list.
 1. Highlight and run the section **Display dead tuples**. This query displays the number of dead and live tuples in the database. Make a note of the number of dead tuples.
@@ -149,22 +149,15 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 1. Navigate to [the Azure portal](https://portal.azure.com) and sign in.
 1. Select **All resources**.
-
-    :::image type="content" source="../media/4-all-resources.png" alt-text="Screenshot of All resources icon.":::
 1. Select the Azure Database for PostgreSQL flexible server that you created for this exercise.
 1. In **Monitoring**, select **Metrics**.
-
-    :::image type="content" source="../media/4-metrics.png" alt-text="Screenshot of Metrics icon.":::
 1. Select **Metric** and select **CPU percent**.
-    :::image type="content" source="../media/4-processor-percent.png" alt-text="Screenshot showing Metric selection." lightbox="../media/4-processor-percent.png":::
 1. Take note that you can view various metrics about your databases.
 
 ## Task 4: View data in system catalog tables
 
 1. Switch to Azure Data Studio.
 1. In **SERVERS**, select your PostgreSQL server and wait until a connection is made and a green circle is displayed on the server.
-
-    :::image type="content" source="../media/4-connection.png" alt-text="Screenshot of connected server.":::
 1. Right-click the server and select **New Query**.
 1. Type the following SQL and select **Run**:
 
