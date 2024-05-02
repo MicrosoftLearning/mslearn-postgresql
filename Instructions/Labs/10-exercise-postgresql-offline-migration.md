@@ -79,7 +79,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 7. Finally, use the Azure CLI to execute a Bicep deployment script to provision Azure resources in your resource group:
 
     ```azurecli
-    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-postgresql-server.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD databaseName=adventureworks
+    az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-postgresql-server.bicep" --parameters adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD databaseName=adventureworks
     ```
 
     The Bicep deployment script provisions the Azure services required to complete this exercise into your resource group. The resource deployed is an Azure Database for PostgreSQL - Flexible Server.
@@ -87,17 +87,6 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
     You may encounter a few errors when running the Bicep deployment script. The most common messages and the steps to resolve them are:
-
-    - If you previously ran the Bicep deployment script for this learning path and subsequently deleted the resources, you may receive an error message like the following if you are attempting to rerun the script within 48 hours of deleting the resources:
-
-        ```bash
-        {"code": "InvalidTemplateDeployment", "message": "The template deployment 'deploy' is not valid according to the validation procedure. The tracking id is '4e87a33d-a0ac-4aec-88d8-177b04c1d752'. See inner errors for details."}
-    
-        Inner Errors:
-        {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/{accountName}' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
-        ```
-
-        If you receive this message, modify the `azure deployment group create` command above to set the `restore` parameter equal to `true` and rerun it.
 
     - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and rerun the Bicep deployment script.
 
@@ -113,12 +102,6 @@ Now we need to setup the database which you will migrate to the Azure Database f
 
 First of all we need to create an empty database which we will create a table and then load it with data. Firs of all you will need to download the Lab10_setupTable.sql and Lab10_workorder.csv files from the repository [here](https://github.com/MicrosoftLearning/mslearn-postgresql/tree/main/Allfiles/Labs/10) to C:\.
 Once you have these file we can create the database using the following command, replace the values for host, port, and username as required for your instance of PostgreSQL.
-
-```bash
-psql --host=localhost --port=5432 --username=pgadmin --command="CREATE DATABASE adventureworks;"
-```
-
-Now we can create the table and load the data into it using the following commands.
 
 ```bash
 psql --host=localhost --port=5432 --username=pgadmin --command="CREATE DATABASE adventureworks;"
@@ -173,14 +156,19 @@ pg_dumpall --globals-only -U <<username>> -f <<filename>>.sql
 ## Create Database Migration Project in Azure Database for PostgreSQL Flexible Server
 
 1. Select **Migration** from the menu on the left of the flexible server blade.
-    [![Azure Database for PostgreSQL Flexible Server migration option.]](./media/10-pgflex-migation.png)
+
+   ![Azure Database for PostgreSQL Flexible Server migration option.](./media/10-pgflex-migation.png)
+   
 1. Click on the **+ Create** option at the top of the **Migration** blade.
+   > **Note**: If the **+ Create** option is unavailable, select **Compute + storage** and change the compute tier to either **General Purpose** or **Memory Optimized** and try to create the Migration process again. After the Migration is successful, you can change the compute tier back to **Burstable**.
 1. On the **Setup** tab, enter each field as follows:
     1. Migration name - Migration-AdventureWorks.
     1. Source server type - On-premise Server.
     1. Migration option - Validate and Migrate.
     1. Select **Next: Connect to source >**.
-    [![Setup offline database migration for Azure Database for PostgreSQL Flexible Server.]](./media/10-pgflex-migation-setup.png)
+       
+    ![Setup offline database migration for Azure Database for PostgreSQL Flexible Server.](./media/10-pgflex-migation-setup.png)
+   
 1. On the **Connect to source** tab, enter each field as follows:
     1. Server name - The name of your server that you are using as the source.
     1. Port - The port that your instance of PostgreSQL is using on your source server (default of 5432).
@@ -189,14 +177,18 @@ pg_dumpall --globals-only -U <<username>> -f <<filename>>.sql
     1. SSL mode - Prefer.
     1. Click on the **Connect to source** option to validate the connectivity details provided.
     1. Click on the **Next: Select migration target** button to progress.
-    [![Setup source connection for Azure Database for PostgreSQL Flexible Server migration.]](./media/10-pgflex-migation-source.png)
+       
+    ![Setup source connection for Azure Database for PostgreSQL Flexible Server migration.](./media/10-pgflex-migation-source.png)
+   
 1. The connectivity details should be automatically completed for the target server we are migrating to.
     1. Provide the password for the demo user we specified when creating the flexible server earlier.
         1. In the password filed - Pa$$w0rd.
     1. Click on the **Connect to target** option to validate the connectivity details provided.
     1. Click on the **Next : Select database(s) for migration >** button to progress.
 1. On the **Select database(s) for migration** tab, select the databases from the source server you want to migrate to the flexible server.
-    [![Select database(s) for Azure Database for PostgreSQL Flexible Server migration.]](./media/10-pgflex-migation-dbSelection.png)
+   
+    ![Select database(s) for Azure Database for PostgreSQL Flexible Server migration.](./media/10-pgflex-migation-dbSelection.png)
+   
 1. Click on the **Next : Summary >** button to progress and review the data provided.
 1. On the **Summary** tab review the information and then click the **Start Validation and Migration** button to start the migration to the flexible server.
 1. On the **Migration** tab you can monitor the migration progress by using the **Refresh** button in the top menu of the tab to view the progress through the validation and migration process.
