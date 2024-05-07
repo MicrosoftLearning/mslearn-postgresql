@@ -137,7 +137,7 @@ Run the following command to create the `production.workorder` table for loading
 psql --host=localhost --port=5432 --username=postgres --dbname=adventureworks --command="\COPY production.workorder FROM 'C:\Lab10_workorder.csv' CSV HEADER"
 ```
 
-The command output should be `COPY 72591`, indicating that 72591 rows were written into the table from the CSV file.
+The command output should be `COPY 72101`, indicating that 72101 rows were written into the table from the CSV file.
 
 ## Pre-Migration
 
@@ -198,4 +198,4 @@ Once the migration process is complete then we can perform post-migration tasks 
 
 ## Exercise Clean-up
 
-The Azure Database for PostgreSQL we deployed in this exercise will incur charges you can delete the server after this exercise. Alternatively, you can delete the **rg-learn-work-with-postgresql-eastus** resource group to remove all resources that we deployed as part of this exercise.
+The Azure Database for PostgreSQL we deployed in this exercise will be used in the next exercise. It will incur charges so you can stop the server after this exercise. Alternatively, you can delete the **rg-learn-work-with-postgresql-eastus** resource group to remove all resources that we deployed as part of this exercise. It will mean you have to repeat the steps in this exercise to complete the next exercise.
