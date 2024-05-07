@@ -91,6 +91,7 @@ When using a firewall appliance in front of your source database, you may need t
     ```
 
 1. Check that the row count values match.
+1. Now download the Lab11_workorder.csv file from the repository [here](https://github.com/MicrosoftLearning/mslearn-postgresql/tree/main/Allfiles/Labs/11) to C:\
 1. Load new data into the workorder table on the source server from the CSV using the following command.
 
     ```Bash
