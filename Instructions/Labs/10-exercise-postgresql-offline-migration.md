@@ -131,7 +131,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 Now we need to setup the database which you will migrate to the Azure Database for PostgreSQL Flexible Server. This step needs to be completed on your source PostgreSQL Server instance, this instance will need to be accessible to the Azure Database for PostgreSQL Flexible Server in order to complete this lab.
 
 First of all we need to create an empty database which we will create a table and then load it with data. Firs of all you will need to download the Lab10_setupTable.sql and Lab10_workorder.csv files from the repository [here](https://github.com/MicrosoftLearning/mslearn-postgresql/tree/main/Allfiles/Labs/10) to C:\.
-Once you have these file we can create the database using the following command, replace the values for host, port, and username as required for your instance of PostgreSQL.
+Once you have these files we can create the database using the following command, replace the values for host, port, and username as required for your instance of PostgreSQL.
 
 ```bash
 psql --host=localhost --port=5432 --username=pgadmin --command="CREATE DATABASE adventureworks;"
@@ -211,8 +211,7 @@ pg_dumpall --globals-only -U <<username>> -f <<filename>>.sql
     ![Setup source connection for Azure Database for PostgreSQL Flexible Server migration.](./media/10-pgflex-migation-source.png)
    
 1. The connectivity details should be automatically completed for the target server we are migrating to.
-    1. Provide the password for the demo user we specified when creating the flexible server earlier.
-        1. In the password filed - Pa$$w0rd.
+    1. In the password field - enter the randomly generated password for the **pgAdmin** login you created with the bicep script.
     1. Click on the **Connect to target** option to validate the connectivity details provided.
     1. Click on the **Next : Select database(s) for migration >** button to progress.
 1. On the **Select database(s) for migration** tab, select the databases from the source server you want to migrate to the flexible server.
