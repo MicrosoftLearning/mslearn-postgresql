@@ -15,7 +15,37 @@ In this exercise, you'll create an Azure Database for PostgreSQL flexible server
 
 > [!NOTE]
 > You will need access to an existing PostgreSQL server with a database and appropriate permissions and network access to complete this exercise.
+> This exercise will require that the server you use as a source for the migration is accessible to the Azure Database for PostgreSQL Flexible Server so that it can connect and migrate databases. This will require that the source server is accessible via a public IP address and port. > A list of Azure Region IP Addresses can be downloaded from [Azure IP Ranges and Service Tags – Public Cloud](https://www.microsoft.com/en-gb/download/details.aspx?id=56519) to help minimize the allowed ranges of IP Addresses in your firewall rules based on the Azure region used.
+Open your servers firewall to allow the Migration feature within the Azure Database for PostgreSQL Flexible Server access to the source PostgreSQL Server, which by default is TCP port 5432.
+>
+When using a firewall appliance in front of your source database, you may need to add firewall rules to allow the Migration feature within the Azure Database for PostgreSQL Flexible Server to access the source database(s) for migration.
+>
 > The maximum supported version of PostgreSQL for migration is version 16.
+
+### Edit pg_hba.conf file to allow connectivity from Azure
+
+ The source PostgreSQL server will need to have the pg_hba.conf file updated to ensure that the instance will allow connectivity from the Azure Database for PostgreSQL Flexible Server.
+
+1. You will add entries to pg_hba.conf to allow connections from the Azure IP ranges. Entries in pg_hba.conf dictate which hosts can connect, which databases, which users, and what authentication methods can be used.
+1. For example, if your Azure services are within the IP range 104.45.0.0/16. To allow all users to connect to all databases from this range using password authentication, you would add:
+
+``` bash
+host    all    all    104.45.0.0/16    md5
+```
+
+1. When allowing connections over the internet, including from Azure, ensure you have strong authentication mechanisms in place
+
+- Use strong passwords.
+- Restrict access to as few IP addresses as practical.
+- Use a VPN or VNet: If possible, configure a Virtual Private Network (VPN) or Azure Virtual Network (VNet) to provide a secure tunnel between Azure and your PostgreSQL server.
+
+1. After saving changes to pg_hba.conf, you must reload the PostgreSQL configuration for changes to take effect using a SQL command within a psql session:
+
+```sql
+SELECT pg_reload_conf();
+```
+
+1. Test the connection from Azure to your local PostgreSQL server to ensure that the configuration works as expected. You can do this from an Azure VM or a service that supports outbound database connections.
 
 ### Deploy resources into your Azure subscription
 
