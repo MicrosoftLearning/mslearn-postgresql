@@ -26,7 +26,7 @@ param logAnalyticsName string = 'la-${resourceGroup().location}-${uniqueString(r
 param storageAccountName string = 'sa${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the Key Vault instance.')
-param keyVaultName string = 'kv-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+param keyVaultName string = 'kv-${substring(resourceGroup().location, 0, 7)}-${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the Application Insights instance.')
 param appInsightsName string = 'appi-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
