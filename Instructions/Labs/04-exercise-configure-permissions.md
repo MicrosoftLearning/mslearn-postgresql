@@ -10,15 +10,11 @@ In this lab exercises, you'll assign RBAC roles to control access to Azure Datab
 
 ## Before you start
 
-> [!IMPORTANT]
-> You need your own Azure subscription to complete this exercise. If you do not have an Azure subscription, create an [Azure free trial](https://azure.microsoft.com/free).
+You need your own Azure subscription to complete this exercise. If you do not have an Azure subscription, create an [Azure free trial](https://azure.microsoft.com/free).
 
 To complete these exercises, you need to install a PostgreSQL server that is connected to Microsoft Entra ID - formerly Azure Active Directory
 
 ### Create a Resource Group
-
-> [!NOTE]
-> You can use an existing resource group but creating a separate resource group will make it easier to delete everything after you have finished all the exercises.
 
 1. In a web browser, navigate to the [Azure portal](https://portal.azure.com). Sign in using an Owner or Contributor account.
 2. Under Azure services, select **Resource Groups**, then select **+ Create**.
@@ -201,5 +197,6 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 
 These tests demonstrate that the new user can execute Data Manipulation Language (DML) commands to query and modify data but can't use Data Definition Language (DDL) commands to change the schema. Also, the new user can't GRANT any new privileges to circumvent the permissions.
 
-> [!IMPORTANT]
-> You will not use this PostgreSQL server again so please delete the resource group you created which will remove the server.
+## Clean-Up
+
+You will not use this PostgreSQL server again so please delete the resource group you created which will remove the server.

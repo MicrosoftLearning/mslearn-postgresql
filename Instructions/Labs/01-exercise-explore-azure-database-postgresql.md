@@ -4,22 +4,15 @@ lab:
     module: 'Explore PostgreSQL architecture'
 ---
 
-#  Explore Azure Database for PostgreSQL
+# Explore Azure Database for PostgreSQL
 
 In this exercise, you'll create an Azure Database for PostgreSQL flexible server and configure the backup retention period.
 
 ## Before you start
 
-> [!IMPORTANT]
-> You need your own Azure subscription to complete this exercise. If you don't have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).
+You need your own Azure subscription to complete this exercise. If you don't have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).
 
 ### Create a Resource Group
-
-> [!NOTE]
-> You can use an existing resource group but creating a separate resource group will make it easier to delete everything after you have finished all the exercises.
->
-> In this exercise we will manually setup an Azure Database for PostgreSQL flexible server.
-> In later exercises we will use [Bicep](azure/azure-resource-manager/bicep/overview) to deploy our resources.
 
 1. In a web browser, navigate to the [Azure portal](https://portal.azure.com). Sign in using an Owner or Contributor account.
 2. Under Azure services, select **Resource Groups**, then select **+ Create**.
@@ -100,6 +93,6 @@ In this exercise, you'll create an Azure Database for PostgreSQL flexible server
 1. On the **High availability** blade, you can see that the primary zone is now 2, and the standby availability zone is 1. You may need to refresh your browser to see the latest information.
 1. When you've completed this exercise, delete the server.
 
-> [!IMPORTANT]
-> The server for this lab exercise will incur charges. Delete the resource group **rg-PostgreSQL_Flexi** once you've completed the exercise.
-> This will remove the server and any other resources that you have deployed in this lab exercise.
+## Clean-up
+
+The server for this lab exercise will incur charges. Delete the resource group **rg-PostgreSQL_Flexi** once you've completed the exercise. This will remove the server and any other resources that you have deployed in this lab exercise.

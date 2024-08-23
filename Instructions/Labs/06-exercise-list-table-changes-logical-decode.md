@@ -10,8 +10,7 @@ In this exercise you'll configure logical replication, which is native to Postgr
 
 ## Before you start
 
-> [!IMPORTANT]
-> You need your own Azure subscription to complete this exercise. If you don't have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).
+You need your own Azure subscription to complete this exercise. If you don't have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).
 
 ## Create resource group
 
@@ -122,5 +121,6 @@ For both the publisher and subscriber servers:
 
 You've now created two Azure Database for PostgreSQL flexible servers and configured one as a publisher, and the other as a subscriber. In the publisher database you created and populated the zoo database. In the subscriber database, you created an empty database, which was then populated by streaming replication.
 
-> [!IMPORTANT]
-> Once you've finished the exercise, delete the resource group containing both servers. You'll be charged for the servers unless you either STOP or DELETE them.
+## Clean-Uo
+
+After you've finished the exercise, delete the resource group containing both servers. You'll be charged for the servers unless you either STOP or DELETE them.
