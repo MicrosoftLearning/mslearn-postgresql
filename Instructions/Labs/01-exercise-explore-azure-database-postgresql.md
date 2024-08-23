@@ -39,10 +39,10 @@ In this exercise, you'll create an Azure Database for PostgreSQL flexible server
     1. Workload type - **Development**.
     1. Compute + storage - **Burstable, B1ms**. Select **Configure server** and examine the configuration options. Don't make any changes and close the blade in the right hand corner.
     1. Availability zone - No preference.
-    1. High availability - leave unchecked.
-    1. Authentication Method - leave as **PostgreSQL authentication only**
+    1. High availability - Disabled.
+    1. Authentication Method - **PostgreSQL authentication only**
     1. In **admin username**, enter **demo**.
-    1. In **password**, enter **Pa$$w0rd_01**.
+    1. In **password**, enter a suitably complex password.
     1. Select **Next: Networking >**.
 1. On the Flexible server **Networking** tab, enter each field as follows:
     1. Connectivity method: (o) Public access (allowed IP addresses) and Private endpoint
@@ -78,9 +78,9 @@ In this exercise, you'll create an Azure Database for PostgreSQL flexible server
     1. Availability zone - You can leave this at "No preference" and Azure will automatically choose availability zones for your primary and secondary servers. Alternatively, specify an availability zone to co-locate with your application.
     1. Enable high availability - check this. Note the estimated costs when this option is selected.
     1. High availability mode - choose **Zone redundant - a standby server is always available within another zone in the same region as the primary server**
-    1. Authentication Method - leave as **PostgreSQL authentication only**
+    1. Authentication Method - **PostgreSQL authentication only**
     1. In **admin username**, enter **demo**.
-    1. In **password**, enter **Pa$$w0rd_01**.
+    1. In **password**, enter a suitably complex password.
     1. Select **Next: Networking >**.
 1. On the Flexible server **Networking** tab, enter each field as follows:
     1. Connectivity method: (o) Public access (allowed IP addresses) and Private endpoint
