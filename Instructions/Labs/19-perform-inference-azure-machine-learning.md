@@ -28,6 +28,8 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
 
     ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/11-portal-toolbar-cloud-shell.png)
 
+    If prompted, select the required options to open a *Bash* shell. If you have previously used a *PowerShell* console, switch it to a *Bash* shell.
+
 3. At the Cloud Shell prompt, enter the following to clone the GitHub repo containing exercise resources:
 
     ```bash

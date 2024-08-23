@@ -38,7 +38,7 @@ In this exercise you'll configure logical replication, which is native to Postgr
     1. Availability zone - 1. If availability zones aren't supported, leave as No preference.
     1. High availability - leave unchecked.
     1. In **admin username**, enter **demo**.
-    1. In **password**, enter **Pa$$w0rd**.
+    1. In **password**, enter a suitable complex password.
     1. Select **Next: Networking >**.
 1. On the Flexible server **Networking** tab, enter each field as follows:
     1. Connectivity method: (o) Public access (allowed IP addresses).
@@ -61,7 +61,7 @@ In this exercise you'll configure logical replication, which is native to Postgr
     1. Availability zone - 2. If availability zones aren't supported, leave as No preference.
     1. High availability - leave unchecked.
     1. In **admin username**, enter **demo**.
-    1. In **password**, enter **Pa$$w0rd**.
+    1. In **password**, enter a suitable complex password.
     1. Select **Next: Networking >**.
 1. On the Flexible server **Networking** tab, enter each field as follows:
     1. Connectivity method: (o) Public access (allowed IP addresses)

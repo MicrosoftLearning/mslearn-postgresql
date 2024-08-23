@@ -43,7 +43,7 @@ To complete these exercises, you need to install a PostgreSQL server that is con
     1. Set Microsoft Entra admin - select **Set admin**
         1. Search for your account in **Select Microsoft Entra Admins** and (o) your account and click **Select**
     1. In **admin username**, enter **demo**.
-    1. In **password**, enter **Pa$$w0rd_01**.
+    1. In **password**, enter a suitably complex password.
     1. Select **Next: Networking >**.
 1. On the Flexible server **Networking** tab, enter each field as follows:
     1. Connectivity method: (o) Public access (allowed IP addresses) and Private endpoint
