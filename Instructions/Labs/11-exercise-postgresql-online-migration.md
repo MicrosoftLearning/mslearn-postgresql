@@ -10,12 +10,9 @@ In this exercise you will configure logical replication between a source Postgre
 
 ## Before you start
 
-> [!IMPORTANT]
-> You need your own Azure subscription to complete this exercise. If you don't have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).
->
+You need your own Azure subscription to complete this exercise. If you don't have an Azure subscription, you can create an [Azure free trial](https://azure.microsoft.com/free).
 
-> [!NOTE]
-> This exercise will require that the server you use as a source for the migration is accessible to the Azure Database for PostgreSQL Flexible Server so that it can connect and migrate databases. This will require that the source server is accessible via a public IP address and port. > A list of Azure Region IP Addresses can be downloaded from [Azure IP Ranges and Service Tags – Public Cloud](https://www.microsoft.com/en-gb/download/details.aspx?id=56519) to help minimize the allowed ranges of IP Addresses in your firewall rules based on the Azure region used.
+> **Note:**: This exercise will require that the server you use as a source for the migration is accessible to the Azure Database for PostgreSQL Flexible Server so that it can connect and migrate databases. This will require that the source server is accessible via a public IP address and port. > A list of Azure Region IP Addresses can be downloaded from [Azure IP Ranges and Service Tags – Public Cloud](https://www.microsoft.com/en-gb/download/details.aspx?id=56519) to help minimize the allowed ranges of IP Addresses in your firewall rules based on the Azure region used.
 
 Open your server's firewall to allow the Migration feature within the Azure Database for PostgreSQL Flexible Server access to the source PostgreSQL Server, which by default is TCP port 5432.
 >
@@ -25,8 +22,7 @@ When using a firewall appliance in front of your source database, you may need t
 
 ### Prerequisites
 
-[!NOTE]
-> Before starting this exercise you will need to have completed the previous exercise to have the source and target databases in place to configure logical replication as this exercise builds on the activity in that one.
+> **Note**: Before starting this exercise you will need to have completed the previous exercise to have the source and target databases in place to configure logical replication as this exercise builds on the activity in that one.
 
 ## Create Publication - Source Server
 
