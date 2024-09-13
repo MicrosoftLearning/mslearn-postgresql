@@ -170,6 +170,24 @@ To store and query vectors, and to generate embeddings, you need to allow-list a
     SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
     ```
 
+4. To successfully make calls against your Azure AI Language services using the `azure_ai` extension, you must provide its endpoint and key to the extension. Using the same browser tab where the Cloud Shell is open, navigate to your Language service resource in the [Azure portal](https://portal.azure.com/) and select the **Keys and Endpoint** item under **Resource Management** from the left-hand navigation menu.
+
+    ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/16-azure-language-service-keys-endpoints.png)
+
+    > [!Note]
+    >
+    > If you received the message `NOTICE: extension "azure_ai" already exists, skipping CREATE EXTENSION` when installing the `azure_ai` extension above and have previously configured the extension with your Language service endpoint and key, you can use the `azure_ai.get_setting()` function to confirm those settings are correct, and then skip step 2 if they are.
+
+5. Copy your endpoint and access key values, then in the commands below, replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Run the commands from the `psql` command prompt in the Cloud Shell to add your values to the `azure_ai.settings` table.
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_cognitive.endpoint', '{endpoint}');
+    ```
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '{api-key}');
+    ```
+
 ## Populate the database with sample data
 
 Before you explore the `azure_ai` extension, add a couple of tables to the `rentals` database and populate them with sample data so you have information to work with as you review the extension's functionality.
@@ -233,7 +251,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
     ALTER TABLE listings ADD COLUMN key_phrases text[];
     ```
 
-1. Populate the column in batches. Depending on the quota, you may wish to adjust the `LIMIT` value. Feel free to run the command as many times as you like; you don't need all rows populated for this exercise.
+1. Populate the column in batches. Depending on the quota, you may wish to adjust the `LIMIT` value. *Feel free to run the command as many times as you like*; you don't need all rows populated for this exercise.
 
     ```sql
     UPDATE listings
@@ -245,7 +263,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
 1. Query listings by key phrases:
 
     ```sql
-    SELECT id, name FROM listings WHERE 'market' = ANY(key_phrases);
+    SELECT id, name FROM listings WHERE 'closet' = ANY(key_phrases);
     ```
 
     You will get results like this, depending on which listings have key phrases populated:
@@ -273,7 +291,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
     ALTER TABLE listings ADD COLUMN entities azure_cognitive.entity[];
     ```
 
-2. Populate the column in batches. This process may take several minutes. You may wish to adjust the `LIMIT` value depending on the quota or to return more quickly with partial results. Feel free to run the command as many times as you like; you don't need all rows populated for this exercise.
+2. Populate the column in batches. This process may take several minutes. You may wish to adjust the `LIMIT` value depending on the quota or to return more quickly with partial results. *Feel free to run the command as many times as you like*; you don't need all rows populated for this exercise.
 
     ```sql
     UPDATE listings
@@ -282,12 +300,12 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
     WHERE listings.id = subset.id;
     ```
 
-3. You may now query all listings' entities to find properties with decks:
+3. You may now query all listings' entities to find properties with basements:
 
     ```sql
     SELECT id, name
     FROM listings, unnest(entities) e
-    WHERE e.text LIKE '%roof%deck%'
+    WHERE e.text LIKE '%basement%'
     LIMIT 10;
     ```
 
@@ -339,7 +357,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
     ALTER TABLE listings ADD COLUMN pii_entities azure_cognitive.entity[];
     ```
 
-2. Populate the column in batches. This process may take several minutes. You may wish to adjust the `LIMIT` value depending on the quota or to return more quickly with partial results. Feel free to run the command as many times as you like; you don't need all rows populated for this exercise.
+2. Populate the column in batches. This process may take several minutes. You may wish to adjust the `LIMIT` value depending on the quota or to return more quickly with partial results. *Feel free to run the command as many times as you like*; you don't need all rows populated for this exercise.
 
     ```sql
     UPDATE listings
