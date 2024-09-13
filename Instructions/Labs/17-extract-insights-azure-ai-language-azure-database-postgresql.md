@@ -156,7 +156,7 @@ To store and query vectors, and to generate embeddings, you need to allow-list a
     CREATE EXTENSION vector;
     ```
 
-3. To enable the `azure_ai` extension, run the following SQL command. You'll need the endpoint and API key for the Azure OpenAI resource. For detailed instructions, read [Enable the `azure_ai` extension](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension).
+3. To enable the `azure_ai` extension, run the following SQL command. You'll need the endpoint and API key for the ***Azure OpenAI*** resource. For detailed instructions, read [Enable the `azure_ai` extension](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension).
 
     ```sql
     CREATE EXTENSION azure_ai;
@@ -170,13 +170,7 @@ To store and query vectors, and to generate embeddings, you need to allow-list a
     SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
     ```
 
-4. To successfully make calls against your Azure AI Language services using the `azure_ai` extension, you must provide its endpoint and key to the extension. Using the same browser tab where the Cloud Shell is open, navigate to your Language service resource in the [Azure portal](https://portal.azure.com/) and select the **Keys and Endpoint** item under **Resource Management** from the left-hand navigation menu.
-
-    ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/16-azure-language-service-keys-endpoints.png)
-
-    > [!Note]
-    >
-    > If you received the message `NOTICE: extension "azure_ai" already exists, skipping CREATE EXTENSION` when installing the `azure_ai` extension above and have previously configured the extension with your Language service endpoint and key, you can use the `azure_ai.get_setting()` function to confirm those settings are correct, and then skip step 2 if they are.
+4. To successfully make calls against your ***Azure AI Language*** services using the `azure_ai` extension, you must provide its endpoint and key to the extension. Using the same browser tab where the Cloud Shell is open, navigate to your Language service resource in the [Azure portal](https://portal.azure.com/) and select the **Keys and Endpoint** item under **Resource Management** from the left-hand navigation menu.
 
 5. Copy your endpoint and access key values, then in the commands below, replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Run the commands from the `psql` command prompt in the Cloud Shell to add your values to the `azure_ai.settings` table.
 
