@@ -194,6 +194,10 @@ You can install psql locally or connect from the Azure Portal which will open Cl
 
 ## Install Azure Data Studio
 
+> Note
+>
+> If Azure Data Studio is already installed, go to the *Install the PostgreSQL extension* step.
+
 To install Azure Data Studio for use with Azure Database for PostgreSQL:
 
 1. In a browser, navigate to [Download and install Azure Data Studio](https://go.microsoft.com/fwlink/?linkid=2282284) and under the Windows platform, select **User installer (recommended)**. The executable file is downloaded to your Downloads folder.
