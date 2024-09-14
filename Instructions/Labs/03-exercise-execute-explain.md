@@ -132,6 +132,9 @@ Make sure you have:
        md .\DP3021Lab
        git clone https://github.com/MicrosoftLearning/mslearn-postgresql.git .\DP3021Lab
        ```
+       > NOTE
+       > 
+       > If **git** is not installed, [download](https://git-scm.com/download), install it, and try running the previous commands again.
 1. You have installed Azure Data Studio. If you haven't then [download and install Azure Data Studio](https://go.microsoft.com/fwlink/?linkid=2282284).
 1. Install the **PostgreSQL** extension in Azure Data Studio.
 1. Open Azure Data Studio and connect to your Azure Database for PostgreSQL flexible server created by the Bicep script. Enter the user name **pgAdmin** and password **the random admin password** you previously created.
