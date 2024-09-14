@@ -136,7 +136,7 @@ Make sure you have already cloned the lab scripts from [PostgreSQL Labs](https:/
 
 ## Install Azure Data Studio
 
-To install Azure Data Studio for use with Azure Database for PostgreSQL:
+If you don't have Azure Data Studio installed:
 
 1. In a browser, navigate to [Download and install Azure Data Studio](/sql/azure-data-studio/download-azure-data-studio) and under the Windows platform, select **User installer (recommended)**. The executable file is downloaded to your Downloads folder.
 1. Select **Open file**.
@@ -146,6 +146,8 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. The **Completing the Azure Data Studio Setup Wizard** dialog box is displayed. Select **Finish**. Azure Data Studio starts.
 
 ## Install the PostgreSQL extension
+
+If you don't have the PostgreSQL extension installed in your Azure Data Studio:
 
 1. Open Azure Data Studio if it is not already open.
 1. From the left menu, select **Extensions** to display the Extensions panel.
