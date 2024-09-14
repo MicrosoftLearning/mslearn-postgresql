@@ -162,7 +162,7 @@ Create a subscription
 
 DROP SUBSCRIPTION IF EXISTS sub;
 
-CREATE SUBSCRIPTION sub CONNECTION 'host=postgresql-pub21.postgres.database.azure.com user=demo dbname=zoodb password=Pa$$w0rd' PUBLICATION pub;
+CREATE SUBSCRIPTION sub CONNECTION 'host=postgresql-pub21.postgres.database.azure.com user=demo dbname=zoodb password=YOURSTRONGPASSWORD' PUBLICATION pub;
 
 SELECT *
     FROM pg_stat_subscription;
