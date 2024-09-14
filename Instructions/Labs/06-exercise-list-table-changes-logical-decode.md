@@ -121,6 +121,6 @@ For both the publisher and subscriber servers:
 
 You've now created two Azure Database for PostgreSQL flexible servers and configured one as a publisher, and the other as a subscriber. In the publisher database you created and populated the zoo database. In the subscriber database, you created an empty database, which was then populated by streaming replication.
 
-## Clean-Uo
+## Clean-Up
 
 After you've finished the exercise, delete the resource group containing both servers. You'll be charged for the servers unless you either STOP or DELETE them.
