@@ -138,7 +138,7 @@ Make sure you have:
 1. You have installed Azure Data Studio. If you haven't then [download and install ***Azure Data Studio***](https://go.microsoft.com/fwlink/?linkid=2282284).
 1. Install the **PostgreSQL** extension in Azure Data Studio.
 1. Open Azure Data Studio and connect to your Azure Database for PostgreSQL flexible server created by the Bicep script. Enter the user name **pgAdmin** and password **the random admin password** you previously created.
-1. If you haven't yet created the zoodb, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**.
+1. If you haven't created the zoodb database yet, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**.
    1. Highlight the **DROP** and **CREATE** statements and run them.
    1. At the top of the screen, use the drop-down arrow to display the databases on the server, including zoodb and system databases. Select the **zoodb** database.
    1. Highlight the **Create tables**, **Create foreign keys**, and **Populate tables** sections and run them.
