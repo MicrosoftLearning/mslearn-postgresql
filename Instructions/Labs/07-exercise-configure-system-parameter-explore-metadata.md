@@ -120,10 +120,19 @@ You may encounter a few errors when running the Bicep deployment script. The mos
 
 ### Connect to the database with Azure Data Studio
 
-1. Download and install Azure Data Studio from [Download and install Azure Data Studio](/sql/azure-data-studio/download-azure-data-studio).
-1. Start Azure Data Studio.
-1. Select the **View** menu and select **Extensions**.
-1. In **Search Extensions in Marketplace**, type **PostgreSQL** and select **Install**.
+1. If you haven't done so yet, clone the lab scripts from the [PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql.git) GitHub repository locally:
+    1. Open a command line/terminal.
+    1. Run the command:
+       ```bash
+       md .\DP3021Lab
+       git clone https://github.com/MicrosoftLearning/mslearn-postgresql.git .\DP3021Lab
+       ```
+       > NOTE
+       > 
+       > If **git** is not installed, [download and install the ***git*** app](https://git-scm.com/download) and try running the previous commands again.
+1. If you haven't install Azure Data Studio yet, [download and install ***Azure Data Studio***](https://go.microsoft.com/fwlink/?linkid=2282284).
+1. If you haven't install the **PostgreSQL** extension in Azure Data Studio, install it now.
+1. Open Azure Data Studio.
 1. Select **Connections**.
 1. Select **Servers** and select **New connection**.
 1. In **Connection type**, select **PostgreSQL**.
@@ -132,20 +141,25 @@ You may encounter a few errors when running the Bicep deployment script. The mos
 1. In **Password**, type enter the randomly generated password for the **pgAdmin** login you generated
 1. Select **Remember password**.
 1. Click **Connect**
+1. If you haven't created the zoodb database yet, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**.
+   1. Highlight the **DROP** and **CREATE** statements and run them.
+   1. At the top of the screen, use the drop-down arrow to display the databases on the server, including zoodb and system databases. Select the **zoodb** database.
+   1. Highlight the **Create tables**, **Create foreign keys**, and **Populate tables** sections and run them.
+   1. Highlight the 3 **SELECT** statements at the end of the script and run them to verify that the tables were created and populated.
 
 ## Task 1: Explore the vacuum process in PostgreSQL
 
-1. Open Azure Data Studio.
-1. Either navigate to the folder with your exercise script files, or download the **Lab7_vacuum.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/tree/main/Allfiles/Labs/07).
-1. Select File, **Open File**, and select **Lab7_vacuum.sql**.Connect to your Azure Database for PostgreSQL flexible server.
+1. If not opened, open Azure Data Studio.
+1. In Azure Data Studio, select **File**, **Open File**, and then navigate to the lab scripts. Select **../Allfiles/Labs/07/Lab7_vacuum.sql** and then select **Open**. If necessary, reconnect to the server.
+1. Select the **zoodb** database from the database dropdown.
 1. Highlight and run the section **Check zoodb database is selected**. If necessary, make zoodb the current database using the drop-down list.
 1. Highlight and run the section **Display dead tuples**. This query displays the number of dead and live tuples in the database. Make a note of the number of dead tuples.
-1. Highlight and run the section **Change weight** several times. This query updates the weight column for all the animals.
+1. Highlight and run the section **Change weight** 10 times in a row. This query updates the weight column for all the animals.
 1. Run the section under **Display dead tuples** again. Make a note of the number of dead tuples after the updates have been done.
 1. Run the section under **Manually run VACUUM** to run the vacuum process.
 1. Run the section under **Display dead tuples** again. Make a note of the number of dead tuples after the vacuum process has been run.
 
-## Configure autovacuum server parameters
+## Task 2: Configure autovacuum server parameters
 
 1. In the Azure portal, navigate to your Azure Database for PostgreSQL flexible server.
 1. Under **Settings**, select **Server parameters**.
@@ -161,7 +175,7 @@ You may encounter a few errors when running the Bicep deployment script. The mos
 ## Task 3: View PostgreSQL metadata in the Azure portal
 
 1. Navigate to [the Azure portal](https://portal.azure.com) and sign in.
-1. Select **All resources**.
+1. Search for **Azure Database for PostgreSQL** and select it.
 1. Select the Azure Database for PostgreSQL flexible server that you created for this exercise.
 1. In **Monitoring**, select **Metrics**.
 1. Select **Metric** and select **CPU percent**.
@@ -266,4 +280,5 @@ You may encounter a few errors when running the Bicep deployment script. The mos
 
 ## Exercise Clean-up
 
-The Azure Database for PostgreSQL we deployed in this exercise will incur charges you can delete the server after this exercise. Alternatively, you can delete the **rg-learn-work-with-postgresql-eastus** resource group to remove all resources that we deployed as part of this exercise.
+1. The Azure Database for PostgreSQL we deployed in this exercise will incur charges you can delete the server after this exercise. Alternatively, you can delete the **rg-learn-work-with-postgresql-eastus** resource group to remove all resources that we deployed as part of this exercise.
+1. If needed, delete the .\DP3021Lab folder.
