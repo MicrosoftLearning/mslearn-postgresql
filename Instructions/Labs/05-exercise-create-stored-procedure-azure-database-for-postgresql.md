@@ -138,26 +138,6 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. In the search bar, enter **PostgreSQL**. The PostgreSQL extension for Azure Data Studio icon is displayed.
 1. Select **Install**. The extension installs.
 
-## Before you start
-
-Make sure you have:
-
-1. You have installed and started Azure Database for PostgreSQL flexible server. This should have been installed by the previous Bicep script.
-1. You have already cloned the lab scripts from [PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql.git). If you haven't done so, clone the repository locally:
-    1. Open a command line/terminal.
-    1. Run the command:
-       ```bash
-       md .\DP3021Lab
-       git clone https://github.com/MicrosoftLearning/mslearn-postgresql.git .\DP3021Lab
-       ```
-       > NOTE
-       > 
-       > If **git** is not installed, [download and install the ***git*** app](https://git-scm.com/download) and try running the previous commands again.
-1. You have installed Azure Data Studio. If you haven't then [download and install ***Azure Data Studio***](https://go.microsoft.com/fwlink/?linkid=2282284).
-1. Install the **PostgreSQL** extension in Azure Data Studio.
-1. Open Azure Data Studio and connect to your Azure Database for PostgreSQL flexible server created by the Bicep script. Enter the user name **pgAdmin** and password **the random admin password** you previously created.
-1. If you haven't yet created the zoodb, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**. Run the script.
-
 ## Connect to Azure Database for PostgreSQL flexible server
 
 1. Open Azure Data Studio if it is not already open.
@@ -171,6 +151,22 @@ Make sure you have:
 1. The remaining fields are optional.
 1. Select **Connect**. You are connected to the Azure Database for PostgreSQL server.
 1. A list of the server databases is displayed. This includes system databases, and user databases.
+
+## Before you start
+
+Make sure you have:
+
+1. You have already cloned the lab scripts from [PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql.git). If you haven't done so, clone the repository locally:
+    1. Open a command line/terminal.
+    1. Run the command:
+       ```bash
+       md .\DP3021Lab
+       git clone https://github.com/MicrosoftLearning/mslearn-postgresql.git .\DP3021Lab
+       ```
+       > NOTE
+       > 
+       > If **git** is not installed, [download and install the ***git*** app](https://git-scm.com/download) and try running the previous commands again.
+1. If you haven't yet created the zoodb, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**. Run the script.
 
 ## Create a stored procedure
 
