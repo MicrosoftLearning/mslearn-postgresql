@@ -167,7 +167,7 @@ If you don't have the PostgreSQL extension installed in your Azure Data Studio:
 1. The remaining fields are optional.
 1. Select **Connect**. You are connected to the Azure Database for PostgreSQL server.
 1. A list of the server databases is displayed. This includes system databases, and user databases.
-1. If you haven't yet created the zoodb database, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**.
+1. If you haven't created the zoodb database yet, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**.
    1. Highlight the **DROP** and **CREATE** statements and run them.
    1. At the top of the screen, use the drop-down arrow to display the databases on the server, including zoodb and system databases. Select the **zoodb** database.
    1. Highlight the **Create tables**, **Create foreign keys**, and **Populate tables** sections and run them.
