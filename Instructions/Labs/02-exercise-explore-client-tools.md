@@ -131,7 +131,7 @@ You can install psql locally or connect from the Azure Portal which will open Cl
     1. In the setup wizard, when you reach the **Select Components** dialog box, select **Command Line Tools**.
     > Note
     >
-    > To check if **psql** is already installed in your environment, open command line/terminal, and run the command ***psql***. If it returns a message like *psql: error: connection to server on socket...*, that means that the **psql** tool is installed in your environment, and that you can skip this step.
+    > To check if **psql** is already installed in your environment, open command line/terminal, and run the command ***psql***. If it returns a message like *psql: error: connection to server on socket...*, that means that the **psql** tool is installed in your environment and there is no need to re-install it.
 
 
 
