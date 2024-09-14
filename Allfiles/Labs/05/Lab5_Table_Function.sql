@@ -20,6 +20,8 @@ CALL repopulate_zoo();
 Create a table valued function
 *********************************************************************************/
 
+DROP FUNCTION IF EXISTS enclosure_summary;
+
 CREATE FUNCTION enclosure_summary
 (
     prm_enc_id int
