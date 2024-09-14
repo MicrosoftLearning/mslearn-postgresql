@@ -138,20 +138,6 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. In the search bar, enter **PostgreSQL**. The PostgreSQL extension for Azure Data Studio icon is displayed.
 1. Select **Install**. The extension installs.
 
-## Connect to Azure Database for PostgreSQL flexible server
-
-1. Open Azure Data Studio if it is not already open.
-1. From the left menu, select **Connections**.
-1. Select **New Connection**.
-1. Under **Connection Details**, in **Connection type** select **PostgreSQL** from the drop-down list.
-1. In **Server name**, enter the full server name as it appears on the Azure portal.
-1. In **Authentication type**, leave Password.
-1. In User name and Password, enter the user name **pgAdmin** and password **the random admin password** you created above
-1. Select [ x ] Remember password.
-1. The remaining fields are optional.
-1. Select **Connect**. You are connected to the Azure Database for PostgreSQL server.
-1. A list of the server databases is displayed. This includes system databases, and user databases.
-
 ## Before you start
 
 Make sure you have:
@@ -171,6 +157,20 @@ Make sure you have:
 1. Install the **PostgreSQL** extension in Azure Data Studio.
 1. Open Azure Data Studio and connect to your Azure Database for PostgreSQL flexible server created by the Bicep script. Enter the user name **pgAdmin** and password **the random admin password** you previously created.
 1. If you haven't yet created the zoodb, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**. Run the script.
+
+## Connect to Azure Database for PostgreSQL flexible server
+
+1. Open Azure Data Studio if it is not already open.
+1. From the left menu, select **Connections**.
+1. Select **New Connection**.
+1. Under **Connection Details**, in **Connection type** select **PostgreSQL** from the drop-down list.
+1. In **Server name**, enter the full server name as it appears on the Azure portal.
+1. In **Authentication type**, leave Password.
+1. In User name and Password, enter the user name **pgAdmin** and password **the random admin password** you created above
+1. Select [ x ] Remember password.
+1. The remaining fields are optional.
+1. Select **Connect**. You are connected to the Azure Database for PostgreSQL server.
+1. A list of the server databases is displayed. This includes system databases, and user databases.
 
 ## Create a stored procedure
 
