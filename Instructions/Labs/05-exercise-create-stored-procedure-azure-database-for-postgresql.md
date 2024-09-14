@@ -120,6 +120,20 @@ You may encounter a few errors when running the Bicep deployment script. The mos
     {"code": "ResourceKindRequireAcceptTerms", "message": "This subscription cannot create TextAnalytics until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal then trying again. For more detail go to https://go.microsoft.com/fwlink/?linkid=2164190"}
     ```
 
+## Clone the GitHub repository locally
+
+Make sure you have already cloned the lab scripts from [PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql.git). If you haven't done so, to clone the repository locally:
+
+1. Open a command line/terminal.
+1. Run the command:
+    ```bash
+    md .\DP3021Lab
+    git clone https://github.com/MicrosoftLearning/mslearn-postgresql.git .\DP3021Lab
+    ```
+    > NOTE
+    > 
+    > If **git** is not installed, [download and install the ***git*** app](https://git-scm.com/download) and try running the previous commands again.
+
 ## Install Azure Data Studio
 
 To install Azure Data Studio for use with Azure Database for PostgreSQL:
@@ -151,21 +165,6 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. The remaining fields are optional.
 1. Select **Connect**. You are connected to the Azure Database for PostgreSQL server.
 1. A list of the server databases is displayed. This includes system databases, and user databases.
-
-## Before you start
-
-Make sure you have:
-
-1. You have already cloned the lab scripts from [PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql.git). If you haven't done so, clone the repository locally:
-    1. Open a command line/terminal.
-    1. Run the command:
-       ```bash
-       md .\DP3021Lab
-       git clone https://github.com/MicrosoftLearning/mslearn-postgresql.git .\DP3021Lab
-       ```
-       > NOTE
-       > 
-       > If **git** is not installed, [download and install the ***git*** app](https://git-scm.com/download) and try running the previous commands again.
 1. If you haven't yet created the zoodb, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**. Run the script.
 
 ## Create a stored procedure
@@ -198,5 +197,6 @@ Make sure you have:
 
 ## Clean-Up
 
-Delete the resource group created in this exercise to avoid incurring unnecessary Azure sosts.
+1. Delete the resource group created in this exercise to avoid incurring unnecessary Azure sosts.
+1. If needed, delete the .\DP3021Lab folder.
 
