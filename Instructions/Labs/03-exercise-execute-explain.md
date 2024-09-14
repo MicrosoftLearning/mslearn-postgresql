@@ -161,5 +161,5 @@ Make sure you have:
 ## Clean-up
 
 1. Delete the resource group created in this exercise to avoid incurring unnecessary Azure costs.
-1. If needed, delete the folder **.\DP3021Lab**.
+1. If needed, delete the **.\DP3021Lab** folder.
 
