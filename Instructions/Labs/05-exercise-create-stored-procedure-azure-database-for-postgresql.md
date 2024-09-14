@@ -167,19 +167,30 @@ If you don't have the PostgreSQL extension installed in your Azure Data Studio:
 1. The remaining fields are optional.
 1. Select **Connect**. You are connected to the Azure Database for PostgreSQL server.
 1. A list of the server databases is displayed. This includes system databases, and user databases.
-1. If you haven't yet created the zoodb, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**. Run the script.
+1. If you haven't yet created the zoodb, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**.
+   1. Highlight the **DROP** and **CREATE** statements and run them.
+   1. At the top of the screen, use the drop-down arrow to display the databases on the server, including zoodb and system databases. Select the **zoodb** database.
+   1. Highlight the **Create tables**, **Create foreign keys**, and **Populate tables** sections and run them.
+   1. Highlight the 3 **SELECT** statements at the end of the script and run them to verify that the tables were created and populated.
 
-## Create a stored procedure
+## Create the repopulate_zoo() stored procedure
+
+1. At the top of the screen, use the drop-down arrow to make zoodb the current database.
+1. In Azure Data Studio, select **File**, **Open File**, and then navigate to the lab scripts. Select **../Allfiles/Labs/03/Lab3_RepopulateZoo.sql** and then select **Open**. If necessary, reconnect to the server.
+1. Highlight the section under **Create stored procedure** from **DROP PROCEDURE** to **END $$.** Run the highlighted text.
+1. Keep Azure Data Studio open with the file open, ready for the next exercise.
+
+## Create the new_exhibit() stored procedure
 
 1. At the top of the screen, use the drop-down arrow to make zoodb the current database.
 1. In Azure Data Studio, select **File**, **Open File**, and then navigate to the lab scripts. Select **../Allfiles/Labs/05/Lab5_StoredProcedure.sql** and then select **Open**. If necessary, reconnect to the server.
-1. Highlight the section under **Create stored procedure** from **CREATE PROCEDURE** to **END $$.** Read through the procedure. You will see that it declares some input parameters and uses them to insert rows into the enclosure table and the animal table.
+1. Highlight the section under **Create stored procedure** from **DROP PROCEDURE** to **END $$.** Run the highlighted text. Read through the procedure. You will see that it declares some input parameters and uses them to insert rows into the enclosure table and the animal table.
 1. Keep Azure Data Studio open with the file open, ready for the next exercise.
 
 ## Call the stored procedure
 
-1. Highlight the section under **Call the stored procedure**. This calls the stored procedure by passing values to the input parameters.
-1. Highlight and run the two **SELECT** statements. You can see that a new row has been inserted into enclosure, and five new rows inserted into animal.
+1. Highlight the section under **Call the stored procedure**. Run the highlighted text. This calls the stored procedure by passing values to the input parameters.
+1. Highlight and run the two **SELECT** statements. Run the highlighted text. You can see that a new row has been inserted into enclosure, and five new rows inserted into animal.
 
 ## Create and call a table-valued function
 
