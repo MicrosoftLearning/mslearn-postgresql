@@ -134,8 +134,8 @@ Make sure you have:
        ```
        > NOTE
        > 
-       > If **git** is not installed, [download](https://git-scm.com/download) and install the ***git*** app and try running the previous commands again.
-1. You have installed Azure Data Studio. If you haven't then [download and install Azure Data Studio](https://go.microsoft.com/fwlink/?linkid=2282284).
+       > If **git** is not installed, [download and install the ***git*** app](https://git-scm.com/download) and try running the previous commands again.
+1. You have installed Azure Data Studio. If you haven't then [download and install ***Azure Data Studio***](https://go.microsoft.com/fwlink/?linkid=2282284).
 1. Install the **PostgreSQL** extension in Azure Data Studio.
 1. Open Azure Data Studio and connect to your Azure Database for PostgreSQL flexible server created by the Bicep script. Enter the user name **pgAdmin** and password **the random admin password** you previously created.
 1. If you haven't yet created the zoodb, select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**. Run the script.
