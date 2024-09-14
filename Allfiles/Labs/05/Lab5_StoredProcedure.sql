@@ -24,7 +24,7 @@ Create stored procedure
     to guard against the possibility of SQL injection attacks.
 *********************************************************************************/
 
-DROP PROCEDURE new_exhibit;
+DROP PROCEDURE IF EXISTS new_exhibit;
 
 CREATE PROCEDURE new_exhibit
 (
