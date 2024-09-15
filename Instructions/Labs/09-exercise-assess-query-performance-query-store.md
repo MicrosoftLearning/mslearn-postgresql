@@ -113,13 +113,74 @@ You may encounter a few errors when running the Bicep deployment script. The mos
     {"code": "ResourceKindRequireAcceptTerms", "message": "This subscription cannot create TextAnalytics until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal then trying again. For more detail go to https://go.microsoft.com/fwlink/?linkid=2164190"}
     ```
 
+## Connect to your database using psql in the Azure Cloud Shell
+
+In this task, you connect to the `adventureworks` database on your Azure Database for PostgreSQL server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
+
+1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL flexible server.
+
+2. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `adventureworks` database.
+
+    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the adventureworks database are highlighted by red boxes.](media/08-postgresql-adventureworks-database-connect.png)
+
+3. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** login.
+
+    Once logged in, the `psql` prompt for the `adventureworks` database is displayed.
+
+4. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
+
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/08-azure-cloud-shell-pane-maximize.png)
+
+### Populate the database with data
+
+1. You need to create a table within the database and populate it with sample data so you have information to work with as you review locking in this exercise.
+1. Run the following command to create the `production.workorder` table for loading in data:
+
+    ```sql
+    /*********************************************************************************
+    Create Schema: production
+    *********************************************************************************/
+    DROP SCHEMA IF EXISTS production CASCADE;
+    CREATE SCHEMA production;
+    
+    /*********************************************************************************
+    Create Table: production.workorder
+    *********************************************************************************/
+    
+    DROP TABLE IF EXISTS production.workorder;
+    CREATE TABLE production.workorder
+    (
+        workorderid integer NOT NULL,
+        productid integer NOT NULL,
+        orderqty integer NOT NULL,
+        scrappedqty smallint NOT NULL,
+        startdate timestamp without time zone NOT NULL,
+        enddate timestamp without time zone,
+        duedate timestamp without time zone NOT NULL,
+        scrapreasonid smallint,
+        modifieddate timestamp without time zone NOT NULL DEFAULT now()
+    )
+    WITH (
+        OIDS = FALSE
+    )
+    TABLESPACE pg_default;
+    ```
+
+1. Next, use the `COPY` command to load data from CSV files into the table you created above. Start by running the following command to populate the `production.workorder` table:
+
+    ```sql
+    \COPY production.workorder FROM 'mslearn-postgresql/Allfiles/Labs/08/Lab8_workorder.csv' CSV HEADER
+    ```
+
+    The command output should be `COPY 72591`, indicating that 72591 rows were written into the table from the CSV file.
+
+1. Close the Cloud Shell pane once the data has loaded
 
 ### Connect to the database with Azure Data Studio
 
-1. Download and install Azure Data Studio from [Download and install Azure Data Studio](/sql/azure-data-studio/download-azure-data-studio).
+1. If you haven't install Azure Data Studio yet, [download and install ***Azure Data Studio***](https://go.microsoft.com/fwlink/?linkid=2282284).
 1. Start Azure Data Studio.
-1. Select the **View** menu and select **Extensions**.
-1. In **Search Extensions in Marketplace**, type **PostgreSQL** and select **Install**.
+1. If you haven't install the **PostgreSQL** extension in Azure Data Studio, install it now.
 1. Select **Connections**.
 1. Select **Servers** and select **New connection**.
 1. In **Connection type**, select **PostgreSQL**.
@@ -131,8 +192,6 @@ You may encounter a few errors when running the Bicep deployment script. The mos
 
 ### Create tables within the database
 
-1. Either navigate to the folder with your exercise script files, or download the **Lab8_setupTables.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/tree/main/Allfiles/Labs/08).
-1. Select **File**, **Open file** and navigate to the folder where you saved the scripts. Select **../Allfiles/Labs/08/Lab8_setupTables** and **Open**. Run the script.
 1. Expand **Databases**, right-click **adventureworks** and select **New Query**.
    
     ![Screenshot of adventureworks database highlighting New Query context menu item](media/09-new-query.png)
@@ -167,10 +226,32 @@ You may encounter a few errors when running the Bicep deployment script. The mos
     ![Screenshot showing Connect icon](media/09-connect.png)
    
 1. Select your PostgreSQL server and select **Connect**.
-1. Type each of the following query and select **Run**.
+1. Type the following query and select **Run**.
 
     ```sql
-    SELECT * FROM pg_stat_activity;
+    SELECT 
+        pid,                    -- Process ID of the server process
+        datid,                  -- OID of the database
+        datname,                -- Name of the database
+        usename,                -- Name of the user
+        application_name,       -- Name of the application connected to the database
+        client_addr,            -- IP address of the client
+        client_hostname,        -- Hostname of the client (if available)
+        client_port,            -- TCP port number that the client is using for the connection
+        backend_start,          -- Timestamp when the backend process started
+        xact_start,             -- Timestamp of the current transaction start, if any
+        query_start,            -- Timestamp when the current query started, if any
+        state_change,           -- Timestamp when the state was last changed
+        wait_event_type,        -- Type of event the backend is waiting for, if any
+        wait_event,             -- Event that the backend is waiting for, if any
+        state,                  -- Current state of the session (e.g., active, idle, etc.)
+        backend_xid,            -- Transaction ID, if active
+        backend_xmin,           -- Transaction ID that the process is working with
+        query,                  -- Text of the query being executed
+        encode(backend_type::bytea, 'escape') AS backend_type,           -- Type of backend (e.g., client backend, autovacuum worker). We use encode(…, 'escape') to safely display raw data with invalid characters by converting it into a readable format, doing this prevents a UTF-8 conversion error in Azure Data Studio.
+        leader_pid,             -- PID of the leader process, if this is a parallel worker
+        query_id               -- Query ID (added in more recent PostgreSQL versions)
+    FROM pg_stat_activity;
     ```
 
 1. Review the metrics that are available.
