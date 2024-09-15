@@ -157,8 +157,6 @@ In this task, you connect to the `adventureworks` database on your Azure Databas
         OIDS = FALSE
     )
     TABLESPACE pg_default;
-    
-    ALTER TABLE production.workorder OWNER to pgAdmin;
     ```
 
 1. Next, use the `COPY` command to load data from CSV files into the table you created above. Start by running the following command to populate the `production.workorder` table:
@@ -173,11 +171,9 @@ In this task, you connect to the `adventureworks` database on your Azure Databas
 
 ### Connect to the database with Azure Data Studio
 
-1. Download and install Azure Data Studio from [Download and install Azure Data Studio](/sql/azure-data-studio/download-azure-data-studio).
+1. If you haven't install Azure Data Studio yet, [download and install ***Azure Data Studio***](https://go.microsoft.com/fwlink/?linkid=2282284).
 1. Start Azure Data Studio.
-1. Select the **View** menu and select **Extensions**.
-1. In **Search Extensions in Marketplace**, type **PostgreSQL** and select **Install**.
-1. Select **Connections**.
+1. If you haven't install the **PostgreSQL** extension in Azure Data Studio, install it now.
 1. Select **Servers** and select **New connection**.
 1. In **Connection type**, select **PostgreSQL**.
 1. In **Server name**, type the value that you specified when you deployed the server.
