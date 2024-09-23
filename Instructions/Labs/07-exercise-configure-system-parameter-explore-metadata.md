@@ -1,7 +1,7 @@
 ---
 lab:
-    title: 'Configure and manage Azure Database for PostgreSQL Server'
-    module: 'Explore PostgreSQL architecture'
+    title: 'Configure system parameters and explore metedata with system catalogs and views'
+    module: 'Configure and manage Azure Database for PostgreSQL'
 ---
 
 # Configure system parameters and explore metedata with system catalogs and views
