@@ -80,7 +80,7 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. Under **Connection Details**, in **Connection type** select **PostgreSQL** from the drop-down list.
 1. In **Server name**, enter the full server name as it appears on the Azure portal.
 1. In **Authentication type**, leave Password.
-1. In User name and Password, enter the user name **demo** and password **Pa$$w0rd_01** you created above
+1. In User name and Password, enter the user name **demo** and the complex password you created above
 1. Select [ x ] Remember password.
 1. The remaining fields are optional.
 1. Select **Connect**. You are connected to the Azure Database for PostgreSQL server.
@@ -95,9 +95,9 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. Under **Manage**, select **Users**.
 1. At the top-left, select **New user** and then select **Create new user**.
 1. In the **New user** page, enter these details and then select **Create**:
-    - **User principal name:** HollyRees
-    - **Display Name:** Holly Rees
-    - **Password:** Untick **Auto-generate password** and then type **w0rd_01_Pa$$**.
+    - **User principal name:** Choose a Principle name
+    - **Display Name:** Choose a Display Name
+    - **Password:** Untick **Auto-generate password** and then enter a strong password. Take note of the principal name and password.
     - Click **Review + create**
 
     > [!TIP]
@@ -106,40 +106,40 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 ### Assign the Reader role
 
 1. In the Azure portal, select **All resources** and then select your Azure Database for PostgreSQL resource.
-1. Select **Access control (IAM)** and then select **Role assignments**. Holly Rees doesn't appear in the list.
+1. Select **Access control (IAM)** and then select **Role assignments**. The new account doesn't appear in the list.
 1. Select **+ Add** and then select **Add role assignment**.
 1. Select the **Reader** role, and then select **Next**.
-1. Choose **+ Select members**, add **Holly Rees** to the list of members and then select **Next**.
+1. Choose **+ Select members**, add the new account you added in the previous step to the list of members and then select **Next**.
 1. Select **Review + Assign**.
 
 ### Test the Reader role
 
 1. In the top-right of the Azure portal, select your user account and then select **Sign out**.
-1. Sign in as the new user, with the user principal name that you noted and the password **w0rd_01_Pa$$**. Replace the default password if you're prompted to and make a note of the new one.
+1. Sign in as the new user, with the user principal name and the password that you noted. Replace the default password if you're prompted to and make a note of the new one.
 1. Choose **Ask me later** if prompted for Multi Factor Authentication
 1. In the portal home page, select **All resources** and then select your Azure Database for PostgreSQL resource.
 1. Select **Stop**. An error is displayed, because the Reader role enables you to see the resource but not change it.
 
 ### Assign the Contributor role
 
-1. In the top-right of the Azure portal, select Holly's user account and then select **Sign out**.
+1. In the top-right of the Azure portal, select the new account's user account and then select **Sign out**.
 1. Sign in using your original Owner account.
 1. Navigate to your Azure Database for PostgreSQL resource, and then select **Access Control (IAM)**.
 1. Select **+ Add** and then select **Add role assignment**.
 1. Choose **Privileged administrator roles**
 1. Select the **Contributor** role, and then select **Next**.
-1. Add **Holly Rees** to the list of members and then select **Next**.
+1. Add the new account you previously added to the list of members and then select **Next**.
 1. Select **Review + Assign**.
-1. Select **Role Assignments**. Holly Rees now has assignments for both Reader and Contributor roles.
+1. Select **Role Assignments**. The new account now has assignments for both Reader and Contributor roles.
 
 ## Test the Contributor role
 
 1. In the top-right of the Azure portal, select your user account and then select **Sign out**.
-1. Sign in as the Holly Rees, with the user principal name and password that you noted.
+1. Sign in as the new account, with the user principal name and password that you noted.
 1. In the portal home page, select **All resources** and then select your Azure Database for MySQL resource.
-1. Select **Stop** and then select **Yes**. This time, the server stops without errors because Holly has the necessary role assigned.
+1. Select **Stop** and then select **Yes**. This time, the server stops without errors because the new account has the necessary role assigned.
 1. Select **Start** to ensure that the PostgreSQL server is ready for the next steps.
-1. In the top-right of the Azure portal, select Holly's user account and then select **Sign out**.
+1. In the top-right of the Azure portal, select the new account's user account and then select **Sign out**.
 1. Sign in using your original Owner account.
 
 ## GRANT access to Azure Database for PostgreSQL
@@ -154,7 +154,7 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. To create a new role, execute this code
 
     ```SQL
-    CREATE ROLE dbuser WITH LOGIN NOSUPERUSER INHERIT CREATEDB NOCREATEROLE NOREPLICATION PASSWORD 'Pa$$w0rd';
+    CREATE ROLE dbuser WITH LOGIN NOSUPERUSER INHERIT CREATEDB NOCREATEROLE NOREPLICATION PASSWORD 'R3placeWithAComplexPW!';
     GRANT CONNECT ON DATABASE zoodb TO dbuser;
     ```
 
@@ -171,7 +171,7 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. In the **Connection type** list, select **PostgreSQL**.
 1. In the **Server name** textbox, type the fully qualified server name for your Azure Database for PostgreSQL resource. You can copy it from the Azure portal.
 1. In the **Authentication type** list, select **Password**.
-1. In the **Username** textbox, type **dbuser** and in the **Password** textbox type **Pa$$w0rd**.
+1. In the **Username** textbox, type **dbuser** and in the **Password** textbox type the complex password you created the account with.
 1. Select the **Remember password** checkbox and then select **Connect**.
 1. Select **New query** and then execute this code:
 
