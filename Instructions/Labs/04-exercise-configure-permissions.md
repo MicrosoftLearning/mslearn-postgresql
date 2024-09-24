@@ -89,7 +89,7 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 ## Create a new user account in Microsoft Entra ID
 
 > [!NOTE]
-> In most production or development environments, it is very possible you won't have the subscription account privileges to create accounts on your Azure Entra ID.  In those case, if allowed by your organization, try asking your Microsoft Entra ID administrator to create a test account for you. If you are unable to get the test Entra account, skip this section and continue to the **GRANT access to Azure Database for PostgreSQL** section. 
+> In most production or development environments, it is very possible you won't have the subscription account privileges to create accounts on your Microsoft Entra ID service.  In those case, if allowed by your organization, try asking your Microsoft Entra ID administrator to create a test account for you. If you are unable to get the test Entra account, skip this section and continue to the **GRANT access to Azure Database for PostgreSQL** section. 
 
 1. In the [Azure portal](https://portal.azure.com), sign in using an Owner account and navigate to Microsoft Entra ID.
 1. Under **Manage**, select **Users**.
