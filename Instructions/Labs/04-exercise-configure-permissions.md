@@ -24,7 +24,7 @@ To complete these exercises, you need to install a PostgreSQL server that is con
 ## Create an Azure Database for PostgreSQL flexible server
 
 1. Under Azure services, select **+ Create a resource**.
-    1. In **Search the Market Place**, type **azure database for postgresql flexible server**, choose **Azure Database for PostgreSQL Flexible Server** and click **Create**.
+    1. In **Search the Marketplace**, type **`azure database for postgresql flexible server`**, choose **Azure Database for PostgreSQL Flexible Server** and click **Create**.
 1. On the Flexible server **Basics** tab, enter each field as follows:
     1. Subscription - your subscription.
     1. Resource group - **rg-PostgreSQL_Entra**.
@@ -38,7 +38,7 @@ To complete these exercises, you need to install a PostgreSQL server that is con
     1. Authentication Method - choose **PostgreSQL and Microsoft Entra authentication**
     1. Set Microsoft Entra admin - select **Set admin**
         1. Search for your account in **Select Microsoft Entra Admins** and (o) your account and click **Select**
-    1. In **admin username**, enter **demo**.
+    1. In **admin username**, enter **`demo`**.
     1. In **password**, enter a suitably complex password.
     1. Select **Next: Networking >**.
 1. On the Flexible server **Networking** tab, enter each field as follows:
@@ -145,7 +145,7 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 ## GRANT access to Azure Database for PostgreSQL
 
 1. Open Azure Data Studio and connect to your Azure Database for PostgreSQL server using the **demo** user that you set as the administrator above.
-1. In the query pane, execute this code against psotgres database. Twelve user roles should be returned, including the **demo** role that you're using to connect:
+1. In the query pane, execute this code against postgres database. Twelve user roles should be returned, including the **demo** role that you're using to connect:
 
     ```SQL
     SELECT rolname FROM pg_catalog.pg_roles;
