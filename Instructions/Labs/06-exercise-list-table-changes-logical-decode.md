@@ -36,7 +36,7 @@ You need your own Azure subscription to complete this exercise. If you don't hav
     1. Availability zone - 1. If availability zones aren't supported, leave as No preference.
     1. High availability - Disabled.
     1. Authentication method - PostgreSQL authentication only.
-    1. In **admin username**, enter **demo**.
+    1. In **admin username**, enter **`demo`**.
     1. In **password**, enter a suitable complex password.
     1. Select **Next: Networking >**.
 1. On the Flexible server **Networking** tab, enter each field as follows:
@@ -60,7 +60,7 @@ You need your own Azure subscription to complete this exercise. If you don't hav
     1. Availability zone - 2. If availability zones aren't supported, leave as No preference.
     1. High availability - Disabled.
     1. Authentication method - PostgreSQL authentication only.
-    1. In **admin username**, enter **demo**.
+    1. In **admin username**, enter **`demo`**.
     1. In **password**, enter a suitable complex password.
     1. Select **Next: Networking >**.
 1. On the Flexible server **Networking** tab, enter each field as follows:
@@ -76,8 +76,8 @@ For *both* the publisher and subscriber servers:
 
 1. In the Azure portal, navigate to the server and under Settings select **Server parameters**.
 1. Using the search bar, find each parameter and make the following changes:
-    1. wal_level = LOGICAL
-    1. max_worker_processes = 24
+    1. `wal_level` = LOGICAL
+    1. `max_worker_processes` = 24
 1. Select **Save**. Then select **Save and Restart**.
 1. Wait for both servers to restart.
 
@@ -117,7 +117,7 @@ Make sure you have:
 
 ## Set up the subscriber
 
-1. Open a second instance of Azure Data Studio and connect to the subscriber server..
+1. Open a second instance of Azure Data Studio and connect to the subscriber server.
 1. Select **File**, **Open file** and navigate to the folder where you saved the scripts.
 1. Open the script **../Allfiles/Labs/06/Lab6_Replication.sql** and connect to the subscriber server. (Copy the server name from the Overview section.)
 1. Highlight and run the section **Grant the admin user replication permission**.
