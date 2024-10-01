@@ -101,7 +101,7 @@ You may encounter a few errors when running the Bicep deployment script. The mos
 - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and rerun the commands to create the resource group and run the Bicep deployment script.
 
     ```bash
-    {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.Resources/deployments/{deploymentName}","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{serverName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
+    {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.Resources/deployments/{deploymentName}","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{serverName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
     ```
 
 - If the script is unable to create an AI resource due to the requirement to accept the responsible AI agreement, you may experience the following error; in which case use the Azure Portal user interface to create an Azure AI Services resource, and then re-run the deployment script.
@@ -178,9 +178,9 @@ In this task, you connect to the `adventureworks` database on your Azure Databas
 
 ### Connect to the database with Azure Data Studio
 
-1. If you haven't install Azure Data Studio yet, [download and install ***Azure Data Studio***](https://go.microsoft.com/fwlink/?linkid=2282284).
+1. If you haven't installed Azure Data Studio yet, [download and install ***Azure Data Studio***](https://go.microsoft.com/fwlink/?linkid=2282284).
 1. Start Azure Data Studio.
-1. If you haven't install the **PostgreSQL** extension in Azure Data Studio, install it now.
+1. If you haven't installed the **PostgreSQL** extension in Azure Data Studio, install it now.
 1. Select **Connections**.
 1. Select **Servers** and select **New connection**.
 1. In **Connection type**, select **PostgreSQL**.
@@ -207,12 +207,12 @@ In this task, you connect to the `adventureworks` database on your Azure Databas
 1. Navigate to the Azure portal and sign in.
 1. Select your Azure Database for PostgreSQL server for this exercise.
 1. In **Settings**, select **Server parameters**.
-1. Navigate to the **pg_qs.query_capture_mode** setting.
+1. Navigate to the **`pg_qs.query_capture_mode`** setting.
 1. Select **TOP**.
 
    ![Screenshot of settings to turn Query Store on](media/09-settings-turn-query-store-on.png)
 
-1. Navigate to **pgms_wait_sampling.query_capture_mode**, select **ALL**, and select **Save**.
+1. Navigate to **`pgms_wait_sampling.query_capture_mode`**, select **ALL**, and select **Save**.
    
     ![Screenshot of settings to turn p g m s_wait_sampling.query_capture_mode on](media/09-query-capture-mode.png)
    
