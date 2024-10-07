@@ -106,7 +106,7 @@ You may encounter a few errors when running the Bicep deployment script. The mos
 - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and rerun the commands to create the resource group and run the Bicep deployment script.
 
     ```bash
-    {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.Resources/deployments/{deploymentName}","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{serverName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
+    {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.Resources/deployments/{deploymentName}","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{serverName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
     ```
 
 - If the script is unable to create an AI resource due to the requirement to accept the responsible AI agreement, you may experience the following error; in which case use the Azure Portal user interface to create an Azure AI Services resource, and then re-run the deployment script.
@@ -130,8 +130,8 @@ You may encounter a few errors when running the Bicep deployment script. The mos
        > NOTE
        > 
        > If **git** is not installed, [download and install the ***git*** app](https://git-scm.com/download) and try running the previous commands again.
-1. If you haven't install Azure Data Studio yet, [download and install ***Azure Data Studio***](https://go.microsoft.com/fwlink/?linkid=2282284).
-1. If you haven't install the **PostgreSQL** extension in Azure Data Studio, install it now.
+1. If you haven't installed Azure Data Studio yet, [download and install ***Azure Data Studio***](https://go.microsoft.com/fwlink/?linkid=2282284).
+1. If you haven't installed the **PostgreSQL** extension in Azure Data Studio, install it now.
 1. Open Azure Data Studio.
 1. Select **Connections**.
 1. Select **Servers** and select **New connection**.
@@ -163,7 +163,7 @@ You may encounter a few errors when running the Bicep deployment script. The mos
 
 1. In the Azure portal, navigate to your Azure Database for PostgreSQL flexible server.
 1. Under **Settings**, select **Server parameters**.
-1. In the search bar, type **vacuum**. Find the following parameters, and change the values as follows:
+1. In the search bar, type **`vacuum`**. Find the following parameters, and change the values as follows:
     1. autovacuum = ON (it should be ON by default)
     1. autovacuum_vacuum_scale_factor = 0.1
     1. autovacuum_vacuum_threshold = 50
