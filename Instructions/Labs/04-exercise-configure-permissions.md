@@ -157,6 +157,8 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
     CREATE ROLE dbuser WITH LOGIN NOSUPERUSER INHERIT CREATEDB NOCREATEROLE NOREPLICATION PASSWORD 'R3placeWithAComplexPW!';
     GRANT CONNECT ON DATABASE zoodb TO dbuser;
     ```
+    > [!NOTE]
+    > Make sure to replace the password in the script above for a complex password.
 
 1. To list the new role, execute the above SELECT query in **pg_catalog.pg_roles** again. You should see the **dbuser** role listed.
 1. To enable the new role to query and modify data in the **animal** table in the **zoodb** database, execute this code against the zoodb database:
