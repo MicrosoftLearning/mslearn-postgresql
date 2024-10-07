@@ -101,7 +101,7 @@ You may encounter a few errors when running the Bicep deployment script. The mos
 - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and rerun the commands to create the resource group and run the Bicep deployment script.
 
     ```bash
-    {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.Resources/deployments/{deploymentName}","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{serverName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
+    {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.Resources/deployments/{deploymentName}","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{serverName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
     ```
 
 - If the script is unable to create an AI resource due to the requirement to accept the responsible AI agreement, you may experience the following error; in which case use the Azure Portal user interface to create an Azure AI Services resource, and then re-run the deployment script.
@@ -171,9 +171,9 @@ In this task, you connect to the `adventureworks` database on your Azure Databas
 
 ### Connect to the database with Azure Data Studio
 
-1. If you haven't install Azure Data Studio yet, [download and install ***Azure Data Studio***](https://go.microsoft.com/fwlink/?linkid=2282284).
+1. If you haven't installed Azure Data Studio yet, [download and install ***Azure Data Studio***](https://go.microsoft.com/fwlink/?linkid=2282284).
 1. Start Azure Data Studio.
-1. If you haven't install the **PostgreSQL** extension in Azure Data Studio, install it now.
+1. If you haven't installed the **PostgreSQL** extension in Azure Data Studio, install it now.
 1. Select **Servers** and select **New connection**.
 1. In **Connection type**, select **PostgreSQL**.
 1. In **Server name**, type the value that you specified when you deployed the server.
@@ -235,7 +235,7 @@ In this task, you connect to the `adventureworks` database on your Azure Databas
     ROLLBACK TRANSACTION;
     ```
 
-1. Return to **SQLQuery_1**, wait for a few seconds and notice that the query has completed was the block was removed.
+1. Return to **SQLQuery_1**, wait for a few seconds and notice that the query has completed once the block was removed.
 
 In this exercise, we've seen the default locking behavior. We then applied locks explicitly and saw that although some locks provide very high levels of protection, these locks can also have performance implications.
 
