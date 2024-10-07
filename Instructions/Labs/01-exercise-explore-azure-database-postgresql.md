@@ -22,7 +22,7 @@ You need your own Azure subscription to complete this exercise. If you don't hav
 ### Create an Azure Database for PostgreSQL flexible server
 
 1. Under Azure services, select **+ Create a resource**.
-    1. In **Search the Market Place**, type **azure database for postgresql flexible server**, choose **Azure Database for PostgreSQL flexible server** and click **Create**.
+    1. In **Search the Marketplace**, type **`azure database for postgresql flexible server`**, choose **Azure Database for PostgreSQL flexible server** and click **Create**.
 1. On the Flexible server **Basics** tab, enter each field as follows:
     1. Subscription - your subscription.
     1. Resource group - **rg-PostgreSQL_Flexi**.
@@ -34,7 +34,7 @@ You need your own Azure subscription to complete this exercise. If you don't hav
     1. Availability zone - No preference.
     1. High availability - Disabled.
     1. Authentication Method - **PostgreSQL authentication only**
-    1. In **admin username**, enter **demo**.
+    1. In **admin username**, enter **`demo`**.
     1. In **password**, enter a suitably complex password.
     1. Select **Next: Networking >**.
 1. On the Flexible server **Networking** tab, enter each field as follows:
@@ -46,7 +46,7 @@ You need your own Azure subscription to complete this exercise. If you don't hav
 ## Examine server parameters
 
 1. Under **Settings** select **Server parameters**.
-1. In the **Search to filter items ...** box, enter **connections**. Server parameters related to connections are displayed. Note the value for **max_connections**. Don't make any changes.
+1. In the **Search to filter items ...** box, enter **`connections`**. Server parameters related to connections are displayed. Note the value for **max_connections**. Don't make any changes.
 1. From the left menu, select **Overview** to exit from **Server parameters**.
 
 ## Change backup retention period
@@ -59,7 +59,7 @@ You need your own Azure subscription to complete this exercise. If you don't hav
 ## Optional exercise - configure a high availability server
 
 1. Under Azure services, select **+ Create a resource**.
-    1. In **Search the Market Place**, type **azure database for postgresql flexible server**, choose **Azure Database for PostgreSQL Flexible Server** and click **Create**.
+    1. In **Search the Marketplace**, type **`azure database for postgresql flexible server`**, choose **Azure Database for PostgreSQL Flexible Server** and click **Create**.
 1. On the Flexible server **Basics** tab, enter each field as follows:
     1. Subscription - your subscription.
     1. Resource group - **rg-PostgreSQL_Flexi**.
