@@ -47,13 +47,6 @@ To complete these exercises, you need to install a PostgreSQL server that is con
     1. Under Firewall rules, select **+ Add current client IP address**, to add your current IP address as a firewall rule. You can optionally name this firewall rule to something meaningful. Also add **Add 0.0.0.0 - 255.255.255.255** and click **Continue**
 1. Select **Review + create**. Review your settings, then select **Create** to create your Azure Database for PostgreSQL Flexible server. When the deployment is complete, select **Go to resource** ready for the next step.
 
-### Create the zoo database
-
-1. Either navigate to the folder with your exercise script files, or download the **Lab2_ZooDb.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/02).
-1. Open Azure Data Studio if it is not already open.
-1. Select **File**, **Open file** and navigate to the folder where you saved the script. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**. If a trust warning is displayed select **Open**.
-1. Run the script. The zoodb database is created.
-
 ## Install Azure Data Studio
 
 To install Azure Data Studio for use with Azure Database for PostgreSQL:
@@ -85,6 +78,13 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 1. The remaining fields are optional.
 1. Select **Connect**. You are connected to the Azure Database for PostgreSQL server.
 1. A list of the server databases is displayed. This includes system databases, and user databases.
+
+## Create the zoo database
+
+1. Either navigate to the folder with your exercise script files, or download the **Lab2_ZooDb.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/02).
+1. Open Azure Data Studio if it is not already open.
+1. Select **File**, **Open file** and navigate to the folder where you saved the script. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**. If a trust warning is displayed select **Open**.
+1. Run the script. The zoodb database is created.
 
 ## Create a new user account in Microsoft Entra ID
 
