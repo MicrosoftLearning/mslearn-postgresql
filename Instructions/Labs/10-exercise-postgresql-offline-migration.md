@@ -121,8 +121,9 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     1. Select **+ Add current IP address (xxx.xxx.xxx)** and **Save**.
     1. Select the **Allow public access from any Azure service within Azure to this server** checkbox.
     1. Select the **Allow public access to this resource through the internet using a public IP address** checkbox.
-    > [!NOTE]
-    > On a production environment you would need to select only those options, networks and IPs you would want to have access your Azure Database for PostgreSQL servers. 
+
+> [!NOTE]
+> On a production environment you would need to select only those options, networks and IPs you would want to have access your Azure Database for PostgreSQL servers. 
 
 > [!NOTE]
 > As previously stated, this Bicep script will create two Azure Database for PostgreSQL servers, a source and a destination one.  ***If you are using an on-premise PostgreSQL server in your environment as the source server for this lab, replace the source sever connection information in all the following instructions with the connection information of your on-premise server in your environment***.  Make sure you enable the necessary firewall rules in both your environment and in Azure.
@@ -276,8 +277,8 @@ First, we need to create an empty database, which we will create a table and the
 1. Click on the **+ Create** option at the top of the **Migration** blade.
    > **Note**: If the **+ Create** option is unavailable, select **Compute + storage** and change the compute tier to either **General Purpose** or **Memory Optimized** and try to create the Migration process again. After the Migration is successful, you can change the compute tier back to **Burstable**.
 1. On the **Setup** tab, enter each field as follows:
-    1. Migration name - **Migration-AdventureWorks**.
-    1. Source server type - For this lab, no matter if you are doing a migration from on-premise or from an Azure Database for PostgreSQL, slect **On-premise Server**. On a production environment, pick the correct source server type.
+    1. Migration name - **`Migration-AdventureWorks`**.
+    1. Source server type - For this lab, no matter if you are doing a migration from on-premise or from an Azure Database for PostgreSQL, select **On-premise Server**. On a production environment, pick the correct source server type.
     1. Migration option - **Validate and Migrate**.
     1. Migration mode - **Offline**. 
     1. Select **Next: Select Runtime Server >**.
