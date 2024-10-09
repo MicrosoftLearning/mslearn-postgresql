@@ -16,6 +16,15 @@ param adminLogin string = 'pgAdmin'
 @secure()
 param adminLoginPassword string
 
+@description('Unique name for the Azure OpenAI service.')
+param azureOpenAIServiceName string = 'oai-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+
+@description('Unique name for the Azure AI Language service account.')
+param languageServiceName string = 'lang-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+
+@description('Unique name for the Azure AI Translator service account.')
+param translatorServiceName string = 'trn-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+
 @description('Unique name for the Azure Machine Learning workspace.')
 param workspaceName string = 'aml-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
 
@@ -33,6 +42,9 @@ param appInsightsName string = 'appi-${resourceGroup().location}-${uniqueString(
 
 @description('Unique name for the container registry.')
 param containerRegistryName string = 'acr${resourceGroup().location}${uniqueString(resourceGroup().id)}'
+
+@description('Restore the service instead of creating a new instance. This is useful if you previously soft-delted the service and want to restore it. If you are restoring a service, set this to true. Otherwise, leave this as false.')
+param restore bool = false
 
 @description('Creates a PostgreSQL Flexible Server.')
 resource postgreSQLFlexibleServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
@@ -106,6 +118,69 @@ resource allowlistExtensions 'Microsoft.DBforPostgreSQL/flexibleServers/configur
     source: 'user-override'
     value: 'azure_ai,vector'
   }
+}
+
+@description('Creates an Azure OpenAI service.')
+resource azureOpenAIService 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+  name: azureOpenAIServiceName
+  location: location
+  kind: 'OpenAI'
+  sku: {
+    name: 'S0'
+    tier: 'Standard'
+  }
+  properties: {
+    customSubDomainName: azureOpenAIServiceName
+    publicNetworkAccess: 'Enabled'
+    restore: restore
+  } 
+}
+
+@description('Creates an embedding deployment for the Azure OpenAI service.')
+resource azureOpenAIEmbeddingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
+  name: 'embedding'
+  parent: azureOpenAIService
+  sku: {
+    name: 'Standard'
+    capacity: 30
+  }
+  properties: {
+    model: {
+      name: 'text-embedding-3-small'
+      version: '1'
+      format: 'OpenAI'
+    }
+  }
+}
+
+@description('Creates an Azure AI Language service account.')
+resource languageService 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+  name: languageServiceName
+  location: location
+  kind: 'TextAnalytics'
+  sku: {
+    name: 'S'
+  }
+  properties: {
+    customSubDomainName: languageServiceName
+    publicNetworkAccess: 'Enabled'
+    restore: restore
+  } 
+}
+
+@description('Creates an Azure AI Translator service account.')
+resource translatorService 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+  name: translatorServiceName
+  location: location
+  kind: 'TextTranslation'
+  sku: {
+    name: 'S1'
+  }
+  properties: {
+    customSubDomainName: translatorServiceName
+    publicNetworkAccess: 'Enabled'
+    restore: restore
+  } 
 }
 
 @description('Creates a storage account for Azure Machine Learning.')
@@ -184,11 +259,20 @@ resource mlWorkspace 'Microsoft.MachineLearningServices/workspaces@2021-07-01' =
   }
 }
 
-output mlWorkspaceId string = mlWorkspace.id
-
-
 output serverFqdn string = postgreSQLFlexibleServer.properties.fullyQualifiedDomainName
 output serverName string = postgreSQLFlexibleServer.name
 output databaseName string = rentalsDatabase.name
+
+output azureOpenAIServiceName string = azureOpenAIService.name
+output azureOpenAIEndpoint string = azureOpenAIService.properties.endpoint
+output azureOpenAIEmbeddingDeploymentName string = azureOpenAIEmbeddingDeployment.name
+
+output languageServiceName string = languageService.name
+output languageServiceEndpoint string = languageService.properties.endpoint
+
+output translatorServiceName string = translatorService.name
+output translatorServiceEndpoint string = translatorService.properties.endpoint
+
+output mlWorkspaceId string = mlWorkspace.id
 
 output azureMLWorkspaceName string = mlWorkspace.name
