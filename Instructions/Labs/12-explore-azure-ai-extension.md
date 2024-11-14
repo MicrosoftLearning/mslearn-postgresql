@@ -315,9 +315,9 @@ The `azure_openai` schema provides the ability to integrate the creation of vect
 
     ```sql
     SELECT
-      id,
-      name,
-      azure_openai.create_embeddings('embedding', description) AS vector
+        id,
+        name,
+        azure_openai.create_embeddings('embedding', description) AS vector
     FROM listings
     LIMIT 1;
     ```
@@ -411,9 +411,9 @@ The `azure_cognitive` schema provides the framework for directly interacting wit
 
     ```sql
     SELECT
-      id,
-      comments,
-      azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment
+        id,
+        comments,
+        azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment
     FROM reviews
     WHERE id IN (1, 3);
     ```
