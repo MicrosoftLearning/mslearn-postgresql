@@ -55,7 +55,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     for i in {a..z} {A..Z} {0..9}; 
         do
         a[$RANDOM]=$i
-    done
+        done
     ADMIN_PASSWORD=$(IFS=; echo "${a[*]::18}")
     echo "Your randomly generated PostgreSQL admin user's password is:"
     echo $ADMIN_PASSWORD
