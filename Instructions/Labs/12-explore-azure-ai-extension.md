@@ -10,7 +10,7 @@ As the lead developer for Margie's Travel, you have been tasked with building an
 
 ## Before you start
 
-You need an [Azure subscription](https://azure.microsoft.com/free) with administrative rights, and you must be approved for Azure OpenAI access in that subscription. If you need Azure OpenAI access, apply at the [Azure OpenAI limited access](https://learn.microsoft.com/legal/cognitive-services/openai/limited-access) page.
+You need an [Azure subscription](https://azure.microsoft.com/free) with administrative rights.
 
 ### Deploy resources into your Azure subscription
 
@@ -48,10 +48,10 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
     ```bash
     a=()
-    for i in {a..z} {A..Z} {0..9}; 
+    for i in {a..z} {A..Z} {0..9};
         do
-        a[$RANDOM]=$i
-    done
+        a[$RANDOM]=$i
+        done
     ADMIN_PASSWORD=$(IFS=; echo "${a[*]::18}")
     echo "Your randomly generated PostgreSQL admin user's password is:"
     echo $ADMIN_PASSWORD
@@ -316,9 +316,9 @@ The `azure_openai` schema provides the ability to integrate the creation of vect
 
     ```sql
     SELECT
-      id,
-      name,
-      azure_openai.create_embeddings('embedding', description) AS vector
+        id,
+        name,
+        azure_openai.create_embeddings('embedding', description) AS vector
     FROM listings
     LIMIT 1;
     ```
@@ -412,9 +412,9 @@ The `azure_cognitive` schema provides the framework for directly interacting wit
 
     ```sql
     SELECT
-      id,
-      comments,
-      azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment
+        id,
+        comments,
+        azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment
     FROM reviews
     WHERE id IN (1, 3);
     ```
