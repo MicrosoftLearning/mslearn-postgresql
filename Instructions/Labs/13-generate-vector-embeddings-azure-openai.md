@@ -12,7 +12,7 @@ By the end of this exercise, you'll have an Azure Database for PostgreSQL flexib
 
 ## Before you start
 
-You need an [Azure subscription](https://azure.microsoft.com/free) with administrative rights, and you must be approved for Azure OpenAI access in that subscription. If you need Azure OpenAI access, apply at the [Azure OpenAI limited access](https://learn.microsoft.com/legal/cognitive-services/openai/limited-access) page.
+You need an [Azure subscription](https://azure.microsoft.com/free) with administrative rights.
 
 ### Deploy resources into your Azure subscription
 
