@@ -53,7 +53,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     The following command assigns the name to be used for the resource group that will house all the resources used in this exercise. The resource group name assigned to the corresponding variable is `rg-learn-postgresql-ai-$REGION`, where `$REGION` is the location you specified above. However, you can change it to any other resource group name that suits your preference.
 
     ```bash
-    RG_NAME=rg-postgresql-ai-$REGION
+    RG_NAME=rg-learn-postgresql-ai-$REGION
     ```
 
     The final command randomly generates a password for the PostgreSQL admin login. Make sure you copy it to a safe place to use later to connect to your PostgreSQL flexible server.
@@ -61,9 +61,9 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     ```bash
     a=()
     for i in {a..z} {A..Z} {0..9}; 
-       do
-       a[$RANDOM]=$i
-    done
+        do
+        a[$RANDOM]=$i
+        done
     ADMIN_PASSWORD=$(IFS=; echo "${a[*]::18}")
     echo "Your randomly generated PostgreSQL admin user's password is:"
     echo $ADMIN_PASSWORD
@@ -113,41 +113,37 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 
     ![Screenshot of Azure Machine Learning with the Launch studio button highlighted by a red box.](media/19-aml-launch-studio.png)
 
-4. Select the **Workspaces** menu option and choose your newly created Azure Machine Learning workspace.
-
-    ![Screenshot of Azure Machine Learning Studio with the Workspaces menu option and the Azure Machine Learning workspace highlighted by red boxes.](media/19-aml-workspace.png)
-
-5. Select the **Models** menu option from the **Assets** menu. Then, select the **+ Register** menu option and choose **From local files**.
+4. Select the **Models** menu option from the **Assets** menu. Then, select the **+ Register** menu option and choose **From local files**.
 
     ![Screenshot of the Model List page. A red box surrounds the Models menu option, the Register drop-down button, and the From local files option.](media/19-aml-register-from-local-files.png)
 
-6. In the **Upload model** menu, set the model type to **MLflow**. Then, choose **Browse** and navigate to your **mlflow-model** folder, uploading the assets. After that, select the **Next** button to continue.
+5. In the **Upload model** menu, set the model type to **MLflow**. Then, choose **Browse** and navigate to your **mlflow-model** folder, uploading the assets. After that, select the **Next** button to continue.
 
     ![Screenshot of the Upload model menu page. A red box surrounds the MLflow model type, Browse, and Next buttons.](media/19-aml-register-upload-model.png)
 
-7. Name the model **RentalListings** and then select the **Next** button.
+6. Name the model **RentalListings** and then select the **Next** button.
 
     ![Screenshot of the Model settings screen with the value of RentalListings entered into the Name field. Red highlighting boxes surround the Name text box and Next button.](media/19-aml-register-model-settings.png)
 
-8. Select the **Register** button to complete model registration. This action will take you back to the **Models** page. Select the newly created model.
+7. Select the **Register** button to complete model registration. This action will take you back to the **Models** page. Select the newly created model.
 
-    > [!Note]
-    >
-    > If you do not see a model, select the **Refresh** menu option button to reload the page. After that, you should see the **RentalListings** model.
+> [!Note]
+>
+> If you do not see a model, select the **Refresh** menu option button to reload the page. After that, you should see the **RentalListings** model.
 
-9. Select the **Deploy** button option and create a new **Real-time endpoint**.
+8. Select the **Deploy** button option and create a new **Real-time endpoint**.
 
     ![Screenshot of the Real-time endpoint menu option highlighted by a red box.](media/19-aml-automl-deploy-rte.png)
 
-10. On the deployment fly-out menu, set the **Virtual machine** to something like **Standard_DS2_v2** and the **Instance count** to 1. Select the **Deploy** button. Deployment may take several minutes to complete, as the deployment process includes provisioning a virtual machine and deploying the model as a Docker container.
+9. On the deployment fly-out menu, set the **Virtual machine** to something like **Standard_DS2_v2** and the **Instance count** to 1. Select the **Deploy** button. Deployment may take several minutes to complete, as the deployment process includes provisioning a virtual machine and deploying the model as a Docker container.
 
     ![Screenshot of the deployment fly-out menu. The Virtual machine is Standard_DS2_v2, and the Instance count is 1. Red boxes highlight the Virtual machine drop-down, Instance count textbox, and Deploy button.](media/19-aml-automl-deploy-endpoint.png)
 
-11. After the endpoint deploys, navigate to the **Consume** tab and copy the REST endpoint and primary key so you can use them in the next section.
+10. After the endpoint deploys, navigate to the **Consume** tab and copy the REST endpoint and primary key so you can use them in the next section.
 
     ![Screenshot of the endpoint Consume tab. Red boxes highlight the copy buttons for the REST endpoint and primary authentication key.](media/19-aml-automl-endpoint-consume.png)
 
-12. To test that your endpoint is running correctly, you can use the **Test** tab on your endpoint. Then, paste in the following block, replacing any input that currently exists. Select the **Test** button, and you should see a JSON output containing an array with a single decimal value indicating the number of US dollars you should expect this particular property to earn for a single night of rental.
+11. To test that your endpoint is running correctly, you can use the **Test** tab on your endpoint. Then, paste in the following block, replacing any input that currently exists. Select the **Test** button, and you should see a JSON output containing an array with a single decimal value indicating the number of US dollars you should expect this particular property to earn for a single night of rental.
 
     ```json
     {
@@ -307,9 +303,9 @@ To populate the language translation table, you will create a stored procedure t
     $$ LANGUAGE sql;
     ```
 
-    > [!Note]
-    >
-    > By default, the deployment name is a combination of the model name (**rentallistings**) and the version number (**1**). If you deploy a new version of the model and use the default deployment name, the new deployment name would be **rentallistings-2**.
+> [!Note]
+>
+> By default, the deployment name is a combination of the model name (**rentallistings**) and the version number (**1**). If you deploy a new version of the model and use the default deployment name, the new deployment name would be **rentallistings-2**.
 
 2. Execute the function using the following SQL command:
 
