@@ -53,7 +53,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
     The following command assigns the name to be used for the resource group that will house all the resources used in this exercise. The resource group name assigned to the corresponding variable is `rg-learn-postgresql-ai-$REGION`, where `$REGION` is the location you specified above. However, you can change it to any other resource group name that suits your preference.
 
     ```bash
-    RG_NAME=rg-learn-postgresql-ai-$REGION
+    RG_NAME=rg-postgresql-ai-$REGION
     ```
 
     The final command randomly generates a password for the PostgreSQL admin login. Make sure you copy it to a safe place to use later to connect to your PostgreSQL flexible server.
