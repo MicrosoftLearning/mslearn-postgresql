@@ -142,7 +142,7 @@ Create a publication
     Do NOT do this for subscriber
 *********************************************************************************/
 
--- DROP Publication pub;
+DROP Publication IF EXISTS pub;
 
 CREATE PUBLICATION pub FOR TABLE category, enclosure, animal;
 
@@ -160,9 +160,9 @@ Create a subscription
         password=   the password for the admin user on your publisher server
 *********************************************************************************/
 
--- DROP SUBSCRIPTION sub;
+DROP SUBSCRIPTION IF EXISTS sub;
 
-CREATE SUBSCRIPTION sub CONNECTION 'host=postgresql-pub21.postgres.database.azure.com user=demo dbname=zoodb password=Pa$$w0rd' PUBLICATION pub;
+CREATE SUBSCRIPTION sub CONNECTION 'host=postgresql-pub21.postgres.database.azure.com user=demo dbname=zoodb password=YOURSTRONGPASSWORD' PUBLICATION pub;
 
 SELECT *
     FROM pg_stat_subscription;

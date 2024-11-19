@@ -31,15 +31,13 @@ You need an [Azure subscription](https://azure.microsoft.com/free) with administ
 
 This step guides you through using Azure CLI commands from the Azure Cloud Shell to create a resource group and run a Bicep script to deploy the Azure services necessary for completing this exercise into your Azure subscription.
 
-> [!Note]
->
-> If you are doing multiple modules in this learning path, you can share the Azure environment between them. In that case, you only need to complete this resource deployment step once.
-
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/).
 
 2. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
     ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/17-portal-toolbar-cloud-shell.png)
+
+    If prompted, select the required options to open a *Bash* shell. If you have previously used a *PowerShell* console, switch it to a *Bash* shell.
 
 3. At the Cloud Shell prompt, enter the following to clone the GitHub repo containing exercise resources:
 
@@ -96,38 +94,37 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
-    You may encounter a few errors when running the Bicep deployment script. The most common messages and the steps to resolve them are:
-
-    - If you have not previously created an Azure AI Services resource, you may receive a message that the Responsible AI terms have not been read and accepted in your subscription:
-
-        ```bash
-        {"code": "ResourceKindRequireAcceptTerms", "message": "This subscription cannot create TextAnalytics until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal and trying again.}
-        ```
-
-        To resolve this error, run this command to create a Language service in your resource group and accept the Responsible AI terms for your subscription. Once the resource is created, you can rerun the command to execute the Bicep deployment script.
-
-        ```bash
-        az cognitiveservices account create --name lang-temp-$region-$ADMIN_PASSWORD --resource-group $RG_NAME --kind TextAnalytics --sku F0 --location $REGION --yes
-        ```
-
-    - If you previously ran the Bicep deployment script for this learning path and subsequently deleted the resources, you may receive an error message like the following if you are attempting to rerun the script within 48 hours of deleting the resources:
-
-        ```bash
-        {"code": "InvalidTemplateDeployment", "message": "The template deployment 'deploy' is not valid according to the validation procedure. The tracking id is '4e87a33d-a0ac-4aec-88d8-177b04c1d752'. See inner errors for details."}
-    
-        Inner Errors:
-        {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/oai-learn-eastus-gvg3papkkkimy' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
-        ```
-
-        If you receive this message, modify the `azure deployment group create` command above to set the `restore` parameter equal to `true` and rerun it.
-
-    - If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and try rerunning the Bicep deployment script.
-
-        ```bash
-        {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus2/providers/Microsoft.Resources/deployments/deploy","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.DBforPostgreSQL/flexibleServers/psql-learn-eastus2-gvg3papkkkimy","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
-        ```
-
 8. Close the Cloud Shell pane once your resource deployment is complete.
+
+### Troubleshooting deployment errors
+
+You may encounter a few errors when running the Bicep deployment script.
+
+- If you previously ran the Bicep deployment script for this learning path and subsequently deleted the resources, you may receive an error message like the following if you are attempting to rerun the script within 48 hours of deleting the resources:
+
+    ```bash
+    {"code": "InvalidTemplateDeployment", "message": "The template deployment 'deploy' is not valid according to the validation procedure. The tracking id is '4e87a33d-a0ac-4aec-88d8-177b04c1d752'. See inner errors for details."}
+    
+    Inner Errors:
+    {"code": "FlagMustBeSetForRestore", "message": "An existing resource with ID '/subscriptions/{subscriptionId}/resourceGroups/rg-learn-postgresql-ai-eastus/providers/Microsoft.CognitiveServices/accounts/{accountName}' has been soft-deleted. To restore the resource, you must specify 'restore' to be 'true' in the property. If you don't want to restore existing resource, please purge it first."}
+    ```
+
+    If you receive this message, modify the `azure deployment group create` command above to set the `restore` parameter equal to `true` and rerun it.
+
+- If the selected region is restricted from provisioning specific resources, you must set the `REGION` variable to a different location and rerun the commands to create the resource group and run the Bicep deployment script.
+
+    ```bash
+    {"status":"Failed","error":{"code":"DeploymentFailed","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.Resources/deployments/{deploymentName}","message":"At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.","details":[{"code":"ResourceDeploymentFailure","target":"/subscriptions/{subscriptionId}/resourceGroups/{resourceGrouName}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{serverName}","message":"The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.","details":[{"code":"RegionIsOfferRestricted","message":"Subscriptions are restricted from provisioning in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'. See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
+    ```
+
+- If the script is unable to create an AI resource due to the requirement to accept the responsible AI agreement, you may experience the following error; in which case use the Azure Portal user interface to create an Azure AI Services resource, and then re-run the deployment script.
+
+    ```bash
+    {"code": "InvalidTemplateDeployment", "message": "The template deployment 'deploy' is not valid according to the validation procedure. The tracking id is 'f8412edb-6386-4192-a22f-43557a51ea5f'. See inner errors for details."}
+     
+    Inner Errors:
+    {"code": "ResourceKindRequireAcceptTerms", "message": "This subscription cannot create TextAnalytics until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal then trying again. For more detail go to https://go.microsoft.com/fwlink/?linkid=2164190"}
+    ```
 
 ## Connect to your database using psql in the Azure Cloud Shell
 
@@ -159,7 +156,7 @@ To store and query vectors, and to generate embeddings, you need to allow-list a
     CREATE EXTENSION vector;
     ```
 
-3. To enable the `azure_ai` extension, run the following SQL command. You'll need the endpoint and API key for the Azure OpenAI resource. For detailed instructions, read [Enable the `azure_ai` extension](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension).
+3. To enable the `azure_ai` extension, run the following SQL command. You'll need the endpoint and API key for the ***Azure OpenAI*** resource. For detailed instructions, read [Enable the `azure_ai` extension](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension).
 
     ```sql
     CREATE EXTENSION azure_ai;
@@ -173,9 +170,9 @@ To store and query vectors, and to generate embeddings, you need to allow-list a
     SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
     ```
 
-1. To successfully make calls against your Azure AI Language services using the `azure_ai` extension, you must provide its endpoint and key to the extension. Using the same browser tab where the Cloud Shell is open, navigate to your Language service resource in the [Azure portal](https://portal.azure.com/) and select the **Keys and Endpoint** item under **Resource Management** from the left-hand navigation menu.
+4. To successfully make calls against your ***Azure AI Language*** services using the `azure_ai` extension, you must provide its endpoint and key to the extension. Using the same browser tab where the Cloud Shell is open, navigate to your Language service resource in the [Azure portal](https://portal.azure.com/) and select the **Keys and Endpoint** item under **Resource Management** from the left-hand navigation menu.
 
-2. Copy your endpoint and access key values, then in the commands below, replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Run the commands from the `psql` command prompt in the Cloud Shell to add your values to the `azure_ai.settings` table.
+5. Copy your endpoint and access key values, then in the commands below, replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Run the commands from the `psql` command prompt in the Cloud Shell to add your values to the `azure_ai.settings` table.
 
     ```sql
     SELECT azure_ai.set_setting('azure_cognitive.endpoint', '{endpoint}');
@@ -248,7 +245,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
     ALTER TABLE listings ADD COLUMN key_phrases text[];
     ```
 
-1. Populate the column in batches. Depending on the quota, you may wish to adjust the `LIMIT` value. Feel free to run the command as many times as you like; you don't need all rows populated for this exercise.
+1. Populate the column in batches. Depending on the quota, you may wish to adjust the `LIMIT` value. *Feel free to run the command as many times as you like*; you don't need all rows populated for this exercise.
 
     ```sql
     UPDATE listings
@@ -260,7 +257,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
 1. Query listings by key phrases:
 
     ```sql
-    SELECT id, name FROM listings WHERE 'market' = ANY(key_phrases);
+    SELECT id, name FROM listings WHERE 'closet' = ANY(key_phrases);
     ```
 
     You will get results like this, depending on which listings have key phrases populated:
@@ -288,7 +285,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
     ALTER TABLE listings ADD COLUMN entities azure_cognitive.entity[];
     ```
 
-2. Populate the column in batches. This process may take several minutes. You may wish to adjust the `LIMIT` value depending on the quota or to return more quickly with partial results. Feel free to run the command as many times as you like; you don't need all rows populated for this exercise.
+2. Populate the column in batches. This process may take several minutes. You may wish to adjust the `LIMIT` value depending on the quota or to return more quickly with partial results. *Feel free to run the command as many times as you like*; you don't need all rows populated for this exercise.
 
     ```sql
     UPDATE listings
@@ -297,7 +294,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
     WHERE listings.id = subset.id;
     ```
 
-3. You may now query all listings' entities to find properties with decks:
+3. You may now query all listings' entities to find properties with basements:
 
     ```sql
     SELECT id, name
@@ -354,7 +351,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
     ALTER TABLE listings ADD COLUMN pii_entities azure_cognitive.entity[];
     ```
 
-2. Populate the column in batches. This process may take several minutes. You may wish to adjust the `LIMIT` value depending on the quota or to return more quickly with partial results. Feel free to run the command as many times as you like; you don't need all rows populated for this exercise.
+2. Populate the column in batches. This process may take several minutes. You may wish to adjust the `LIMIT` value depending on the quota or to return more quickly with partial results. *Feel free to run the command as many times as you like*; you don't need all rows populated for this exercise.
 
     ```sql
     UPDATE listings
@@ -475,10 +472,6 @@ Let's ensure the extracted key phrases, recognized entities, and PII were popula
 ## Clean up
 
 Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
-
-> [!Note]
->
-> If you plan on completing additional modules in this learning path, you can skip this task until you have finished all the modules you intend to complete.
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
 
