@@ -25,7 +25,7 @@ By the end, you'll have four new columns in the `listings` table with extracted 
 
 ## Before you start
 
-You need an [Azure subscription](https://azure.microsoft.com/free) with administrative rights, and you must be approved for Azure OpenAI access in that subscription. If you need Azure OpenAI access, apply at the [Azure OpenAI limited access](https://learn.microsoft.com/legal/cognitive-services/openai/limited-access) page.
+You need an [Azure subscription](https://azure.microsoft.com/free) with administrative rights.
 
 ### Deploy resources into your Azure subscription
 
@@ -68,7 +68,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     for i in {a..z} {A..Z} {0..9}; 
         do
         a[$RANDOM]=$i
-    done
+        done
     ADMIN_PASSWORD=$(IFS=; echo "${a[*]::18}")
     echo "Your randomly generated PostgreSQL admin user's password is:"
     echo $ADMIN_PASSWORD
@@ -171,6 +171,18 @@ To store and query vectors, and to generate embeddings, you need to allow-list a
 
     ```sql
     SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
+    ```
+
+1. To successfully make calls against your Azure AI Language services using the `azure_ai` extension, you must provide its endpoint and key to the extension. Using the same browser tab where the Cloud Shell is open, navigate to your Language service resource in the [Azure portal](https://portal.azure.com/) and select the **Keys and Endpoint** item under **Resource Management** from the left-hand navigation menu.
+
+2. Copy your endpoint and access key values, then in the commands below, replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Run the commands from the `psql` command prompt in the Cloud Shell to add your values to the `azure_ai.settings` table.
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_cognitive.endpoint', '{endpoint}');
+    ```
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '{api-key}');
     ```
 
 ## Populate the database with sample data
@@ -289,7 +301,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
 
     ```sql
     SELECT id, name
-    FROM listings, unnest(entities) e
+    FROM listings, unnest(listings.entities) AS e
     WHERE e.text LIKE '%roof%deck%'
     LIMIT 10;
     ```
@@ -347,8 +359,8 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
     ```sql
     UPDATE listings
     SET
-     description_pii_safe = pii.redacted_text,
-     pii_entities = pii.entities
+        description_pii_safe = pii.redacted_text,
+        pii_entities = pii.entities
     FROM (SELECT id, description FROM listings WHERE description_pii_safe IS NULL OR pii_entities IS NULL ORDER BY id LIMIT 100) subset,
     LATERAL azure_cognitive.recognize_pii_entities(subset.description, 'en-us') as pii
     WHERE listings.id = subset.id;
