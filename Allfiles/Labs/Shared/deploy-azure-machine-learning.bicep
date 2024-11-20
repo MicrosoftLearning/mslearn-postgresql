@@ -17,22 +17,22 @@ param adminLogin string = 'pgAdmin'
 param adminLoginPassword string
 
 @description('Unique name for the Azure Machine Learning workspace.')
-param workspaceName string = 'aml-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+param workspaceName string = 'aml-${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the Log Analytics workspace.')
-param logAnalyticsName string = 'la-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+param logAnalyticsName string = 'la-${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the storage account name.')
 param storageAccountName string = 'sa${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the Key Vault instance.')
-param keyVaultName string = 'kv-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+param keyVaultName string = 'kv-${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the Application Insights instance.')
-param appInsightsName string = 'appi-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+param appInsightsName string = 'appi-${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the container registry.')
-param containerRegistryName string = 'acr${resourceGroup().location}${uniqueString(resourceGroup().id)}'
+param containerRegistryName string = 'acr${uniqueString(resourceGroup().id)}'
 
 @description('Creates a PostgreSQL Flexible Server.')
 resource postgreSQLFlexibleServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
