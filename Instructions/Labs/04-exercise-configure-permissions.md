@@ -81,7 +81,7 @@ To install Azure Data Studio for use with Azure Database for PostgreSQL:
 
 ### Create the zoo database
 
-1. Either navigate to the folder with your exercise script files, or download the **Lab2_ZooDb.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/Allfiles/Labs/02).
+1. Either navigate to the folder with your exercise script files, or download the **Lab2_ZooDb.sql** from [MSLearn PostgreSQL Labs](https://github.com/MicrosoftLearning/mslearn-postgresql/blob/main/Allfiles/Labs/02).
 1. Open Azure Data Studio if it is not already open.
 1. Select **File**, **Open file** and navigate to the folder where you saved the script. Select **../Allfiles/Labs/02/Lab2_ZooDb.sql** and **Open**. If a trust warning is displayed select **Open**.
 1. Run the script. The zoodb database is created.
