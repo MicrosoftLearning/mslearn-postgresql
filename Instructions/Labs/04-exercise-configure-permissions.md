@@ -228,8 +228,6 @@ In this section, you connect to the PostgreSQL server using the PostgreSQL exten
 
 1. On the lower right of Visual Studio Code, make sure the connection is green. If it isn't, it should say **PGSQL Disconnected**. Select the **PGSQL Disconnected** text and then select your PostgreSQL server connection from the list in the command palette. If it asks for a password, enter the password you previously generated.
 
-    > &#128221; You can also change the database on the query pane. You can note the server name and database name under the query tab itself. Selecting the database name will show a list of databases. Select the `zoodb` database from the list.
-
 1. Time to create the database.
 
     1. Highlight the **DROP** and **CREATE** statements and run them.
@@ -238,9 +236,11 @@ In this section, you connect to the PostgreSQL server using the PostgreSQL exten
 
     1. Select the ellipsis in the menu bar with the *run* icon and select **Change PostgreSQL Database**. Select `zoodb` from the list of databases.
 
+    > &#128221; You can also change the database on the query pane. You can note the server name and database name under the query tab itself. Selecting the database name will show a list of databases. Select the `zoodb` database from the list.
+
     1. Run the **SELECT current_database()** statement again to confirm that the database is now set to `zoodb`.
 
-    1. Highlight the **Created tables**, **Create foreign keys**, and **Populate tables** sections and run them.
+    1. Highlight the **Create tables**, **Create foreign keys**, and **Populate tables** sections and run them.
 
     1. Highlight the 3 **SELECT** statements at the end of the script and run them to verify that the tables were created and populated.
 
