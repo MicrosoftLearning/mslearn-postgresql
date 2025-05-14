@@ -211,7 +211,7 @@ In this section, you connect to the PostgreSQL server using the PostgreSQL exten
 
     1. In the **NEW CONNECTION** dialog box, enter the following information:
 
-        - **Server name**: <your-server-name>.postgres.database.azure.com
+        - **Server name**: `<your-server-name>`.postgres.database.azure.com
         - **Authentication type**: Password
         - **User name**: pgAdmin
         - **Password**: The random password you previously generated.
@@ -228,8 +228,6 @@ In this section, you connect to the PostgreSQL server using the PostgreSQL exten
 
 1. On the lower right of Visual Studio Code, make sure the connection is green. If it isn't, it should say **PGSQL Disconnected**. Select the **PGSQL Disconnected** text and then select your PostgreSQL server connection from the list in the command palette. If it asks for a password, enter the password you previously generated.
 
-    > &#128221; You can also change the database on the query pane. You can note the server name and database name under the query tab itself. Selecting the database name will show a list of databases. Select the `zoodb` database from the list.
-
 1. Time to create the database.
 
     1. Highlight the **DROP** and **CREATE** statements and run them.
@@ -237,6 +235,8 @@ In this section, you connect to the PostgreSQL server using the PostgreSQL exten
     1. If you highlight just the **SELECT current_database()** statement and run it, you notice that the database is currently set to `postgres`. You need to change it to `zoodb`.
 
     1. Select the ellipsis in the menu bar with the *run* icon and select **Change PostgreSQL Database**. Select `zoodb` from the list of databases.
+
+    > &#128221; You can also change the database on the query pane. You can note the server name and database name under the query tab itself. Selecting the database name will show a list of databases. Select the `zoodb` database from the list.
 
     1. Run the **SELECT current_database()** statement again to confirm that the database is now set to `zoodb`.
 
@@ -298,7 +298,7 @@ Time to create a table-valued function. A table-valued function is a user-define
 
 In this section, you explore some of the built-in functions available in PostgreSQL. PostgreSQL has a rich set of built-in functions that you can use to perform various operations on data. These functions can be used in SQL queries to manipulate and analyze data.
 
-1. In Visual Studio Code, select **File**, **Open File**, and then navigate to the lab scripts. Select **../Allfiles/Labs/05/Lab5_InbuiltFunctions.sql** and then select **Open**. If necessary, reconnect to the server by selecting the **PGSQL Disconnected** text and then selecting your PostgreSQL server connection from the list in the command palette. If it asks for a password, enter the password you previously generated.
+1. In Visual Studio Code, select **File**, **Open File**, and then navigate to the lab scripts. Select **../Allfiles/Labs/05/Lab5_SimpleFunctions.sql** and then select **Open**. If necessary, reconnect to the server by selecting the **PGSQL Disconnected** text and then selecting your PostgreSQL server connection from the list in the command palette. If it asks for a password, enter the password you previously generated.
 
 > &#128221; The functions in this script are not specific to the zoo database. They are general PostgreSQL functions that can be used in any database. You can run them in any database, including the `postgres` database.
 
