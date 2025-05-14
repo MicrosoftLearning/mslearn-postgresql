@@ -211,12 +211,12 @@ In this section, you connect to the PostgreSQL server using the PostgreSQL exten
 
     1. In the **NEW CONNECTION** dialog box, enter the following information:
 
-        - **Server name**: <your-server-name>.postgres.database.azure.com
+        - **Server name**: `<your-server-name>`.postgres.database.azure.com
         - **Authentication type**: Password
         - **User name**: pgAdmin
         - **Password**: The random password you previously generated.
         - Check the **Save password** checkbox.
-        - **Connection name**: <your-server-name>
+        - **Connection name**: `<your-server-name>`
 
     1. Test the connection by selecting **Test Connection**. If the connection is successful, select **Save & Connect** to save the connection, otherwise review the connection information, and try again.
 
