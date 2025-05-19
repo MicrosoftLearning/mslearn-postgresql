@@ -236,7 +236,7 @@ In this section, you connect to the PostgreSQL server using the PostgreSQL exten
 
     1. Select the ellipsis in the menu bar with the *run* icon and select **Change PostgreSQL Database**. Select `zoodb` from the list of databases.
 
-    > &#128221; You can also change the database on the query pane. You can note the server name and database name under the query tab itself. Selecting the database name will show a list of databases. Select the `zoodb` database from the list.
+        > &#128221; You can also change the database on the query pane. You can note the server name and database name under the query tab itself. Selecting the database name will show a list of databases. Select the `zoodb` database from the list.
 
     1. Run the **SELECT current_database()** statement again to confirm that the database is now set to `zoodb`.
 
@@ -418,4 +418,18 @@ These tests demonstrate that the new user can execute Data Manipulation Language
 
 1. If you don't need this PostgreSQL server anymore for other exercises, to avoid incurring unnecessary Azure costs, delete the resource group created in this exercise.
 
+1. If you want to keep the PostgreSQL server running, you can leave it running. If you don't want to leave it running, you can stop the server to avoid incurring unnecessary costs in the bash terminal. To stop the server, run the following command:
+
+    ```azurecli
+    az postgres flexible-server stop --name <your-server-name> --resource-group $RG_NAME
+    ```
+
+    Replace `<your-server-name>` with the name of your PostgreSQL server.
+
+    > &#128221; You can also stop the server from the Azure portal. In the Azure portal, navigate to **Resource groups** and select the resource group you previously created. Select the PostgreSQL server and then select **Stop** from the menu.
+
 1. If needed, delete the git repository you cloned earlier.
+
+You successfully completed this exercise. You learned how to assign RBAC roles to control access to Azure Database for PostgreSQL resources and PostgreSQL GRANTS to control access to database operations.
+
+You also learned how to create a new user account in Microsoft Entra ID and assign it the Reader and Contributor roles. Finally, you created a new role in PostgreSQL and assigned it permissions to access the database.

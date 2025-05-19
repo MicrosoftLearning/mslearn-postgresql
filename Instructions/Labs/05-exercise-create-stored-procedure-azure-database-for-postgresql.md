@@ -236,7 +236,7 @@ In this section, you connect to the PostgreSQL server using the PostgreSQL exten
 
     1. Select the ellipsis in the menu bar with the *run* icon and select **Change PostgreSQL Database**. Select `zoodb` from the list of databases.
 
-    > &#128221; You can also change the database on the query pane. You can note the server name and database name under the query tab itself. Selecting the database name will show a list of databases. Select the `zoodb` database from the list.
+        > &#128221; You can also change the database on the query pane. You can note the server name and database name under the query tab itself. Selecting the database name will show a list of databases. Select the `zoodb` database from the list.
 
     1. Run the **SELECT current_database()** statement again to confirm that the database is now set to `zoodb`.
 
@@ -288,11 +288,11 @@ Time to create a table-valued function. A table-valued function is a user-define
 
 1. Highlight and run the **CALL repopulate_zoo()** stored procedure to start with clean data.
 
-1. Highlight and run the section following the **Create a table valued function** comment. This function returns a table called **enclosure_summary**. Read through the function code to understand how the table is populated.
+1. Highlight and run the script following the **Create a table valued function** comment. This function returns a table called **enclosure_summary**. Read through the function code to understand how the table is populated.
 
 1. Highlight and run the two select statements, passing in a different enclosure ID each time.
 
-1. Highlight and run the section following the **How to use a table valued function with a LATERAL join** comment. This script shows the table-valued function being used in place of a table name in a join.
+1. Highlight and run the script following the **How to use a table valued function with a LATERAL join** comment. This script shows the table-valued function being used in place of a table name in a join.
 
 ## In-built functions
 
@@ -304,7 +304,11 @@ In this section, you explore some of the built-in functions available in Postgre
 
 1. Highlight and run each function to see how it works. For more information, review the [online documentation](https://www.postgresql.org/docs/current/functions.html) article for information about each function.
 
-1. If you want to keep the PostgreSQL server running, you can leave it running. Otherwise, you can stop the server to avoid incurring unnecessary costs in the bash terminal. To stop the server, run the following command:
+## Clean-Up
+
+1. If you don't need this PostgreSQL server anymore for other exercises, to avoid incurring unnecessary Azure costs, delete the resource group created in this exercise.
+
+1. If you want to keep the PostgreSQL server running, you can leave it running. If you don't want to leave it running, you can stop the server to avoid incurring unnecessary costs in the bash terminal. To stop the server, run the following command:
 
     ```azurecli
     az postgres flexible-server stop --name <your-server-name> --resource-group $RG_NAME
@@ -314,10 +318,8 @@ In this section, you explore some of the built-in functions available in Postgre
 
     > &#128221; You can also stop the server from the Azure portal. In the Azure portal, navigate to **Resource groups** and select the resource group you previously created. Select the PostgreSQL server and then select **Stop** from the menu.
 
-1. Close Visual Studio Code.
-
-## Clean-Up
-
-1. If you don't need this PostgreSQL server anymore for other exercises, to avoid incurring unnecessary Azure costs, delete the resource group created in this exercise.
-
 1. If needed, delete the git repository you cloned earlier.
+
+You successfully completed this exercise. You created a couple of stored procedures and executed them. You also created a table-valued function and explored some of the built-in functions available in PostgreSQL.
+
+You can now use these stored procedures and functions in your own PostgreSQL databases to perform various operations on data.
