@@ -299,7 +299,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
     ```sql
     SELECT id, name
     FROM listings, unnest(listings.entities) AS e
-    WHERE e.text LIKE '%roof%deck%'
+    WHERE e.text LIKE '%basements%'
     LIMIT 10;
     ```
 
@@ -381,7 +381,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
 4. You may also identify the entities recognized in PII; for example, using the identical listing as above:
 
     ```sql
-    SELECT entities
+    SELECT pii_entities
     FROM listings
     WHERE entities IS NOT NULL
     LIMIT 1;
