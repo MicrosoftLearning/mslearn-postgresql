@@ -370,7 +370,7 @@ psql -h <servername> -p <port> -U <username> <dbname>
         backend_xid,            -- Transaction ID, if active
         backend_xmin,           -- Transaction ID that the process is working with
         query,                  -- Text of the query being executed
-        encode(backend_type::bytea, 'escape') AS backend_type,           -- Type of backend (e.g., client backend, autovacuum worker). We use encode(…, 'escape') to safely display raw data with invalid characters by converting it into a readable format, doing this prevents a UTF-8 conversion error in Azure Data Studio.
+        encode(backend_type::bytea, 'escape') AS backend_type,           -- Type of backend (e.g., client backend, autovacuum worker). We use encode(…, 'escape') to safely display raw data with invalid characters by converting it into a readable format, doing this prevents a UTF-8 conversion error in Visual Studio Code.
         leader_pid,             -- PID of the leader process, if this is a parallel worker
         query_id               -- Query ID (added in more recent PostgreSQL versions)
     FROM pg_stat_activity;
