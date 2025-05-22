@@ -9,7 +9,7 @@ DROP DATABASE IF EXISTS zoodb;
 
 CREATE DATABASE zoodb;
 
--- SELECT current_database();
+SELECT current_database();
 
 
 /*********************************************************************************
