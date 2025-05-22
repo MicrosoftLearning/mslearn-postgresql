@@ -132,7 +132,7 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL - Flexible Server.
 
-2. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `rentals` database.
+2. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `rentals` database. Note that selecting **Connect** does not actually connect you to the database; it simply provides instructions for connecting to the database using various methods. Review the instructions to **Connect from browser or locally** and use those to connect using the Azure Cloud Shell.
 
     ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](media/17-postgresql-rentals-database-connect.png)
 
@@ -299,7 +299,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
     ```sql
     SELECT id, name
     FROM listings, unnest(listings.entities) AS e
-    WHERE e.text LIKE '%roof%deck%'
+    WHERE e.text LIKE '%basements%'
     LIMIT 10;
     ```
 
@@ -381,7 +381,7 @@ To reset your sample data, you can execute `DROP TABLE listings`, and repeat the
 4. You may also identify the entities recognized in PII; for example, using the identical listing as above:
 
     ```sql
-    SELECT entities
+    SELECT pii_entities
     FROM listings
     WHERE entities IS NOT NULL
     LIMIT 1;
