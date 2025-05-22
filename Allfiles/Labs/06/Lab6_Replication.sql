@@ -7,7 +7,7 @@ Grant the admin user replication permission
     Do this for publisher and subscriber
 *********************************************************************************/
 
-ALTER ROLE "demo" WITH REPLICATION;
+ALTER ROLE "pgAdmin" WITH REPLICATION;
 
 
 /*********************************************************************************
