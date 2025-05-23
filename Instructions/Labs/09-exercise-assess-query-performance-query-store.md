@@ -237,7 +237,7 @@ psql -h <servername> -p <port> -U <username> <dbname>
     You can find the Server name in **Overview** in the Azure portal or as an output from the bicep script or on the Azure portal.
 
     ```sql
-   psql -h <servername>.postgres.database.azure.com -p 5432 -U pgAdmin postgres
+   psql -h <servername>.postgres.database.azure.com -p 5432 -U pgAdmin adventureworks
     ```
 
     You're prompted for the password for the admin account you previously copied.
