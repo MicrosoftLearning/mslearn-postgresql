@@ -237,7 +237,7 @@ psql -h <servername> -p <port> -U <username> <dbname>
     You can find the Server name in **Overview** in the Azure portal or as an output from the bicep script or on the Azure portal.
 
     ```sql
-   psql -h <servername>.postgres.database.azure.com -p 5432 -U pgAdmin postgres
+   psql -h <servername>.postgres.database.azure.com -p 5432 -U pgAdmin adventureworks
     ```
 
     You're prompted for the password for the admin account you previously copied.
@@ -272,7 +272,7 @@ psql -h <servername> -p <port> -U <username> <dbname>
 1. Next, use the `COPY` command to load data from CSV files into the table you previously created. Start by running the following command to populate the `production.workorder` table:
 
     ```sql
-    \COPY production.workorder FROM 'mslearn-postgresql/Allfiles/Labs/08/Lab8_workorder.csv' CSV HEADER
+    \COPY production.workorder FROM 'Allfiles/Labs/08/Lab8_workorder.csv' CSV HEADER
     ```
 
     The command output should be `COPY 72591`, indicating that 72,591 rows were written into the table from the CSV file.
@@ -355,7 +355,7 @@ psql -h <servername> -p <port> -U <username> <dbname>
 
 1. Return to *first* query window and run the query in that window again.
 
-1. Notice that the **stockedqty** value for the first row is still **673**. The query is using a snapshot of the data and isn't seeing the updates from the other transaction.
+1. Notice that the **scrappedqty** value for the first row is still **673**. The query is using a snapshot of the data and isn't seeing the updates from the other transaction.
 
 1. Select the *second* query tab, delete the existing query, type the following query and select **Run**.
 

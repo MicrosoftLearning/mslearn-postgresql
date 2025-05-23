@@ -125,7 +125,7 @@ In this section, you create the publisher server. The publisher server is the so
 1. On the Flexible server **Basics** tab, enter each field as follows:
     - **Subscription** - your subscription.
     - **Resource group** - select **rg-PostgreSQL_Replication**.
-    - **Server name** - *psql-postgresql-pub9999* (Name must be globally unique, so replace 9999 with four random numbers).
+    - **Server name** - *psql-postgresql-sub9999* (Name must be globally unique, so replace 9999 with four random numbers).
     - **Region** - select the same region as the resource group.
     - **PostgreSQL version** - select 16.
     - **Workload type** - *Development*.
