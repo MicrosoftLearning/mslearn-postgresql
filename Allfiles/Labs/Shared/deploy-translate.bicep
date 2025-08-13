@@ -16,10 +16,6 @@ param adminLogin string = 'pgAdmin'
 @secure()
 param adminLoginPassword string
 
-@description('Name of the database.')
-@minLength(1)
-param databaseName string = 'rentals'
-
 @description('Unique name for the Azure AI Translator service account.')
 param translatorServiceName string = 'trn-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
 
