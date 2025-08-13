@@ -16,6 +16,10 @@ param adminLogin string = 'pgAdmin'
 @secure()
 param adminLoginPassword string
 
+@description('Name of the database.')
+@minLength(1)
+param databaseName string = 'rentals'
+
 @description('Unique name for the Azure OpenAI service.')
 param azureOpenAIServiceName string = 'oai-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
 
@@ -80,7 +84,7 @@ resource allowAll 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-
 
 @description('Creates the "rentals" database in the PostgreSQL Flexible Server.')
 resource rentalsDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-03-01-preview' = {
-  name: 'rentals'
+  name: databaseName
   parent: postgreSQLFlexibleServer
   properties: {
     charset: 'UTF8'
