@@ -44,7 +44,7 @@ param embeddingCapacity int = 1
 param chatModelName string = 'gpt-4o-mini'
 
 @description('Chat model version (date-stamped or "latest" depending on model).')
-param chatModelVersion string = 'latest'
+param chatModelVersion string = '2024-07-18'
 
 @description('Chat deployment capacity (small for labs).')
 param chatCapacity int = 1
