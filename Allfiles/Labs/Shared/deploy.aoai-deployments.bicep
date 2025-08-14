@@ -1,30 +1,24 @@
-@description('Location (not strictly required for existing, kept for clarity).')
-param location string = resourceGroup().location
-
-@description('Name of the existing Azure OpenAI account to attach deployments to.')
+@description('Name of the existing Azure OpenAI account.')
 param azureOpenAIServiceName string
 
-@description('Embedding model name and version.')
+@description('Embedding deployment settings (lab defaults).')
 param embeddingModelName string = 'text-embedding-ada-002'
 param embeddingModelVersion string = '2'
-@description('Embedding deployment capacity (small for labs).')
 param embeddingCapacity int = 1
 
-@description('Chat model name and version (must be available in your region).')
+@description('Chat deployment settings (must be supported in your region/account).')
 param chatModelName string = 'gpt-4o-mini'
 param chatModelVersion string = '2024-07-18'
-@description('Chat deployment capacity (small for labs).')
 param chatCapacity int = 1
 
-// Reference the existing AOAI account as the parent
+// Reference the existing AOAI account
 resource aoai 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
   name: azureOpenAIServiceName
 }
 
-// Embedding deployment
+// 1) Create embedding deployment first
 resource embedding 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
-  name: 'embedding'
-  parent: aoai
+  name: '${aoai.name}/embedding'
   sku: {
     name: 'Standard'
     capacity: embeddingCapacity
@@ -38,10 +32,9 @@ resource embedding 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01'
   }
 }
 
-// Chat deployment
+// 2) Then create chat deployment (explicitly depends on embedding)
 resource chat 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
-  name: 'chat'
-  parent: aoai
+  name: '${aoai.name}/chat'
   sku: {
     name: 'Standard'
     capacity: chatCapacity
@@ -53,7 +46,10 @@ resource chat 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
       format: 'OpenAI'
     }
   }
+  dependsOn: [
+    embedding
+  ]
 }
 
-output azureOpenAIEmbeddingDeploymentName string = embedding.name
-output azureOpenAIChatDeploymentName string = chat.name
+output azureOpenAIEmbeddingDeploymentName string = 'embedding'
+output azureOpenAIChatDeploymentName string = 'chat'
