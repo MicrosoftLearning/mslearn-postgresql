@@ -1,109 +1,117 @@
 title,department,policy_text
-Performance Review Policy,Sales,Employees receive formal performance reviews annually.
-Dress Code Policy,Facilities,Employees are expected to dress in business casual attire.
-Warranty Policy,Sales,Products are covered under warranty for one year.
-Account Management Policy,Sales,Accounts must be reviewed quarterly.
-Anti-Harassment Policy,Marketing,Harassment of any kind is not tolerated.
-Recognition Program Policy,Facilities,Employees may nominate peers for recognition awards.
-Software Installation Policy,Sales,Only approved software may be installed on company devices.
-Workplace Accommodation Policy,Finance,Employees may request reasonable accommodations.
-Data Privacy Policy,Operations,Employees must protect customer data and follow privacy regulations.
-Work From Abroad Policy,Facilities,Employees may work abroad for up to 30 days with approval.
-File Naming Policy,Marketing,Files must follow naming conventions for easy retrieval.
-Churn Prevention Policy,Sales,Customer churn must be analyzed and addressed.
-Event Sponsorship Policy,Facilities,Event sponsorships must align with company goals.
-Company Vehicle Policy,Legal,Use of company vehicles must be logged and approved.
-Onboarding Policy,Sales,New hires must complete onboarding within their first week.
-Legal Hold Policy,IT,Legal holds must be applied to relevant documents.
-Budget Planning Policy,HR,Departments must submit budgets by Q4.
-Holiday Schedule Policy,Facilities,Company holidays are published annually and observed accordingly.
-Support Ticket Policy,Operations,Support tickets must be resolved within SLA.
-Supplier Evaluation Policy,Facilities,Suppliers must be evaluated annually.
-Parking Policy,HR,Parking spaces are assigned and must be used accordingly.
-Equal Opportunity Policy,HR,The company is committed to equal opportunity employment.
-Customer Interaction Policy,Operations,Employees must maintain professionalism in all customer interactions.
-Customer Feedback Policy,Operations,Customer feedback must be logged and reviewed.
-Marketing Approval Policy,Operations,Marketing materials must be approved before release.
-Remote Work Policy,Facilities,Employees may work remotely up to three days per week with manager approval.
-Code of Conduct,Legal,All employees must adhere to professional behavior standards.
-Meeting Room Booking Policy,Sales,Meeting rooms must be booked in advance using the portal.
-Internal Communication Policy,IT,Use company channels for internal communication.
-Mobile Device Policy,IT,Employees may request company-issued mobile devices for work.
-Training Reimbursement Policy,Sales,Employees may be reimbursed for approved external training.
-Client Gift Policy,HR,Client gifts must comply with company guidelines.
-Campaign Review Policy,HR,Marketing campaigns must be reviewed quarterly.
-Employee Referral Policy,Finance,Employees may refer candidates for open positions.
-Offer Letter Policy,Marketing,Offer letters must follow approved templates.
-Work Anniversary Recognition Policy,Marketing,Employees are recognized on their work anniversaries.
-Conflict of Interest Policy,Marketing,Employees must disclose any potential conflicts of interest.
-Business Continuity Policy,HR,Departments must maintain business continuity plans.
-Office Supplies Policy,Operations,Office supplies must be ordered through the approved vendor.
-System Downtime Policy,Operations,Planned downtimes are communicated in advance.
-Delivery Confirmation Policy,Marketing,Deliveries must be confirmed upon receipt.
-Hardware Upgrade Policy,IT,Hardware upgrades must be requested through IT.
-Exit Interview Policy,Facilities,Departing employees are encouraged to participate in an exit interview.
-Security Incident Policy,IT,Security incidents must be reported immediately.
-Promotion Policy,Finance,Promotions are based on performance and business needs.
-Sales Incentive Policy,Marketing,Sales incentives must be documented and approved.
-Probation Period Policy,Facilities,New hires are subject to a 90-day probation period.
-Mentorship Program Policy,HR,Employees may participate in the mentorship program.
-Public Speaking Policy,Legal,Employees must get approval before public speaking engagements.
-Sustainability Policy,Finance,Departments should consider sustainability in operations.
-Remote Access Policy,Legal,Remote access must use secure VPN connections.
-Incident Response Policy,Legal,Incident response procedures must be followed during disruptions.
-Inventory Management Policy,Sales,Inventory must be tracked and reconciled monthly.
-Asset Disposal Policy,Sales,IT assets must be disposed of securely.
-Meeting Minutes Policy,Sales,Meeting minutes must be documented and shared.
-Office Access Policy,HR,Access badges must be worn and not shared.
-Product Return Policy,Marketing,Returns must follow the documented return process.
-Email Signature Policy,HR,All employees must use the approved email signature format.
-Cloud Storage Policy,Operations,Use approved cloud storage for company documents.
-Shipping Policy,HR,Shipping must use approved carriers.
-Social Media Policy,Finance,Employees must not disclose confidential information on social media.
-Remote Meeting Policy,Operations,Remote meetings should use approved video conferencing tools.
-Interview Panel Policy,HR,Interview panels must include diverse representation.
-Expense Approval Policy,Legal,All expenses over $500 require prior approval from Finance.
-Customer Onboarding Policy,HR,New customers must complete onboarding steps.
-Document Retention Policy,Legal,Documents must be retained according to legal requirements.
-Cybersecurity Awareness Policy,Marketing,Employees must complete annual cybersecurity training.
-Corporate Card Policy,Operations,Corporate card usage must comply with expense guidelines.
-Flexible Hours Policy,HR,Employees may adjust work hours with manager approval.
-Sick Leave Policy,Sales,Employees accrue sick leave monthly for personal or family illness.
-Social Event Policy,Finance,Social events must be approved and budgeted.
-Content Publishing Policy,Marketing,Content must be reviewed before publishing.
-Team Building Policy,Finance,Team building events must be approved and budgeted.
-Home Office Equipment Policy,Legal,Employees may request ergonomic equipment for remote work.
-Laptop Usage Policy,IT,Company laptops must be used for business purposes only.
-Procurement Policy,Marketing,All purchases must follow the procurement process.
-Bereavement Leave Policy,Legal,Employees may take up to 5 days of bereavement leave.
-Disaster Recovery Policy,Facilities,IT must maintain disaster recovery protocols.
-Petty Cash Policy,Legal,Petty cash usage must be documented and reconciled monthly.
-Brand Guidelines Policy,Facilities,All materials must follow brand guidelines.
-Project Kickoff Policy,IT,Projects must begin with a formal kickoff meeting.
-Contract Review Policy,Finance,Contracts must be reviewed by Legal before signing.
-Parental Leave Policy,Marketing,Eligible employees may take up to 12 weeks of paid parental leave.
-Background Check Policy,Sales,All new hires must pass background checks.
-Tuition Assistance Policy,HR,Employees may apply for tuition assistance for approved programs.
-Internet Usage Policy,Finance,Company internet should be used for work-related activities only.
-Whistleblower Policy,HR,Employees may report unethical behavior anonymously.
-Exit Clearance Policy,Sales,Departing employees must complete exit clearance.
-Vendor Management Policy,Marketing,Vendors must be approved and reviewed annually.
-Quality Assurance Policy,HR,Products must pass quality checks before release.
-Conference Attendance Policy,Operations,Employees may attend conferences with prior approval.
-Media Contact Policy,Finance,Only authorized employees may speak to the media.
-Diversity and Inclusion Policy,Operations,The company promotes a diverse and inclusive workplace.
-Workplace Safety Policy,HR,Employees must follow safety procedures and report hazards.
-Workplace Cleanliness Policy,Sales,Employees are responsible for maintaining clean workspaces.
-Helpdesk Ticket Policy,Operations,All IT issues must be submitted via helpdesk ticket.
-Meeting Etiquette Policy,Facilities,Meetings should start on time and follow an agenda.
-Lead Management Policy,Finance,Sales leads must be tracked in the CRM.
-IT Asset Management Policy,Facilities,All IT assets must be tracked and returned upon exit.
-Password Policy,HR,Passwords must be changed every 90 days and meet complexity requirements.
-Travel Reimbursement Policy,Facilities,Employees must submit receipts for travel expenses within 30 days.
-Press Release Policy,Legal,Press releases must be approved by Marketing and Legal.
-Vacation Policy,IT,Employees receive 15 vacation days per year. Unused days may roll over.
-Escalation Policy,Facilities,Customer issues must follow the escalation process.
-Job Posting Policy,Legal,All internal job postings are listed on the company portal.
-Company Property Policy,Facilities,Employees must return company property upon exit.
-Change Management Policy,HR,Changes to systems must follow the change management process.
-Renewal Policy,Legal,Renewals must be initiated 60 days before expiration.
+Performance Review Policy,Sales,Employees receive formal reviews twice a year; ratings determine merit increases and development plans.
+Vacation Policy,HR,Full-time employees accrue 15 days of vacation per year; carryover is limited to 5 days.
+Parental Leave Policy,HR,New parents are eligible for up to 12 weeks of paid leave following birth, adoption, or foster placement.
+Travel Reimbursement Policy,Finance,Reasonable travel expenses are reimbursed with itemized receipts submitted within 30 days.
+Remote Work Policy,IT,Employees may work remotely up to three days per week with manager approval; VPN is required for system access.
+Sick Leave Policy,HR,Employees receive 10 paid sick days per year; extended leave may require documentation from a healthcare provider.
+Code of Conduct,Legal,Employees must act with integrity and comply with all laws; report violations to Compliance.
+Workplace Accommodation Policy,HR,The company provides reasonable accommodations for qualified individuals with disabilities; contact HR to initiate a request.
+Corporate Card Policy,Finance,Corporate cards are issued to eligible employees for business expenses only; personal charges are prohibited.
+Data Retention Policy,Legal,Records must be retained according to the schedule; legal holds override standard retention periods.
+Email Usage Policy,IT,Business email is for company use; do not send confidential data externally without encryption.
+Brand Guidelines,Marketing,All public materials must follow brand standards for logo, color, and tone.
+Office Safety Policy,Facilities,Report hazards immediately; follow posted evacuation routes and attend annual drills.
+Purchasing Policy,Procurement,All purchases over 1,000 require a purchase order and vendor approval.
+Device Security Policy,IT,All laptops must have disk encryption enabled and screen lock set to 5 minutes.
+Social Media Policy,Marketing,Employees should identify affiliation and include disclaimers; do not disclose confidential information.
+Equal Opportunity Policy,HR,The company is an equal opportunity employer; discrimination and harassment are prohibited.
+Customer Data Privacy,Legal,Customer data must be collected with consent and used only for stated purposes.
+Expense Approval Policy,Finance,Expenses over 500 require manager approval in the expense system prior to purchase.
+Meeting Room Etiquette,Facilities,Cancel unused reservations; leave rooms tidy and return equipment.
+Open Source Software Policy,IT,All OSS use must be reviewed for license compatibility; submit requests via the approval portal.
+Equal Opportunity Policy,HR,Employment decisions are based on merit and business needs; retaliation is not tolerated.
+Corporate Communications Policy,Marketing,Press inquiries must be routed to Corporate Communications; do not speak on behalf of the company without authorization.
+Incident Response Policy,IT,Report suspected security incidents immediately; follow the IR playbook for triage and escalation.
+Vendor Management Policy,Procurement,New vendors require due diligence and contract review; renewals must be reviewed annually.
+Badge Access Policy,Facilities,Badges are for personal use only; lost badges must be reported within 24 hours.
+Records Management Policy,Legal,Store records in approved systems; do not retain duplicate copies longer than necessary.
+Team Offsite Policy,Operations,Team offsites require pre-approval, budget confirmation, and a business agenda.
+Training and Development,HR,Employees have access to learning budgets and required compliance training modules.
+Shipping and Receiving,Operations,All shipments must be logged; hazardous materials follow the special handling SOP.
+Campaign Review Policy,Marketing,All marketing campaigns require brand and legal review prior to launch.
+Hardware Upgrade Policy,IT,Eligible devices may be upgraded every 36 months; submit a ticket for evaluation.
+Facilities Access After Hours,Facilities,After-hours access requires manager approval and security notification.
+Remote Meeting Policy,Operations,Use approved conferencing tools; record only with consent.
+Corporate Giving Policy,Legal,Donations and sponsorships must comply with anti-corruption laws and internal thresholds.
+Travel Booking Policy,Finance,Use the approved travel portal; select lowest logical fare and preferred vendors.
+Warehouse Safety Rules,Operations,Follow PPE requirements; only certified staff may operate forklifts.
+Office Move Procedure,Facilities,Moves must be coordinated with Facilities two weeks in advance.
+Procurement Thresholds,Procurement,Three quotes required for purchases over 10,000; RFP for strategic suppliers.
+Password Management Policy,IT,Use a password manager; minimum 14 characters; MFA is mandatory for external access.
+Mobile Device Policy,IT,Company data on mobile devices must use MDM; report lost devices immediately.
+Home Office Stipend,Finance,Eligible employees may claim a one-time stipend for home office setup with itemized receipts.
+Conference Room Equipment,Facilities,Do not disconnect cables; report AV issues via the service portal.
+Privacy Impact Assessments,Legal,Projects involving personal data require a PIA before launch.
+Customer Onboarding Policy,Sales,Standard onboarding includes account verification, welcome materials, and training options.
+Inventory Management,Operations,Cycle counts occur monthly; discrepancies must be investigated within 48 hours.
+Media Relations Protocol,Marketing,All media inquiries are handled by the PR team; do not comment unofficially.
+Flexible Hours Policy,HR,Flexible start and end times are allowed within core hours with manager agreement.
+Home Office Equipment Policy,IT,Company-provided peripherals must meet accessibility and security standards; returns required upon separation.
+Contract Approval Matrix,Legal,Contracts must follow the approval matrix by value and risk category; use the CLM system.
+Corporate Card Reconciliation,Finance,Submit reconciliations by the 5th business day; unresolved charges may be withheld from reimbursement.
+Building Access for Visitors,Facilities,Escort visitors at all times; issue temporary badges and collect on exit.
+SLA for Customer Support,Operations,Response and resolution targets are defined by tier; measure and report monthly.
+Lead Assignment Rules,Sales,Leads are assigned by territory and segment; disputes go to Sales Operations.
+Campaign Asset Management,Marketing,Store final assets in the DAM; archive outdated assets quarterly.
+Security Awareness Training,IT,All employees must complete annual security training and simulated phishing exercises.
+Gifts and Hospitality,Legal,Record gifts over 100; certain industries require zero tolerance.
+Parking Policy,Facilities,Parking permits are required; reserved spots are for authorized personnel only.
+Work From Anywhere Guidance,HR,Temporary remote work from other states or countries requires HR and Legal review.
+Reimbursement Submission Timing,Finance,Submit expenses within 30 days; late submissions need director approval.
+Escalation Policy,Operations,Use the on-call schedule; document root cause analyses after major incidents.
+Sales Discount Policy,Sales,Discounts over 15% require VP approval; document rationale in the CRM.
+Social Media Listening,Marketing,Use approved tools; escalate critical brand mentions per the playbook.
+Access Reviews,IT,Quarterly access reviews are required for SOX in-scope systems; managers must attest.
+Conflict of Interest Policy,Legal,Disclose relationships that could influence decisions; annual attestation required.
+Visitor Wi-Fi Use,IT,Visitors may use guest Wi-Fi; no access to internal resources is permitted.
+Office Ergonomics,Facilities,Request ergonomic assessments; use approved chairs and monitor stands.
+Travel Per Diem Rates,Finance,Use published per diem rates by city; receipts not required for per diem meals.
+Ticket Triage Guidelines,Operations,Classify tickets by severity; major incidents require immediate broadcast.
+Customer Onboarding Checklist,Sales,Follow the checklist to ensure data accuracy, user provisioning, and initial training.
+Sales Territory Policy,Sales,Changes to territories occur twice a year; appeals go to the review board.
+Design Review Process,Marketing,Creative work undergoes peer and manager review before distribution.
+BYOD Agreement,IT,Personal devices must meet security standards; company may wipe managed profiles if needed.
+Workplace Bullying Prevention,HR,Report bullying to HR; retaliation against reporters is prohibited.
+NDAs and Confidentiality,Legal,Use the latest NDA template; store signed copies in the contract system.
+Facility Maintenance Requests,Facilities,Submit maintenance tickets with photos when possible; emergencies call the hotline.
+Quarter-End Close Checklist,Finance,Follow the close timeline; late entries require controller approval.
+Shift Scheduling Rules,Operations,Post schedules two weeks in advance; shift swaps need supervisor approval.
+Trade Show Booth Guidelines,Marketing,Use approved booth designs; coordinate giveaways with Procurement.
+Laptop Refresh Schedule,IT,Devices are replaced on a rolling schedule; return old equipment to IT for secure disposal.
+Interview and Hiring Guidance,HR,Structured interviews improve fairness; hiring teams must complete training.
+Regulatory Reporting,Legal,Submit required filings by deadlines; retain evidence of submission.
+Ergonomic Equipment Checkout,Facilities,Borrow equipment via the sign-out sheet; return within the agreed period.
+Mileage Reimbursement,Finance,Use IRS standard mileage rate; log start and end locations.
+Runbook Standards,Operations,Keep runbooks current; include rollback steps and validation checks.
+Background Check Policy,HR,Background checks are conducted post-offer where permitted; follow regional regulations.
+On-Call Compensation,HR,Eligible roles receive on-call stipends; details are in the compensation guide.
+Return Merchandise Authorization,Operations,RMAs must be issued before returns; track in the logistics system.
+Exit Clearance Policy,HR,Complete the checklist for equipment return, system access removal, and final documentation.
+Brand Voice and Tone,Marketing,Follow the approved voice and tone guide for all channels; avoid jargon and legal claims.
+Conference Attendance Policy,Finance,Employees may attend conferences with manager approval; expenses follow the travel policy.
+Diversity and Inclusion Policy,HR,Build an inclusive workplace; all employees participate in annual training.
+Sales Enablement Materials,Sales,Use current playbooks; outdated materials should be archived.
+Crisis Communications Plan,Marketing,Use pre-approved statements; legal and executive review required for high-severity incidents.
+Patch Management Policy,IT,Apply critical patches within 7 days; track exceptions and remediation plans.
+Policy Acknowledgment Tracking,HR,Employees must acknowledge new policies within 14 days.
+Export Controls Compliance,Legal,Do not export controlled items or data without authorization; consult Legal for guidance.
+Space Planning Requests,Facilities,Submit seating changes through the space planning tool; departments share costs.
+Audit Readiness,Finance,Maintain evidence for key controls; respond to auditor requests promptly.
+SOP Change Control,Operations,Changes to SOPs require version control and stakeholder sign-off.
+Partner MDF Requests,Marketing,Partner marketing funds require a business case and post-activity report.
+Source Code Repository Policy,IT,Use approved repositories; enforce branch protection and mandatory reviews.
+Whistleblower Hotline,Legal,Report suspected misconduct anonymously; all reports are investigated.
+Catering and Event Setup,Facilities,Request setup at least five business days in advance; provide floor plans.
+Travel Advances,Finance,Advances are approved case-by-case; reconcile within 15 days after travel.
+Major Incident Bridge,Operations,Join the bridge within 10 minutes of notification; record all actions.
+Quarterly Business Reviews,Sales,Submit QBR decks using the standard template; include pipeline and win/loss analysis.
+SEO and Content Guidelines,Marketing,Follow keyword and accessibility standards; avoid unsupported claims.
+Network Access Control,IT,Only managed devices may join the corporate network; guest VLAN for visitors.
+Employee Handbook,HR,The handbook summarizes core policies; employees should review updates annually.
+Intellectual Property,Legal,All inventions created on company time belong to the company; disclose promptly.
+Office Move Day Rules,Facilities,Label boxes clearly; IT will handle equipment disconnection and reconnection.
+Budgeting Calendar,Finance,Department budgets are drafted in Q3; final approvals in Q4.
+Quality Control Checks,Operations,QC checks occur at defined stages; defects must be logged and analyzed.
+Referral Bonus Program,HR,Bonuses are paid after the new hire passes probation; certain roles may be excluded.
+Records Request Handling,Legal,Route subpoenas and requests to the Legal team immediately; do not respond directly.
