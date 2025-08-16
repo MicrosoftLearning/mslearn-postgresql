@@ -10,9 +10,9 @@ Workplace Accommodation Policy,HR,The company provides reasonable accommodations
 Corporate Card Policy,Finance,Corporate cards are issued to eligible employees for business expenses only; personal charges are prohibited.
 Data Retention Policy,Legal,Records must be retained according to the schedule; legal holds override standard retention periods.
 Email Usage Policy,IT,Business email is for company use; do not send confidential data externally without encryption.
-Brand Guidelines,Marketing,All public materials must follow brand standards for logo, color, and tone.
+Brand Guidelines,Marketing,All public materials must follow brand standards for logo color and tone.
 Office Safety Policy,Facilities,Report hazards immediately; follow posted evacuation routes and attend annual drills.
-Purchasing Policy,Procurement,All purchases over 1,000 require a purchase order and vendor approval.
+Purchasing Policy,Procurement,All purchases over 1000 require a purchase order and vendor approval.
 Device Security Policy,IT,All laptops must have disk encryption enabled and screen lock set to 5 minutes.
 Social Media Policy,Marketing,Employees should identify affiliation and include disclaimers; do not disclose confidential information.
 Equal Opportunity Policy,HR,The company is an equal opportunity employer; discrimination and harassment are prohibited.
@@ -26,7 +26,7 @@ Incident Response Policy,IT,Report suspected security incidents immediately; fol
 Vendor Management Policy,Procurement,New vendors require due diligence and contract review; renewals must be reviewed annually.
 Badge Access Policy,Facilities,Badges are for personal use only; lost badges must be reported within 24 hours.
 Records Management Policy,Legal,Store records in approved systems; do not retain duplicate copies longer than necessary.
-Team Offsite Policy,Operations,Team offsites require pre-approval, budget confirmation, and a business agenda.
+Team Offsite Policy,Operations,Team offsites require pre-approval budget confirmation and a business agenda.
 Training and Development,HR,Employees have access to learning budgets and required compliance training modules.
 Shipping and Receiving,Operations,All shipments must be logged; hazardous materials follow the special handling SOP.
 Campaign Review Policy,Marketing,All marketing campaigns require brand and legal review prior to launch.
@@ -37,13 +37,13 @@ Corporate Giving Policy,Legal,Donations and sponsorships must comply with anti-c
 Travel Booking Policy,Finance,Use the approved travel portal; select lowest logical fare and preferred vendors.
 Warehouse Safety Rules,Operations,Follow PPE requirements; only certified staff may operate forklifts.
 Office Move Procedure,Facilities,Moves must be coordinated with Facilities two weeks in advance.
-Procurement Thresholds,Procurement,Three quotes required for purchases over 10,000; RFP for strategic suppliers.
+Procurement Thresholds,Procurement,Three quotes required for purchases over 10000; RFP for strategic suppliers.
 Password Management Policy,IT,Use a password manager; minimum 14 characters; MFA is mandatory for external access.
 Mobile Device Policy,IT,Company data on mobile devices must use MDM; report lost devices immediately.
 Home Office Stipend,Finance,Eligible employees may claim a one-time stipend for home office setup with itemized receipts.
 Conference Room Equipment,Facilities,Do not disconnect cables; report AV issues via the service portal.
 Privacy Impact Assessments,Legal,Projects involving personal data require a PIA before launch.
-Customer Onboarding Policy,Sales,Standard onboarding includes account verification, welcome materials, and training options.
+Customer Onboarding Policy,Sales,Standard onboarding includes account verification welcome materials and training options.
 Inventory Management,Operations,Cycle counts occur monthly; discrepancies must be investigated within 48 hours.
 Media Relations Protocol,Marketing,All media inquiries are handled by the PR team; do not comment unofficially.
 Flexible Hours Policy,HR,Flexible start and end times are allowed within core hours with manager agreement.
@@ -68,7 +68,7 @@ Visitor Wi-Fi Use,IT,Visitors may use guest Wi-Fi; no access to internal resourc
 Office Ergonomics,Facilities,Request ergonomic assessments; use approved chairs and monitor stands.
 Travel Per Diem Rates,Finance,Use published per diem rates by city; receipts not required for per diem meals.
 Ticket Triage Guidelines,Operations,Classify tickets by severity; major incidents require immediate broadcast.
-Customer Onboarding Checklist,Sales,Follow the checklist to ensure data accuracy, user provisioning, and initial training.
+Customer Onboarding Checklist,Sales,Follow the checklist to ensure data accuracy user provisioning and initial training.
 Sales Territory Policy,Sales,Changes to territories occur twice a year; appeals go to the review board.
 Design Review Process,Marketing,Creative work undergoes peer and manager review before distribution.
 BYOD Agreement,IT,Personal devices must meet security standards; company may wipe managed profiles if needed.
@@ -87,7 +87,7 @@ Runbook Standards,Operations,Keep runbooks current; include rollback steps and v
 Background Check Policy,HR,Background checks are conducted post-offer where permitted; follow regional regulations.
 On-Call Compensation,HR,Eligible roles receive on-call stipends; details are in the compensation guide.
 Return Merchandise Authorization,Operations,RMAs must be issued before returns; track in the logistics system.
-Exit Clearance Policy,HR,Complete the checklist for equipment return, system access removal, and final documentation.
+Exit Clearance Policy,HR,Complete the checklist for equipment return system access removal and final documentation.
 Brand Voice and Tone,Marketing,Follow the approved voice and tone guide for all channels; avoid jargon and legal claims.
 Conference Attendance Policy,Finance,Employees may attend conferences with manager approval; expenses follow the travel policy.
 Diversity and Inclusion Policy,HR,Build an inclusive workplace; all employees participate in annual training.
