@@ -20,7 +20,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 1. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](../media/14-portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/14-portal-toolbar-cloud-shell.png)
 
     If prompted, select the required options to open a *Bash* shell. If you previously used a *PowerShell* console, switch it to a *Bash* shell.
 
@@ -140,7 +140,7 @@ You connect to the `ContosoHelpDesk` database on your Azure Database for Postgre
 
 1. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `ContosoHelpDesk` database. Selecting **Connect** doesn't actually connect you to the database; it simply provides instructions for connecting to the database using various methods. Review the instructions to **Connect from browser or locally** and use those instructions to connect using the Azure Cloud Shell.
 
-    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the ContosoHelpDesk database are highlighted by red boxes.](../media/14-postgresql-database-connect.png)
+    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the ContosoHelpDesk database are highlighted by red boxes.](media/14-postgresql-database-connect.png)
 
 1. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** sign in.
 
@@ -148,7 +148,7 @@ You connect to the `ContosoHelpDesk` database on your Azure Database for Postgre
 
 1. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it helps to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
 
-    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](../media/14-azure-cloud-shell-pane-maximize.png)
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/14-azure-cloud-shell-pane-maximize.png)
 
 ## Setup: Configure extensions
 
@@ -699,3 +699,4 @@ Combining your graph and vector search skills allow you to create powerful searc
 In this exercise, you used a small graph to add structure to retrieval. Instead of relying on look alike text only, you first pull candidates by connections like department and topic, then rank that list with `pgvector` against your question. Because it all runs in one database inside *Azure Database for PostgreSQL*, the flow stays simple to operate and easy to explain since the filters and paths are visible.
 
 To apply the methods discussed here on your own data, start small. Pick a few entities and relationships that matter, link them to your rows, use a short `openCypher` query to fetch candidate `ids`, then apply vector ranking. Tighten or relax the filters as needed, swap in other concepts, and keep the workflow in SQL so it's straightforward to maintain.
+
