@@ -86,7 +86,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
       STATE=$(az cognitiveservices account show -g "$RG_NAME" -n "$AOAI" --query "properties.provisioningState" -o tsv)
       echo "provisioningState=$STATE"
       [ "$STATE" = "Succeeded" ] && break
-      sleep 10
+      sleep 30
     done
 
     #3 OpenAI deployments: embedding + chat
@@ -705,5 +705,6 @@ Combining your graph and vector search skills allow you to create powerful searc
 In this exercise, you used a small graph to add structure to retrieval. Instead of relying on look alike text only, you first pull candidates by connections like department and topic, then rank that list with `pgvector` against your question. Because it all runs in one database inside *Azure Database for PostgreSQL*, the flow stays simple to operate and easy to explain since the filters and paths are visible.
 
 To apply the methods discussed here on your own data, start small. Pick a few entities and relationships that matter, link them to your rows, use a short `openCypher` query to fetch candidate `ids`, then apply vector ranking. Tighten or relax the filters as needed, swap in other concepts, and keep the workflow in SQL so it's straightforward to maintain.
+
 
 
