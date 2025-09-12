@@ -25,6 +25,9 @@ param azureOpenAIServiceName string = 'oai-learn-${resourceGroup().location}-${u
 
 @description('Unique name for the Azure AI Language service account.')
 param languageServiceName string = 'lang-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+@description('Unique name for the Azure AI Translator service account.')
+param translatorServiceName string = 'trn-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+
 
 @description('Restore the service instead of creating a new instance. This is useful if you previously soft-delted the service and want to restore it. If you are restoring a service, set this to true. Otherwise, leave this as false.')
 param restore bool = false
@@ -161,8 +164,6 @@ output azureOpenAIEmbeddingDeploymentName string = azureOpenAIEmbeddingDeploymen
 
 output languageServiceName string = languageService.name
 output languageServiceEndpoint string = languageService.properties.endpoint
-@description('Unique name for the Azure AI Translator service account.')
-param translatorServiceName string = 'trn-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
 
 @description('Creates an Azure AI Translator service account.')
 resource translatorService 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
@@ -178,6 +179,5 @@ resource translatorService 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
     restore: restore
   }
 }
-
 output translatorServiceName string = translatorService.name
 output translatorServiceEndpoint string = translatorService.properties.endpoint
