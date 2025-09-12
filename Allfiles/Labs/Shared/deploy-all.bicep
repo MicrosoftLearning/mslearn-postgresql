@@ -163,13 +163,21 @@ output languageServiceName string = languageService.name
 output languageServiceEndpoint string = languageService.properties.endpoint
 @description('Unique name for the Azure AI Translator service account.')
 param translatorServiceName string = 'trn-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
-@description('Creates an Azure Database for PostgreSQL.')
-name: 'rentals'
+
 @description('Creates an Azure AI Translator service account.')
 resource translatorService 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
-name: translatorServiceName
-kind: 'TextTranslation'
-name: 'S1'
-customSubDomainName: translatorServiceName
+  name: translatorServiceName
+  location: location
+  kind: 'TextTranslation'
+  sku: {
+    name: 'S1'
+  }
+  properties: {
+    customSubDomainName: translatorServiceName
+    publicNetworkAccess: 'Enabled'
+    restore: restore
+  }
+}
+
 output translatorServiceName string = translatorService.name
 output translatorServiceEndpoint string = translatorService.properties.endpoint
