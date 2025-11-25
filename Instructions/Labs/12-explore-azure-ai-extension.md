@@ -447,6 +447,65 @@ The `azure_ml` schema lets functions connect to Azure ML services directly from 
 
     By providing an endpoint and key, you can connect to an Azure ML deployed endpoint like you connected to your Azure OpenAI and Azure AI Services endpoints. Interacting with Azure ML requires having a trained and deployed model, so it is out of scope for this exercise, and you are not setting up that connection to try it out here.
 
+### Explore semantic operators
+
+The `azure_ai` extension includes a small set of semantic operators that let you work with generative AI models directly from SQL. These operators help you generate content, evaluate statements, extract information, and rank documents. Each operator uses the model settings you configured earlier in `azure_ai.settings`.
+
+Start by reviewing the available operators:
+
+- `azure_ai.generate` – generates text and can return structured JSON when a schema is supplied.
+- `azure_ai.is_true` – evaluates whether a statement is likely to be true.
+- `azure_ai.extract` – pulls specific fields or values from unstructured text.
+- `azure_ai.rank` – returns documents ordered by relevance to a query.
+
+1. Run the following query to generate text using `azure_ai.generate`. This example summarizes a listing description:
+
+    ```sql
+    SELECT azure_ai.generate(
+    prompt => 'Summarize this listing: ' || description
+    )
+    FROM listings
+    LIMIT 1;
+    ```
+
+1. Next, use `azure_ai.is_true` to evaluate whether a review expresses a particular claim:
+
+    ```sql
+    SELECT
+        id,
+        comments,
+        azure_ai.is_true(
+        'This review is positive: ' || comments
+        ) AS is_positive
+    FROM reviews
+    LIMIT 3;
+    ```
+
+1. Use `azure_ai.extract` to pull structured details out of free-form text. In this example, extract information about location and amenities:
+
+    ```sql
+    SELECT azure_ai.extract(
+    description,
+    ARRAY['location', 'amenities']
+    )
+    FROM listings
+    LIMIT 1;
+    ```
+
+1. Finally, try the `azure_ai.rank` operator. Pass a query and an array of listing descriptions to see how the operator ranks them for relevance:
+
+    ```sql
+    SELECT *
+    FROM azure_ai.rank(
+    'quiet neighborhood apartment',
+    ARRAY(
+        SELECT description FROM listings LIMIT 5
+    )
+    );
+    ```
+
+Each operator returns model-generated output that you can use directly in queries, views, and application logic. These operators give you a way to integrate generative AI behaviors into your database without leaving SQL.
+
 ## Clean up
 
 Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
