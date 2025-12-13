@@ -14,8 +14,7 @@ You need your own Azure subscription to complete this exercise. If you don't hav
 
 ### Edit pg_hba.conf file to allow connectivity from Azure (skip if not migrating from an external PostgreSQL server)
 
-> [!NOTE]
-> This lab creates two Azure Database for PostgreSQL to use as a source and destination for the migration. However, if you are using your own environment, to complete this exercise, you will need access to an existing PostgreSQL server with a database, appropriate permissions, and network access.
+> **Note**: This lab creates two Azure Database for PostgreSQL to use as a source and destination for the migration. However, if you are using your own environment, to complete this exercise, you will need access to an existing PostgreSQL server with a database, appropriate permissions, and network access.
 > 
 > If you use your own environment, this exercise will require that the server you use as a source for the migration is accessible to the Azure Database for PostgreSQL Flexible Server so that it can connect and migrate databases. This will require that the source server is accessible via a public IP address and port. A list of Azure Region IP Addresses can be downloaded from [Azure IP Ranges and Service Tags – Public Cloud](https://www.microsoft.com/en-gb/download/details.aspx?id=56519) to help minimize the allowed ranges of IP Addresses in your firewall rules-based on the Azure region used. Open your servers firewall to allow the Migration feature within the Azure Database for PostgreSQL Flexible Server access to the source PostgreSQL Server, which is TCP port **5432** by default.
 >
@@ -122,11 +121,9 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     1. Select the **Allow public access from any Azure service within Azure to this server** checkbox.
     1. Select the **Allow public access to this resource through the internet using a public IP address** checkbox.
 
-> [!NOTE]
-> On a production environment you would need to select only those options, networks and IPs you would want to have access your Azure Database for PostgreSQL servers. 
+> **Note**: On a production environment you would need to select only those options, networks and IPs you would want to have access your Azure Database for PostgreSQL servers. 
 
-> [!NOTE]
-> As previously stated, this Bicep script will create two Azure Database for PostgreSQL servers, a source and a destination one.  ***If you are using an on-premise PostgreSQL server in your environment as the source server for this lab, replace the source sever connection information in all the following instructions with the connection information of your on-premise server in your environment***.  Make sure you enable the necessary firewall rules in both your environment and in Azure.
+> **Note**: As previously stated, this Bicep script will create two Azure Database for PostgreSQL servers, a source and a destination one.  ***If you are using an on-premise PostgreSQL server in your environment as the source server for this lab, replace the source sever connection information in all the following instructions with the connection information of your on-premise server in your environment***.  Make sure you enable the necessary firewall rules in both your environment and in Azure.
     
 ### Troubleshooting deployment errors
 
