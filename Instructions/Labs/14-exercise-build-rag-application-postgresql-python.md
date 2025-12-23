@@ -87,7 +87,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
       STATE=$(az cognitiveservices account show -g "$RG_NAME" -n "$AOAI" --query "properties.provisioningState" -o tsv)
       echo "provisioningState=$STATE"
       [ "$STATE" = "Succeeded" ] && break
-      sleep 10
+      sleep 30
     done
 
     #3 OpenAI deployments: embedding + chat
@@ -139,7 +139,9 @@ You connect to the `ContosoHelpDesk` database on your Azure Database for Postgre
 
 1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL server.
 
-1. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `ContosoHelpDesk` database. Selecting **Connect** doesn't actually connect you to the database; it simply provides instructions for connecting to the database using various methods. Review the instructions to **Connect from browser or locally** and use those instructions to connect using the Azure Cloud Shell.
+1. In the resource menu, under **Settings**, select **Connect**, then select **ContosoHelpDesk** for the database. 
+
+1. Expand the section **Connect from browser or locally** and use the command shown to connect using the Azure Cloud Shell.
 
     ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the ContosoHelpDesk database are highlighted by red boxes.](media/14-postgresql-database-connect.png)
 
@@ -357,7 +359,7 @@ On the GitHub repo you cloned, you can find the `app.py` file, which contains th
 
 1. Review the libraries the application depends on. The main library you use for interacting with Azure OpenAI is `langchain_openai`.
 
-1. our first function, `get_conn`, just creates a connection to the PostgreSQL database. This one is predefined for you. For the following three functions, replace the comments with actual code provided.
+1. Our first function, `get_conn`, just creates a connection to the PostgreSQL database. This one is predefined for you. For the following three functions, replace the comments with actual code provided.
 
 1. Replace the comment **# Retrieve top-k rows by cosine similarity (embedding must be present)** with the following script:
 
@@ -536,4 +538,5 @@ By completing this exercise, you now know how to build a retrieval augmented app
 Additionally, you explored how to optimize query performance using vector indexes, which is crucial for scaling your application as the dataset grows. By using these indexes, you can ensure that your RAG application remains responsive and efficient, even as the volume of data increases.
 
 Finally, you learned about the importance of monitoring and fine-tuning your application over time. As user queries evolve and the dataset expands, you need to revisit your indexing strategy, prompt design, and overall architecture to maintain optimal performance and accuracy.
+
 

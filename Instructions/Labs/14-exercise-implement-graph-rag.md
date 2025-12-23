@@ -86,7 +86,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
       STATE=$(az cognitiveservices account show -g "$RG_NAME" -n "$AOAI" --query "properties.provisioningState" -o tsv)
       echo "provisioningState=$STATE"
       [ "$STATE" = "Succeeded" ] && break
-      sleep 10
+      sleep 30
     done
 
     #3 OpenAI deployments: embedding + chat
@@ -138,7 +138,9 @@ You connect to the `ContosoHelpDesk` database on your Azure Database for Postgre
 
 1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL server.
 
-1. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `ContosoHelpDesk` database. Selecting **Connect** doesn't actually connect you to the database; it simply provides instructions for connecting to the database using various methods. Review the instructions to **Connect from browser or locally** and use those instructions to connect using the Azure Cloud Shell.
+1. In the resource menu, under **Settings**, select **Connect**, then select **ContosoHelpDesk** for the database. 
+
+1. Expand the section **Connect from browser or locally** and use the command shown to connect using the Azure Cloud Shell.
 
     ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the ContosoHelpDesk database are highlighted by red boxes.](media/14-postgresql-database-connect.png)
 
@@ -432,7 +434,9 @@ Let's create the nodes from the company policies data.
     ```sql
     -- Disable pagination for better output readability
     \pset pager off
+    ```
 
+    ```sql
     -- Upsert the policy nodes
     SELECT public.policy_graph_upsert(policy_id, title, department, category, policy_text)
     FROM public.company_policies
@@ -515,7 +519,9 @@ So far you added the nodes for policies, departments, categories, and topics. It
     ```sql
     -- Disable pagination for better output readability
     \pset pager off
+    ```
 
+    ```sql
     -- BELONGS_TO
     SELECT public.create_policy_link_in_policies_graph(policy_id, 'Department', department, 'BELONGS_TO')
     FROM public.company_policies;
@@ -699,4 +705,6 @@ Combining your graph and vector search skills allow you to create powerful searc
 In this exercise, you used a small graph to add structure to retrieval. Instead of relying on look alike text only, you first pull candidates by connections like department and topic, then rank that list with `pgvector` against your question. Because it all runs in one database inside *Azure Database for PostgreSQL*, the flow stays simple to operate and easy to explain since the filters and paths are visible.
 
 To apply the methods discussed here on your own data, start small. Pick a few entities and relationships that matter, link them to your rows, use a short `openCypher` query to fetch candidate `ids`, then apply vector ranking. Tighten or relax the filters as needed, swap in other concepts, and keep the workflow in SQL so it's straightforward to maintain.
+
+
 
