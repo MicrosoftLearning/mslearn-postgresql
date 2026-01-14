@@ -4,6 +4,8 @@ lab:
     module: 'Integrate AI Services to enrich your applications with intelligent features in Azure Database for PostgreSQL'
 ---
 
+# Use Azure AI services with Azure Database for PostgreSQL
+
 In this exercise, you help **Margie’s Travel**, a vacation rental company, improve how property listings and guest reviews are stored and used in their application.  
 
 The company wants to:  
