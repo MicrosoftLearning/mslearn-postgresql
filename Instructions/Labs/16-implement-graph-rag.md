@@ -8,6 +8,8 @@ lab:
 
 This hands-on exercise adds a lightweight knowledge-graph layer inside the same Azure Database for PostgreSQL you used in earlier units. You create two small tables for **nodes** and **edges**, link them to your existing `company_policies` rows, and then run a **graph-narrowed vector search** that first filters by relationships (Topic/Department) and then ranks with pgvector. The goal is *higher precision* on multi-concept questions without complicating prompts or moving data to a separate store.
 
+Let's consider the following scenario: An employee wants to know about the company's policies on remote work for the engineering department. A simple vector search might return general remote work policies, but by using a knowledge graph to filter results specifically related to the engineering department, you can provide more accurate and relevant information.
+
 By the end of this exercise, you will:
 
 - Understand how to create and manage graph structures in PostgreSQL.
