@@ -1,4 +1,10 @@
-# Explore the Visual Studio Code PostgreSQL Extension and GitHub Copilot
+---
+lab:
+    title: 'Explore the Visual Studio Code PostgreSQL Extension and GitHub Copilot'
+    module: 'Develop PostgreSQL solutions in Visual Studio Code with the PostgreSQL extension and GitHub Copilot'
+---
+
+#  Explore the Visual Studio Code PostgreSQL Extension and GitHub Copilot
 
 As the lead developer for Margie’s Travel, you're tasked with improving your team’s productivity when working with Azure Database for PostgreSQL. You want to learn how the PostgreSQL extension for Visual Studio Code, together with GitHub Copilot, can help you write and refine SQL more efficiently. In this exercise, you deploy the required Azure resources, connect to your database, and prepare sample data so you can use the extension and Copilot in later steps.
 
