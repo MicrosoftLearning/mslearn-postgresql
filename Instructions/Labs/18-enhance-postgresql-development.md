@@ -20,7 +20,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 2. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](../media/portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](./media/18-portal-toolbar-cloud-shell.png)
 
     If prompted, select the required options to open a *Bash* shell. If you previously used a *PowerShell* console, switch it to a *Bash* shell.
 
@@ -86,7 +86,7 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 2. Under **Settings**, select **Databases**, then select **Connect** next to the `rentals` database. Review the connection instructions for **Connect from browser or locally** and follow the steps for connecting using the Azure Cloud Shell.
 
-    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](../media/postgresql-database-connect.png)
+    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](./media/18-postgresql-rentals-database-connect.png)
 
 3. When prompted, enter the randomly generated password for the `pgAdmin` sign in.
 
@@ -94,7 +94,7 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 5. Select **Maximize** in Cloud Shell to create more space.
 
-    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](../media/azure-cloud-shell-pane.png)
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](./media/18-azure-cloud-shell-pane-maximize.png)
 
 ## Populate the database with sample data
 
