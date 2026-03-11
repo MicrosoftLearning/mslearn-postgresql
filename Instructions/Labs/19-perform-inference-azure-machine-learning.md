@@ -1,7 +1,14 @@
 ---
 lab:
-    title: 'Perform Inference using Azure Machine Learning'
-    module: 'Use Azure Machine Learning Inferencing with Azure Database for PostgreSQL'
+  title: Perform Inference using Azure Machine Learning
+  module: Use Azure Machine Learning Inferencing with Azure Database for PostgreSQL
+  description: In this exercise, you will deploy a model created using Azure Machine Learning's Automated machine learning functionality. Then, you will use that deployed model to estimate nightly sale prices for short-term rental properties.
+  duration: 98 minutes
+  level: 500
+  islab: true
+  primarytopics:
+    - Azure
+    - Azure Machine Learning
 ---
 
 # Perform Inference using Azure Machine Learning
