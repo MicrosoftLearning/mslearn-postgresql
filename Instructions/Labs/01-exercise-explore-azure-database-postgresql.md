@@ -1,7 +1,14 @@
 ---
 lab:
-    title: 'Explore Azure Database for PostgreSQL'
-    module: 'Explore PostgreSQL architecture'
+  title: Explore Azure Database for PostgreSQL
+  module: Explore PostgreSQL architecture
+  description: In this exercise, you'll create an Azure Database for PostgreSQL flexible server and configure the backup retention period.
+  duration: 148 minutes
+  level: 400
+  islab: true
+  primarytopics:
+    - Azure
+    - Azure Database for PostgreSQL
 ---
 
 # Explore Azure Database for PostgreSQL
