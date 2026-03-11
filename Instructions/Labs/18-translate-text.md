@@ -1,7 +1,20 @@
 ---
 lab:
-    title: 'Translate Text with Azure AI Translator'
-    module: 'Translate Text using the Azure AI Translator and Azure Database for PostgreSQL'
+  title: Translate Text with Azure AI Translator
+  module: Translate Text using the Azure AI Translator and Azure Database for PostgreSQL
+  description: As the lead developer for Margie's Travel, you have been asked to assist
+    in an internationalization effort. Today, all rental listings for the company's
+    short-term rental service are in English. You want to translate these listings
+    into a variety of languages without extensive development effort. All of your
+    data is hosted in an Azure Database for PostgreSQL flexible server, and you would
+    like to use Azure AI Services to perform translation.
+  duration: 92 minutes
+  level: 400
+  islab: true
+  primarytopics:
+  - Azure
+  - Azure AI services
+  - Azure Database for PostgreSQL
 ---
 
 # Translate Text with Azure AI Translator
