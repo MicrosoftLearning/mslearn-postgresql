@@ -1,7 +1,16 @@
 ---
 lab:
-    title: 'Generate vector embeddings with Azure OpenAI'
-    module: 'Enable Semantic Search with Azure Database for PostgreSQL'
+  title: Generate vector embeddings with Azure OpenAI
+  module: Enable Semantic Search with Azure Database for PostgreSQL
+  description: To perform semantic searches, you must first generate embedding vectors
+    from a model, store them in a vector database, and then query the embeddings.
+    You'll create a database, populate it with sample data, and run semantic searches
+    against those listings.
+  duration: 92 minutes
+  level: 500
+  islab: true
+  primarytopics:
+  - Azure
 ---
 
 # Generate vector embeddings with Azure OpenAI
