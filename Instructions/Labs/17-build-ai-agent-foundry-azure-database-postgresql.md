@@ -1,7 +1,18 @@
 ---
 lab:
-    title: 'Build and test an AI agent with Foundry Agent Service and PostgreSQL'
-    module: 'Implement generative AI agents with Azure Database for PostgreSQL'
+  title: Build and test an AI agent with Foundry Agent Service and PostgreSQL
+  module: Implement generative AI agents with Azure Database for PostgreSQL
+  description: In this exercise, you help **Margie's Travel** create an intelligent
+    agent that retrieves property listings from **Azure Database for PostgreSQL**
+    using semantic search. The agent runs in **Foundry Agent Service** and uses a
+    lightweight **Python Azure Function** to call PostgreSQL, which performs its own
+    AI work through the `azure_ai` and `pgvector` extensions.
+  duration: 132 minutes
+  level: 400
+  islab: true
+  primarytopics:
+  - Azure
+  - Azure Database for PostgreSQL
 ---
 
 # Build and test an AI agent with Foundry Agent Service and PostgreSQL
