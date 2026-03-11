@@ -1,7 +1,19 @@
 ---
 lab:
-    title: 'Explore PostgreSQL with client tools'
-    module: 'Understand client-server communication in PostgreSQL'
+  title: Explore PostgreSQL with client tools
+  module: Understand client-server communication in PostgreSQL
+  description: In this exercise, you download and install psql and the Visual Studio
+    Code Postgres extension. If you already have Visual Studio Code and its Postgres
+    extension installed on your machine, you can jump ahead to Connect to Azure Database
+    for PostgreSQL flexible server.
+  duration: 152 minutes
+  level: 400
+  islab: true
+  primarytopics:
+  - Azure
+  - Azure Database for PostgreSQL
+  - Visual Studio
+  - Visual Studio Code
 ---
 
 # Explore PostgreSQL with client tools
