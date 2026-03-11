@@ -1,7 +1,14 @@
 ---
 lab:
-    title: 'Assess query performance using Query Store'
-    module: 'Tune queries in Azure Database for PostgreSQL'
+  title: Assess query performance using Query Store
+  module: Tune queries in Azure Database for PostgreSQL
+  description: In this exercise, learn how to query performance metrics using the Query Store in Azure Database for PostgreSQL.
+  duration: 30 minutes
+  level: 400
+  islab: true
+  primarytopics:
+    - Azure
+    - Azure Database for PostgreSQL
 ---
 
 # Assess query performance using Query Store
