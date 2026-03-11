@@ -1,7 +1,20 @@
 ---
 lab:
-    title: 'Build RAG Applications with Azure Database for PostgreSQL and Python'
-    module: 'Build RAG applications with Azure Database for PostgreSQL'
+  title: Build RAG Applications with Azure Database for PostgreSQL and Python
+  module: Build RAG applications with Azure Database for PostgreSQL
+  description: In this scenario, you’re building a small internal assistant for the
+    company’s policy questions at Contoso. You set up a table in Azure Database for
+    PostgreSQL, load the CSV of policies, and store an embedding for each policy so
+    the database can match questions by meaning, not just keywords. You add a vector
+    index to keep lookups fast. Then you write a short Python script that asks for
+    a question, fetches the most relevant policies, and prints an answer based only
+    on those policies, including the policy title.
+  duration: 126 minutes
+  level: 500
+  islab: true
+  primarytopics:
+  - Azure
+  - Azure Database for PostgreSQL
 ---
 
 # Build RAG Applications with Azure Database for PostgreSQL and Python
