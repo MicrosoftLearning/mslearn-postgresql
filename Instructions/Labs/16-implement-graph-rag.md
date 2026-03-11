@@ -1,7 +1,20 @@
 ---
 lab:
-    title: 'Implement GraphRAG with Azure Database for PostgreSQL'
-    module: 'Build RAG applications with Azure Database for PostgreSQL'
+  title: Implement GraphRAG with Azure Database for PostgreSQL
+  module: Build RAG applications with Azure Database for PostgreSQL
+  description: This hands-on exercise adds a lightweight knowledge-graph layer inside
+    the same Azure Database for PostgreSQL you used in earlier units. You create two
+    small tables for **nodes** and **edges**, link them to your existing `company_policies`
+    rows, and then run a **graph-narrowed vector search** that first filters by relationships
+    (Topic/Department) and then ranks with pgvector. The goal is *higher precision*
+    on multi-concept questions without complicating prompts or moving data to a separate
+    store.
+  duration: 136 minutes
+  level: 500
+  islab: true
+  primarytopics:
+  - Azure
+  - Azure Database for PostgreSQL
 ---
 
 # Implement GraphRAG with Azure Database for PostgreSQL
