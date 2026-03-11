@@ -1,7 +1,11 @@
 ---
 lab:
-    title: 'Understand locking'
-    module: 'Understand concurrency in PostgreSQL'
+  title: Understand locking
+  module: Understand concurrency in PostgreSQL
+  description: In this exercise, you look at system parameters and metadata in PostgreSQL.
+  duration: 156 minutes
+  level: 400
+  islab: true
 ---
 
 # Understand locking
