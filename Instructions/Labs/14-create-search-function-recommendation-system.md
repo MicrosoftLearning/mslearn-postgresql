@@ -1,7 +1,11 @@
 ---
 lab:
-    title: 'Create a search function for a recommendation system'
-    module: 'Enable Semantic Search with Azure Database for PostgreSQL'
+  title: Create a search function for a recommendation system
+  module: Enable Semantic Search with Azure Database for PostgreSQL
+  description: The following command assigns the name to be used for the resource group that will house all the resources used in this exercise. The resource group name assigned to the corresponding variable is rg-learn-postgresql-ai-$REGION, where $REGION is the location you specified above. However, you can change it to any other resource group name that suits your preference.
+  duration: 84 minutes
+  level: 500
+  islab: true
 ---
 
 # Create a search function for a recommendation system
