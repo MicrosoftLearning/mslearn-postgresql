@@ -1,7 +1,18 @@
 ---
 lab:
-    title: 'Analyze Sentiment'
-    module: 'Perform Sentiment Analysis and Opinion Mining using Azure Database for PostgreSQL'
+  title: Analyze Sentiment
+  module: Perform Sentiment Analysis and Opinion Mining using Azure Database for PostgreSQL
+  description: As part of the AI-powered app you are building for Margie's Travel,
+    you want to provide users with information on the sentiment of individual reviews
+    and the overall sentiment of all reviews for a given rental property. To accomplish
+    this, use the `azure_ai` extension in an Azure Database for PostgreSQL flexible
+    server to integrate sentiment analysis functionality into your database.
+  duration: 98 minutes
+  level: 500
+  islab: true
+  primarytopics:
+  - Azure
+  - Azure Database for PostgreSQL
 ---
 
 # Analyze Sentiment
