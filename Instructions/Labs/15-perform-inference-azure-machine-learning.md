@@ -1,7 +1,21 @@
 ---
 lab:
-    title: 'Perform Inference using Azure Machine Learning'
-    module: 'Integrate AI Services to enrich your applications with intelligent features in Azure Database for PostgreSQL'
+  title: Perform Inference using Azure Machine Learning
+  module: Integrate AI Services to enrich your applications with intelligent features
+    in Azure Database for PostgreSQL
+  description: As the lead developer for Margie's Travel (MT), you have been asked
+    to help develop a feature estimating nightly rental prices for short-term rentals.
+    You have collected some historical data as a text file and would like to use this
+    to train a simple regression model in Azure Machine Learning. Then, you would
+    like to use that model against data you have hosted in an Azure Database for PostgreSQL
+    flexible server database.
+  duration: 100 minutes
+  level: 500
+  islab: true
+  primarytopics:
+  - Azure
+  - Azure Database for PostgreSQL
+  - Azure Machine Learning
 ---
 
 # Perform Inference using Azure Machine Learning
