@@ -1,7 +1,14 @@
 ---
 lab:
-    title: 'Create a search function for a recommendation system'
-    module: 'Enable Semantic Search with Azure Database for PostgreSQL'
+  title: Create a search function for a recommendation system
+  module: Enable Semantic Search with Azure Database for PostgreSQL
+  description: Let's build a recommendation system using semantic search. The system
+    will recommend several listings based on a provided sample listing. The sample
+    could be from the listing the user is viewing or their preferences. We'll implement
+    the system as a PostgreSQL function leveraging the `azure_openai` extension.
+  duration: 84 minutes
+  level: 500
+  islab: true
 ---
 
 # Create a search function for a recommendation system
