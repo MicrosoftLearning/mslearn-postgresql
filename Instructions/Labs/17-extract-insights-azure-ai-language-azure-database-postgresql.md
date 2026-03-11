@@ -1,7 +1,21 @@
 ---
 lab:
-    title: 'Extract insights using the Azure AI Language'
-    module: 'Extract insights using the Azure AI Language service with Azure Database for PostgreSQL'
+  title: Extract insights using the Azure AI Language
+  module: Extract insights using the Azure AI Language service with Azure Database
+    for PostgreSQL
+  description: Recall that the listings company wants to analyze market trends, like
+    the most popular phrases or places. The team also intends to enhance protections
+    for personally identifiable information (PII). The current data is stored in an
+    Azure Database for PostgreSQL flexible server. The project budget is small, so
+    minimizing upfront costs and ongoing costs in maintaining keywords and tags is
+    essential. The developers are wary of how many forms PII can take and prefer a
+    cost-effective, vetted solution over an in-house regular expression matcher.
+  duration: 10 minutes
+  level: 500
+  islab: true
+  primarytopics:
+  - Azure
+  - Azure Database for PostgreSQL
 ---
 
 # Extract insights using the Azure AI Language service with Azure Database for PostgreSQL
