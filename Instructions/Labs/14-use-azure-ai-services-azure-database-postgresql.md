@@ -1,7 +1,17 @@
 ---
 lab:
-    title: 'Use Azure AI services with Azure Database for PostgreSQL'
-    module: 'Integrate AI Services to enrich your applications with intelligent features in Azure Database for PostgreSQL'
+  title: Use Azure AI services with Azure Database for PostgreSQL
+  module: Integrate AI Services to enrich your applications with intelligent features
+    in Azure Database for PostgreSQL
+  description: In this exercise, you help **Margie’s Travel**, a vacation rental company,
+    improve how property listings and guest reviews are stored and used in their application.
+  duration: 104 minutes
+  level: 500
+  islab: true
+  primarytopics:
+  - Azure
+  - Azure AI services
+  - Azure Database for PostgreSQL
 ---
 
 # Use Azure AI services with Azure Database for PostgreSQL
