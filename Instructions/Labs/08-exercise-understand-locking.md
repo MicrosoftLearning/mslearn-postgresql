@@ -1,7 +1,11 @@
 ---
 lab:
-    title: 'Understand locking'
-    module: 'Understand concurrency in PostgreSQL'
+  title: Understand locking
+  module: Understand concurrency in PostgreSQL
+  description: The following command assigns the name to be used for the resource group that houses all the resources used in this exercise. The resource group name assigned to the corresponding variable is rg-learn-work-with-postgresql-$REGION, where $REGION is the location you previously specified. However, you can change it to any other resource group name that suits your preference or that you might already have.
+  duration: 156 minutes
+  level: 400
+  islab: true
 ---
 
 # Understand locking
