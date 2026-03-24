@@ -1,7 +1,15 @@
 ---
 lab:
-    title: 'Perform Inference using Azure Machine Learning'
-    module: 'Integrate AI Services to enrich your applications with intelligent features in Azure Database for PostgreSQL'
+  title: Perform Inference using Azure Machine Learning
+  module: Integrate AI Services to enrich your applications with intelligent features in Azure Database for PostgreSQL
+  description: In this exercise, you learned how to deploy an Azure Machine Learning model and use it to perform inference from an Azure Database for PostgreSQL flexible server using the azureai extension.
+  duration: 100 minutes
+  level: 500
+  islab: true
+  primarytopics:
+    - Azure
+    - Azure Database for PostgreSQL
+    - Azure Machine Learning
 ---
 
 # Perform Inference using Azure Machine Learning

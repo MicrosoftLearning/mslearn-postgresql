@@ -1,7 +1,14 @@
 ---
 lab:
-    title: 'Configure system parameters and explore metadata with system catalogs and views'
-    module: 'Configure and manage Azure Database for PostgreSQL'
+  title: Configure system parameters and explore metadata with system catalogs and views
+  module: Configure and manage Azure Database for PostgreSQL
+  description: In this exercise, you learned how to configure system parameters and explore metadata in PostgreSQL. You also learned how to view PostgreSQL metadata in the Azure portal and view data in system catalog tables. Additionally, you learned how to view a complex metadata query using a system view.
+  duration: 158 minutes
+  level: 400
+  islab: true
+  primarytopics:
+    - Azure
+    - Azure Portal
 ---
 
 # Configure system parameters and explore metadata with system catalogs and views

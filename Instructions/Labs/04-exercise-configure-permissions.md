@@ -1,7 +1,14 @@
 ---
 lab:
-    title: 'Configure permissions in Azure Database for PostgreSQL'
-    module: 'Secure Azure Database for PostgreSQL'
+  title: Configure permissions in Azure Database for PostgreSQL
+  module: Secure Azure Database for PostgreSQL
+  description: In this lab exercises, you assign role-based access control (RBAC) roles to control access to Azure Database for PostgreSQL resources and PostgreSQL GRANTS to control access to database operations.
+  duration: 162 minutes
+  level: 500
+  islab: true
+  primarytopics:
+    - Azure
+    - Azure Database for PostgreSQL
 ---
 
 # Configure permissions in Azure Database for PostgreSQL

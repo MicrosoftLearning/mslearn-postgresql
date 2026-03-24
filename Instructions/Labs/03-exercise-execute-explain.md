@@ -1,7 +1,11 @@
 ---
 lab:
-    title: 'Execute the EXPLAIN statement'
-    module: 'Understand PostgreSQL query processing'
+  title: Execute the EXPLAIN statement
+  module: Understand PostgreSQL query processing
+  description: In this exercise, you look at the EXPLAIN function and how it can display the execution plan that the PostgreSQL planner generates for a supplied statement.
+  duration: 148 minutes
+  level: 400
+  islab: true
 ---
 
 # Execute the EXPLAIN statement
