@@ -231,9 +231,6 @@ resource aiProject 'Microsoft.MachineLearningServices/workspaces@2024-04-01' = {
     hubResourceId: aiHub.id
     publicNetworkAccess: 'Enabled'
   }
-  dependsOn: [
-    aiHub
-  ]
 }
 
 output serverFqdn string = postgreSQLFlexibleServer.properties.fullyQualifiedDomainName
