@@ -239,8 +239,7 @@ Before you use the `azure_ai` extension, add two tables to the `rentals` databas
     WHERE listing_vector IS NULL;
     ```
 
-> [!NOTE]    
-> Adding these embeddings can take several minutes, depending on the available quota.
+> &#128221; Adding these embeddings can take several minutes, depending on the available quota.
 
 ## Use Azure AI Services to enrich the application
 
@@ -285,7 +284,7 @@ Long property descriptions can overwhelm guests and make comparisons harder. Mar
   LIMIT 3;
   ```
 
-> [!NOTE] Abstractive summarization isn't supported in all Azure regions. If you receive an error, try a different region that supports this feature. See [Region support for Azure Language features](https://learn.microsoft.com/azure/ai-services/language-service/concepts/regional-support) for details.
+> &#128221; Abstractive summarization isn't supported in all Azure regions. If you receive an error, try a different region that supports this feature. See [Region support for Azure Language features](https://learn.microsoft.com/azure/ai-services/language-service/concepts/regional-support) for details.
 
 ## Task 2: Analyze guest sentiment
 

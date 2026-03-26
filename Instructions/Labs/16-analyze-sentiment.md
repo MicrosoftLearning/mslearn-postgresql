@@ -190,9 +190,7 @@ The Azure AI services integrations included in the `azure_cognitive` schema of t
 
     ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/16-azure-language-service-keys-endpoints.png)
 
-> [!Note]
->
-> If you received the message `NOTICE: extension "azure_ai" already exists, skipping CREATE EXTENSION` when installing the `azure_ai` extension above and have previously configured the extension with your Language service endpoint and key, you can use the `azure_ai.get_setting()` function to confirm those settings are correct, and then skip step 2 if they are.
+> &#128221; If you received the message `NOTICE: extension "azure_ai" already exists, skipping CREATE EXTENSION` when installing the `azure_ai` extension above and have previously configured the extension with your Language service endpoint and key, you can use the `azure_ai.get_setting()` function to confirm those settings are correct, and then skip step 2 if they are.
 
 2. Copy your endpoint and access key values, then in the commands below, replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Run the commands from the `psql` command prompt in the Cloud Shell to add your values to the `azure_ai.settings` table.
 
@@ -280,9 +278,7 @@ In this task, you use the `azure_cognitive.analyze_sentiment()` function to eval
 
     From the two records analyzed, note the `sentiment` values in the output, `(mixed,0.71,0.09,0.2)` and `(positive,0.99,0.01,0)`. These represent the `sentiment_analysis_result` returned by the `analyze_sentiment()` function in the above query. The analysis was performed over the `comments` field in the `reviews` table.
 
-    > [!Note]
-    >
-    > Using the `analyze_sentiment()` function inline lets you quickly analyze the text's sentiment within your queries. While this works well for a small number of records, it may not be ideal for analyzing the sentiment of a large number of records or updating all the records in a table that may contain tens of thousands of reviews or more.
+    > &#128221; Using the `analyze_sentiment()` function inline lets you quickly analyze the text's sentiment within your queries. While this works well for a small number of records, it may not be ideal for analyzing the sentiment of a large number of records or updating all the records in a table that may contain tens of thousands of reviews or more.
 
 2. Another approach that can be useful for longer reviews is to analyze the sentiment of each sentence within it. To do this, use the overload of the `analyze_sentiment()` function, which accepts an array of text.
 

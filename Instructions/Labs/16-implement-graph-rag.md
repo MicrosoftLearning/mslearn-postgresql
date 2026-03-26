@@ -658,8 +658,7 @@ Let's narrow our search to policies that belong to the **Finance** department an
     LIMIT 5;
     ```
 
-> [!TIP]  
-> In `psql`, run the `\set question` command on its **own line**, and press **Enter** before you run the SQL query. If you paste both at once, the Common Table Expression (CTE) might not run as expected.
+> &#128161; In `psql`, run the `\set question` command on its **own line**, and press **Enter** before you run the SQL query. If you paste both at once, the Common Table Expression (CTE) might not run as expected.
 
 This query generates a ranked list of policy passages that are relevant to the specified question. It first uses the graph structure to filter candidates by department and topic, then ranks them by semantic similarity to the question.
 

@@ -357,8 +357,7 @@ Before you look at our Python application, you need to set the correct environme
 
 1. Save the file and close the *code* editor.
 
-> [!NOTE]
-> If you can't find the save/exit options, on the *code* editor window, move your mouse to the upper right of the editor. Your icon should change, press your mouse button and you should see the options to save and close.
+> &#128221; If you can't find the save/exit options, on the *code* editor window, move your mouse to the upper right of the editor. Your icon should change, press your mouse button and you should see the options to save and close.
 
 ### Update your Python RAG application
 

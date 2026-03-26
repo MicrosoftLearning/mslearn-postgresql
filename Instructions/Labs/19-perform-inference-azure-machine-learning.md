@@ -154,9 +154,7 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 
 7. Select the **Register** button to complete model registration. This action will take you back to the **Models** page. Select the newly created model.
 
-> [!Note]
->
-> If you do not see a model, select the **Refresh** menu option button to reload the page. After that, you should see the **RentalListings** model.
+> &#128221; If you do not see a model, select the **Refresh** menu option button to reload the page. After that, you should see the **RentalListings** model.
 
 8. Select the **Deploy** button option and create a new **Real-time endpoint**.
 
@@ -330,9 +328,7 @@ To populate the language translation table, you will create a stored procedure t
     $$ LANGUAGE sql;
     ```
 
-> [!Note]
->
-> By default, the deployment name is a combination of the model name (**rentallistings**) and the version number (**1**). If you deploy a new version of the model and use the default deployment name, the new deployment name would be **rentallistings-2**.
+> &#128221; By default, the deployment name is a combination of the model name (**rentallistings**) and the version number (**1**). If you deploy a new version of the model and use the default deployment name, the new deployment name would be **rentallistings-2**.
 
 2. Execute the function using the following SQL command:
 

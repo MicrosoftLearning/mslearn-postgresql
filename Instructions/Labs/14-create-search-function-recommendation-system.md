@@ -342,9 +342,7 @@ In this benchmark, we obtained the sample listing's embedding and performed the 
 
 Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
 
-> [!Note]
->
-> If you plan on completing additional modules in this learning path, you can skip this task until you have finished all the modules you intend to complete.
+> &#128221; If you plan on completing additional modules in this learning path, you can skip this task until you have finished all the modules you intend to complete.
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
 
