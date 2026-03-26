@@ -79,6 +79,7 @@ resource allowAllAzureServicesAndResourcesWithinAzureIps 'Microsoft.DBforPostgre
 resource allowAll 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-03-01-preview' = {
   name: 'AllowAll'
   parent: postgreSQLFlexibleServer
+  dependsOn: [allowAllAzureServicesAndResourcesWithinAzureIps]
   properties: {
     startIpAddress: '0.0.0.0'
     endIpAddress: '255.255.255.255'
@@ -89,6 +90,7 @@ resource allowAll 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-
 resource rentalsDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-03-01-preview' = {
   name: databaseName
   parent: postgreSQLFlexibleServer
+  dependsOn: [allowAll]
   properties: {
     charset: 'UTF8'
     collation: 'en_US.UTF8'
