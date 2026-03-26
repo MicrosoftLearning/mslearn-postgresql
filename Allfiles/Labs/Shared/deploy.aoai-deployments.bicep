@@ -45,6 +45,9 @@ resource embedding 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01'
 resource chat 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
   name: 'chat'
   parent: aoai
+  dependsOn: [
+    embedding
+  ]
   sku: {
     name: 'Standard'
     capacity: chatCapacity
