@@ -147,6 +147,25 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 
 5. In the **Upload model** menu, set the model type to **MLflow**. Then, choose **Browse** and navigate to your **mlflow-model** folder, uploading the assets. After that, select the **Next** button to continue.
 
+    > [!Note]
+    >
+    > If your environment does not allow shared key access on storage accounts, you may receive an error when registering the model that states you don't have permissions to perform upload actions on the datastore. To resolve this, follow these steps:
+    >
+    > 1. First, assign the required identity-based roles on the workspace's storage account by running the following Azure CLI commands in the Cloud Shell:
+    >
+    >     ```bash
+    >     USER_ID=$(az ad signed-in-user show --query id -o tsv)
+    >     STORAGE_ID=$(az storage account show --name <storage_account_name> --resource-group $RG_NAME --query id -o tsv)
+    >     az role assignment create --assignee $USER_ID --role "Storage Blob Data Contributor" --scope $STORAGE_ID
+    >     az role assignment create --assignee $USER_ID --role "Storage File Data Privileged Contributor" --scope $STORAGE_ID
+    >     ```
+    >
+    >     Replace `<storage_account_name>` with the name of the storage account associated with your Azure Machine Learning workspace. You can find this in the Azure portal under your Machine Learning workspace's overview page.
+    >
+    > 2. Next, switch the workspace datastore to use identity-based authentication. In Azure ML Studio, go to **Data** > **Datastores** > **workspaceblobstore**, select **Update authentication**, and turn **off** the **"Save credentials with the datastore for data access"** toggle. Save the change.
+    >
+    > 3. Wait a few minutes for the permissions to propagate, then retry the model registration.
+
     ![Screenshot of the Upload model menu page. A red box surrounds the MLflow model type, Browse, and Next buttons.](media/19-aml-register-upload-model.png)
 
 6. Name the model **RentalListings** and then select the **Next** button.
@@ -159,15 +178,19 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 >
 > If you do not see a model, select the **Refresh** menu option button to reload the page. After that, you should see the **RentalListings** model.
 
-8. Select the **Deploy** button option and create a new **Real-time endpoint**.
+8. Select the **Use this model** button option and create a new **Real-time endpoint**.
 
     ![Screenshot of the Real-time endpoint menu option highlighted by a red box.](media/19-aml-automl-deploy-rte.png)
 
-9. On the deployment fly-out menu, set the **Virtual machine** to something like **Standard_DS2_v2** and the **Instance count** to 1. Select the **Deploy** button. Deployment may take several minutes to complete, as the deployment process includes provisioning a virtual machine and deploying the model as a Docker container.
+9. On the deployment fly-out menu, set the **Virtual machine** to something like **Standard_DS2_v2** and the **Instance count** to 1. Select the **Use this** button. Deployment may take several minutes to complete, as the deployment process includes provisioning a virtual machine and deploying the model as a Docker container.
 
     ![Screenshot of the deployment fly-out menu. The Virtual machine is Standard_DS2_v2, and the Instance count is 1. Red boxes highlight the Virtual machine drop-down, Instance count textbox, and Deploy button.](media/19-aml-automl-deploy-endpoint.png)
 
 10. After the endpoint deploys, navigate to the **Consume** tab and copy the REST endpoint and primary key so you can use them in the next section.
+
+    > [!Note]
+    >
+    > If the **Consume** tab does not appear, select **Endpoints** on the left-hand side menu, and then select your newly created endpoint. The **Consume** tab should then be visible.
 
     ![Screenshot of the endpoint Consume tab. Red boxes highlight the copy buttons for the REST endpoint and primary authentication key.](media/19-aml-automl-endpoint-consume.png)
 
@@ -201,19 +224,21 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 
 In this task, you connect to the `rentals` database on your Azure Database for PostgreSQL flexible server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
 
-1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL flexible server.
+1. In the [Azure portal](https://portal.azure.com/), open the Cloud Shell by selecting the **Cloud Shell** icon in the toolbar.
 
-2. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `rentals` database. Note that selecting **Connect** does not actually connect you to the database; it simply provides instructions for connecting to the database using various methods. Review the instructions to **Connect from browser or locally** and use those to connect using the Azure Cloud Shell.
+2. Run the following command to connect to your `rentals` database, replacing `<server-name>` with the name of your PostgreSQL flexible server (found on the **Overview** page of your PostgreSQL resource in the Azure portal):
 
-    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](media/17-postgresql-rentals-database-connect.png)
+    ```bash
+    psql -h <server-name>.postgres.database.azure.com -U pgAdmin -d rentals
+    ```
 
-3. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** login.
+3. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** login you created during the Bicep deployment.
 
     Once logged in, the `psql` prompt for the `rentals` database is displayed.
 
 4. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
 
-    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/17-azure-cloud-shell-pane-maximize.png)
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/19-azure-cloud-shell-pane.png)
 
 ## Install and configure the `azure_ai` extension
 
