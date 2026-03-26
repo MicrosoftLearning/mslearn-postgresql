@@ -147,26 +147,18 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 
 5. In the **Upload model** menu, set the model type to **MLflow**. Then, choose **Browse** and navigate to your **mlflow-model** folder, uploading the assets. After that, select the **Next** button to continue.
 
-    > [!Note]
-    >
-    > If your environment does not allow shared key access on storage accounts, you may receive an error when registering the model that states you don't have permissions to perform upload actions on the datastore. To resolve this, follow these steps:
-    >
-    > 1. First, assign the required identity-based roles on the workspace's storage account by running the following Azure CLI commands in the Cloud Shell:
-    >
-    >     ```bash
-    >     USER_ID=$(az ad signed-in-user show --query id -o tsv)
-    >     STORAGE_ID=$(az storage account show --name <storage_account_name> --resource-group $RG_NAME --query id -o tsv)
-    >     az role assignment create --assignee $USER_ID --role "Storage Blob Data Contributor" --scope $STORAGE_ID
-    >     az role assignment create --assignee $USER_ID --role "Storage File Data Privileged Contributor" --scope $STORAGE_ID
-    >     ```
-    >
-    >     Replace `<storage_account_name>` with the name of the storage account associated with your Azure Machine Learning workspace. You can find this in the Azure portal under your Machine Learning workspace's overview page.
-    >
-    > 2. Next, switch the workspace datastore to use identity-based authentication. In Azure ML Studio, go to **Data** > **Datastores** > **workspaceblobstore**, select **Update authentication**, and turn **off** the **"Save credentials with the datastore for data access"** toggle. Save the change.
-    >
-    > 3. Wait a few minutes for the permissions to propagate, then retry the model registration.
-
     ![Screenshot of the Upload model menu page. A red box surrounds the MLflow model type, Browse, and Next buttons.](media/19-aml-register-upload-model.png)
+
+> &#128221; If your environment does not allow shared key access on storage accounts, you may receive an error when registering the model that states you don't have permissions to perform upload actions on the datastore. To resolve this, first assign the required identity-based roles on the workspace's storage account by running the following Azure CLI commands in the Cloud Shell (replace `<storage_account_name>` with the name of the storage account found on your Machine Learning workspace's overview page):
+>
+> ```bash
+> USER_ID=$(az ad signed-in-user show --query id -o tsv)
+> STORAGE_ID=$(az storage account show --name <storage_account_name> --resource-group $RG_NAME --query id -o tsv)
+> az role assignment create --assignee $USER_ID --role "Storage Blob Data Contributor" --scope $STORAGE_ID
+> az role assignment create --assignee $USER_ID --role "Storage File Data Privileged Contributor" --scope $STORAGE_ID
+> ```
+>
+> Next, switch the workspace datastore to use identity-based authentication. In Azure ML Studio, go to **Data** > **Datastores** > **workspaceblobstore**, select **Update authentication**, and turn **off** the **"Save credentials with the datastore for data access"** toggle. Save the change. Wait a few minutes for the permissions to propagate, then retry the model registration.
 
 6. Name the model **RentalListings** and then select the **Next** button.
 
@@ -174,9 +166,7 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 
 7. Select the **Register** button to complete model registration. This action will take you back to the **Models** page. Select the newly created model.
 
-> [!Note]
->
-> If you do not see a model, select the **Refresh** menu option button to reload the page. After that, you should see the **RentalListings** model.
+> &#128221; If you do not see a model, select the **Refresh** menu option button to reload the page. After that, you should see the **RentalListings** model.
 
 8. Select the **Use this model** button option and create a new **Real-time endpoint**.
 
@@ -188,9 +178,7 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 
 10. After the endpoint deploys, navigate to the **Consume** tab and copy the REST endpoint and primary key so you can use them in the next section.
 
-    > [!Note]
-    >
-    > If the **Consume** tab does not appear, select **Endpoints** on the left-hand side menu, and then select your newly created endpoint. The **Consume** tab should then be visible.
+    > &#128221; If the **Consume** tab does not appear, select **Endpoints** on the left-hand side menu, and then select your newly created endpoint. The **Consume** tab should then be visible.
 
     ![Screenshot of the endpoint Consume tab. Red boxes highlight the copy buttons for the REST endpoint and primary authentication key.](media/19-aml-automl-endpoint-consume.png)
 
@@ -356,9 +344,7 @@ To populate the language translation table, you will create a stored procedure t
     $$ LANGUAGE sql;
     ```
 
-> [!Note]
->
-> By default, the deployment name is a combination of the model name (**rentallistings**) and the version number (**1**). If you deploy a new version of the model and use the default deployment name, the new deployment name would be **rentallistings-2**.
+> &#128221; By default, the deployment name is a combination of the model name (**rentallistings**) and the version number (**1**). If you deploy a new version of the model and use the default deployment name, the new deployment name would be **rentallistings-2**.
 
 2. Execute the function using the following SQL command:
 
