@@ -151,12 +151,12 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 
     > &#128221; If your environment does not allow shared key access on storage accounts, you may receive an error when registering the model that states you don't have permissions to perform upload actions on the datastore. To resolve this, first assign the required identity-based roles on the workspace's storage account by running the following Azure CLI commands in the Cloud Shell (replace `<storage_account_name>` with the name of the storage account found on your Machine Learning workspace's overview page):
 
-        ```bash
-        USER_ID=$(az ad signed-in-user show --query id -o tsv)
-        STORAGE_ID=$(az storage account show --name <storage_account_name> --resource-group $RG_NAME --query id -o tsv)
-        az role assignment create --assignee $USER_ID --role "Storage Blob Data Contributor" --scope $STORAGE_ID
-        az role assignment create --assignee $USER_ID --role "Storage File Data Privileged Contributor" --scope $STORAGE_ID
-        ```
+    ```bash
+    USER_ID=$(az ad signed-in-user show --query id -o tsv)
+    STORAGE_ID=$(az storage account show --name <storage_account_name> --resource-group $RG_NAME --query id -o tsv)
+    az role assignment create --assignee $USER_ID --role "Storage Blob Data Contributor" --scope $STORAGE_ID
+    az role assignment create --assignee $USER_ID --role "Storage File Data Privileged Contributor" --scope $STORAGE_ID
+    ```
 
     > Then, switch the workspace datastore to use identity-based authentication. In Azure ML Studio, go to **Data** > **Datastores** > **workspaceblobstore**, select **Update authentication**, and turn **off** the **"Save credentials with the datastore for data access"** toggle. Save the change. Wait a few minutes for the permissions to propagate, then retry the model registration.
 
