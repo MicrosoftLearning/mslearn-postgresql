@@ -136,10 +136,16 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
       --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
       --body '{"identity":{"type":"SystemAssigned"}}'
 
-    # Get the system MI principal ID
-    SYS_MI=$(az rest --method get \
-      --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
-      --query "identity.principalId" -o tsv)
+    # Wait for the identity to be assigned, then get the principal ID
+    echo "Waiting for system-assigned managed identity..."
+    SYS_MI=""
+    while [ -z "$SYS_MI" ] || [ "$SYS_MI" = "null" ]; do
+      sleep 15
+      SYS_MI=$(az rest --method get \
+        --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
+        --query "identity.principalId" -o tsv)
+      echo "principalId=$SYS_MI"
+    done
 
     # Grant 'Cognitive Services OpenAI User' to the system MI (for in-database embeddings)
     az role assignment create \

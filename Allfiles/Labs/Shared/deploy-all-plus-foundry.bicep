@@ -32,10 +32,10 @@ param translatorServiceName string = 'trn-learn-${resourceGroup().location}-${un
 @description('Unique name for the Storage Account.')
 param storageAccountName string = 'st${uniqueString(resourceGroup().id)}'
 
-@description('Unique name for the AI Foundry Hub.')
+@description('Unique name for the Microsoft Foundry Hub.')
 param aiHubName string = 'aihub-${uniqueString(resourceGroup().id)}'
 
-@description('Unique name for the AI Foundry Project.')
+@description('Unique name for the Microsoft Foundry Project.')
 param aiProjectName string = 'aiproj-${uniqueString(resourceGroup().id)}'
 
 @description('Restore the service instead of creating a new instance. This is useful if you previously soft-delted the service and want to restore it. If you are restoring a service, set this to true. Otherwise, leave this as false.')
@@ -180,7 +180,7 @@ resource translatorService 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   }
 }
 
-@description('Creates a Storage Account for AI Foundry Hub.')
+@description('Creates a Storage Account for Microsoft Foundry Hub.')
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: storageAccountName
   location: location
@@ -195,7 +195,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   }
 }
 
-@description('Creates an Azure AI Foundry Hub.')
+@description('Creates an Azure Microsoft Foundry Hub.')
 resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-04-01' = {
   name: aiHubName
   location: location
@@ -214,7 +214,7 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-04-01' = {
   }
 }
 
-@description('Creates an Azure AI Foundry Project.')
+@description('Creates an Azure Microsoft Foundry Project.')
 resource aiProject 'Microsoft.MachineLearningServices/workspaces@2024-04-01' = {
   name: aiProjectName
   location: location

@@ -88,10 +88,16 @@ You use **Azure Cloud Shell** with the **Bash** environment to deploy and config
       --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
       --body '{"identity":{"type":"SystemAssigned"}}'
 
-    # Get the system MI principal ID
-    SYS_MI=$(az rest --method get \
-      --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
-      --query "identity.principalId" -o tsv)
+    # Wait for the identity to be assigned, then get the principal ID
+    echo "Waiting for system-assigned managed identity..."
+    SYS_MI=""
+    while [ -z "$SYS_MI" ] || [ "$SYS_MI" = "null" ]; do
+      sleep 15
+      SYS_MI=$(az rest --method get \
+        --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
+        --query "identity.principalId" -o tsv)
+      echo "principalId=$SYS_MI"
+    done
 
     # Grant 'Cognitive Services OpenAI User' to the system MI (for in-database embeddings)
     az role assignment create \
@@ -145,6 +151,7 @@ SELECT azure_ai.set_setting('azure_openai.subscription_key', '{api-key}');
 
 ```sql
 SELECT azure_ai.set_setting('azure_openai.endpoint', '{endpoint}');
+SELECT azure_ai.set_setting('azure_openai.auth_type', 'managed-identity');
 ```
 
 These settings allow PostgreSQL to call Azure AI for embedding generation.
@@ -179,7 +186,8 @@ Load CSV data:
 ```sql
 \COPY listings (id, name, description, property_type, room_type, price, weekly_price)
   FROM 'mslearn-postgresql/Allfiles/Labs/Shared/listings.csv' WITH (FORMAT csv, HEADER);
-
+```
+```sql
 \COPY reviews (id, listing_id, date, comments)
   FROM 'mslearn-postgresql/Allfiles/Labs/Shared/reviews.csv' WITH (FORMAT csv, HEADER);
 ```
@@ -508,7 +516,7 @@ If Cloud Shell prompts you to **switch to Classic mode** when using `code`, acce
                   logger.info("Performing semantic search...")
                   search_query = """
                      WITH query_embedding AS (
-                        SELECT azure_openai.create_embeddings('embedding', %s, max_attempts => 5, retry_delay_ms => 500) AS emb
+                        SELECT azure_openai.create_embeddings('embedding', %s, max_attempts => 5, retry_delay_ms => 500)::vector AS emb
                      )
                      SELECT l.id, l.name, l.description, l.property_type, l.room_type, l.price, l.weekly_price
                      FROM listings l, query_embedding qe
@@ -616,6 +624,8 @@ If Cloud Shell prompts you to **switch to Classic mode** when using `code`, acce
 
 1. **Deploy the Function via zip** (This step takes several minutes to run):
 
+   > **Note:** If your Cloud Shell session times out or disconnects during this step, you may see a message like *"A Cloud Shell credential problem occurred."* If this happens, close and reopen Cloud Shell, re-set your variables (`FUNCAPP_NAME` and `RG_NAME`), and retry the deploy command.
+
    ```bash
    cd $HOME/rental-search-func
    
@@ -635,6 +645,8 @@ If Cloud Shell prompts you to **switch to Classic mode** when using `code`, acce
    echo "Deployment initiated. Waiting for completion..."
    sleep 30
    ```
+
+   > **Note:** The deployment may respond with status code **202** — this is normal and means the deployment was accepted and is building remotely. You may also see a Cloud Shell credential warning; if so, close and reopen Cloud Shell, re-set your variables, and retry the deploy command.
 
 1. **Restart the Function App to ensure all changes take effect**:
    ```bash
@@ -673,7 +685,7 @@ If Cloud Shell prompts you to **switch to Classic mode** when using `code`, acce
    echo ""
    echo "Deployment complete!"
    echo ""
-   echo "Your Function Key (save this for Task 4):"
+   echo "Your Function Key (save this for the next task):"
    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
    echo "$FUNC_KEY"
    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -683,7 +695,7 @@ If Cloud Shell prompts you to **switch to Classic mode** when using `code`, acce
    echo "https://$HOST/api/search"
    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
    echo ""
-   echo "For Task 4, you'll need:"
+   echo "For the next task, you'll need:"
    echo "  • Function App Host: $HOST"
    echo "  • Function Key: $FUNC_KEY"
    ```
@@ -730,28 +742,30 @@ Now register your Function API with Microsoft Foundry so the agent can call it.
 
 > **Note**: This exercise uses an HTTP-triggered Azure Function with an OpenAPI specification, which allows the agent to call your function as a custom tool. Microsoft Foundry also supports native queue-based integration for queue-triggered functions, but the HTTP approach with OpenAPI offers simpler deployment and direct REST API access suitable for this learning scenario.
 
-1. Go to [AI Foundry (Preview)](https://ai.azure.com/).  
+1. Go to [Microsoft Foundry](https://ai.azure.com/).
 
-1. Navigate to your project, then select **Agents** from the left menu.
+1. On the landing page, find your project in the resource list (it starts with `aiproj-`) and select it.
+
+1. In the left menu, select **Agents**.
 
 1. Select **+ New agent** and configure:
    - **Agent name**: `RentalAdvisor`
-   - **Deployment**: select the latest GPT-4 deployment available
+   - **Deployment**: select a **gpt-4o** or **gpt-4o-mini** deployment. If none is available, select **+ Create new deployment** and deploy one of these models.
+
+   > **Important:** Do not select gpt-5 family models — they only support code interpreter and file search, not custom Actions (OpenAPI tools) which this exercise requires.
+
    - Select **Create**
 
-1. In the agent setup page, scroll down to the **Actions (0)** section and select **Add**.
+1. In the agent setup page, scroll down to the **Actions** section and select **+ Add**.
 
-1. In the **Create a custom tool** wizard:
+1. In the **Add action** dialog, select **OpenAPI 3.0 specified tool**.
 
-   **Step 1 - Tool details**:
+1. Configure the tool:
+
    - **Name**: `postgresqlRentalSearch`
    - **Description**: `Searches vacation rental properties using semantic search on PostgreSQL. Returns property listings matching natural language queries.`
-   - Select **Next**
-
-1. On **Step 2 - Define schema**:
-
    - **Authentication method**: Select **Anonymous** from the dropdown.
-   - In the **OpenAPI Specification** text area, paste the following specification, replacing `<your-func-host>` with your Function App hostname and `<your-function-key>` with your function key from step 3.5:
+   - In the **OpenAPI Specification** text area, paste the following specification, replacing `<your-func-host>` with your Function App hostname and `<your-function-key>` with your function key from the previous task:
    
    > **Note**: This approach embeds the function key as a query parameter in the OpenAPI specification. The specification is stored securely by Microsoft Foundry and the key is not exposed to end users.
    
@@ -765,11 +779,11 @@ Now register your Function API with Microsoft Foundry so the agent can call it.
      },
      "servers": [
        {
-         "url": "https://<your-func-host>/api/search"
+         "url": "https://<your-func-host>"
        }
      ],
      "paths": {
-       "/": {
+       "/api/search": {
          "post": {
            "summary": "Search rental properties",
            "description": "Performs semantic search on rental property listings using natural language queries",
@@ -844,7 +858,7 @@ Now register your Function API with Microsoft Foundry so the agent can call it.
    }
    ```
 
-1. Select **Next** and then select **Create Tool**.
+1. Select **Create Tool** to add the tool to your agent.
 
 1. Update the agent instructions:
 
@@ -866,7 +880,7 @@ Your agent is now ready to use the PostgreSQL-backed rental search tool!
 
 Time to see your agent in action!
 
-Select the **Playground**:
+Select the **Try in Playground**:
 
 On the chat screen, enter queries like:
 
