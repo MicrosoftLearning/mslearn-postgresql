@@ -124,8 +124,9 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
     If you're using **managed identity**, run the following commands now to set it up if you haven't already. Otherwise skip to the next step.
 
     ```bash
-    # Get server name, AOAI name, subscription ID
+    # Re-derive all variables (in case your Cloud Shell session was reset)
     PGSERVER=$(az postgres flexible-server list -g "$RG_NAME" --query "[0].name" -o tsv)
+    AOAI=$(az cognitiveservices account list -g "$RG_NAME" --query "[?kind=='OpenAI'].name | [0]" -o tsv)
     AOAI_ID=$(az cognitiveservices account show -g "$RG_NAME" -n "$AOAI" --query "id" -o tsv)
     SUB_ID=$(az account show --query "id" -o tsv)
 

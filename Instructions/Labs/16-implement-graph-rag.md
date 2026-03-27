@@ -382,9 +382,9 @@ Before you can use the Apache AGE extension, you need to enable it on the Azure 
 1. Under the **Value** column, add `AGE` to the list of enabled extensions.
 1. Do a new search for **shared_preload_libraries**.
 1. Under the **Value** column, add `AGE` to the list of enabled extensions.
-1. Select **Save** to apply the changes.
+1. Select **Save** and then **Save and Restart** to apply the changes.
 
-Now you should be able to use the Apache AGE extension in your PostgreSQL database.
+It will take a few moments for the server to restart. Once the restart is complete, you should be able to use the Apache AGE extension in your PostgreSQL database.
 
 ## Build the knowledge graph
 
@@ -477,7 +477,9 @@ Let's create the nodes from the company policies data.
     ```sql
     -- Disable pagination for better output readability
     \pset pager off
+    ```
 
+    ```sql
     -- Upsert the policy nodes
     SELECT public.policy_graph_upsert(policy_id, title, department, category, policy_text)
     FROM public.company_policies
@@ -518,6 +520,9 @@ Let's create the nodes from the company policies data.
     SELECT public.create_entity_in_policies_graph('Topic', name)
     FROM topics;
     ```
+
+    > **Note:** The functions return `void`, so the output shows blank rows — this is expected. What matters is the row counts: 108 policy nodes, 8 departments, 8 categories, and 20 topics.
+
 You should now have all the nodes created, time to create the edges that connect them.
 
 ### Create the graph edges
@@ -560,7 +565,9 @@ So far you added the nodes for policies, departments, categories, and topics. It
     ```sql
     -- Disable pagination for better output readability
     \pset pager off
+    ```
 
+    ```sql
     -- BELONGS_TO
     SELECT public.create_policy_link_in_policies_graph(policy_id, 'Department', department, 'BELONGS_TO')
     FROM public.company_policies;
