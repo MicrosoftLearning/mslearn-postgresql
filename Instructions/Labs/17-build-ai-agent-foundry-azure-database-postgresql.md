@@ -68,21 +68,53 @@ You use **Azure Cloud Shell** with the **Bash** environment to deploy and config
 
 > Note the PostgreSQL server **FQDN**, username (`pgAdmin`), and password, you'll use these in the next steps.
 
+1. Throughout this exercise, you authenticate to Azure OpenAI using **one** of two methods. Choose the one that applies to your environment and follow only those instructions at each step:
+
+    - **API keys** — use a key copied from the Azure portal (works in most environments).
+    - **Managed identity** — use Microsoft Entra ID token-based authentication (required when API keys are disabled at the organization level).
+
+    If you're using **managed identity**, run the following commands now to set it up. Otherwise skip to the next step.
+
+    ```bash
+    # Re-derive all variables (in case your Cloud Shell session was reset)
+    PGSERVER=$(az postgres flexible-server list -g "$RG_NAME" --query "[0].name" -o tsv)
+    AOAI=$(az cognitiveservices account list -g "$RG_NAME" --query "[?kind=='OpenAI'].name | [0]" -o tsv)
+    AOAI_ID=$(az cognitiveservices account show -g "$RG_NAME" -n "$AOAI" --query "id" -o tsv)
+    SUB_ID=$(az account show --query "id" -o tsv)
+
+    # Enable system-assigned managed identity on the PostgreSQL server
+    # (The az CLI has no direct flag for this, so we use az rest per Microsoft docs)
+    az rest --method patch \
+      --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
+      --body '{"identity":{"type":"SystemAssigned"}}'
+
+    # Get the system MI principal ID
+    SYS_MI=$(az rest --method get \
+      --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
+      --query "identity.principalId" -o tsv)
+
+    # Grant 'Cognitive Services OpenAI User' to the system MI (for in-database embeddings)
+    az role assignment create \
+      --assignee "$SYS_MI" \
+      --role "Cognitive Services OpenAI User" \
+      --scope "$AOAI_ID"
+
+    # Restart the server so it picks up the new identity
+    az postgres flexible-server restart -g "$RG_NAME" -n "$PGSERVER"
+    ```
+
+    > **Note:** Wait 2-3 minutes after the restart for the server to come back up and for role assignments to propagate. If you receive authorization errors in later steps, wait a couple of minutes and retry.
+
 ## Connect to your database using psql in the Azure Cloud Shell
 
 You connect to the `rentals` database on your Azure Database for PostgreSQL server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
 
-1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL server.
+1. In the [Azure portal](https://portal.azure.com/), open the Cloud Shell by selecting the **Cloud Shell** icon in the toolbar.
 
-1. In the resource menu, under **Settings**, select **Databases** and then select **Connect** for the `rentals` database. Selecting **Connect** doesn't actually connect you to the database; it simply provides instructions for connecting to the database using various methods. Review the instructions to **Connect from browser or locally** and use those instructions to connect using the Azure Cloud Shell.
+1. Run the following command to connect to your `rentals` database, replacing `<server-name>` with the name of your PostgreSQL flexible server (found on the **Overview** page of your PostgreSQL resource in the Azure portal):
 
-   ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](./media/17-postgresql-rentals-database-connect.png)
-
-1. Open the **Cloud Shell (Bash)** in the Azure portal if it's not already open.
-
-1. In the Cloud Shell, run the `psql` command provided in the **Connect from browser or locally** instructions. It should look similar to the following command (replace `<your-postgresql-server-name>` with your actual server name):
    ```bash
-   psql -h <your-postgresql-server-name>.postgres.database.azure.com -p 5432 -U pgAdmin rentals
+   psql -h <server-name>.postgres.database.azure.com -p 5432 -U pgAdmin rentals
    ```
 
 1. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** sign in.
@@ -96,9 +128,23 @@ You connect to the `rentals` database on your Azure Database for PostgreSQL serv
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS azure_ai;
+```
 
-SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<your-openai-account>.openai.azure.com');
-SELECT azure_ai.set_setting('azure_openai.subscription_key', '<your-api-key>');
+Now configure the `azure_ai` extension connection to Azure OpenAI. You need the endpoint for your Azure OpenAI resource (found on the **Keys and Endpoint** page under **Resource Management** in the Azure portal).
+
+Run the commands for your chosen authentication method:
+
+> **Using API keys:** Copy one of the available keys from the same page. You can use either `KEY 1` or `KEY 2`.
+
+```sql
+SELECT azure_ai.set_setting('azure_openai.endpoint', '{endpoint}');
+SELECT azure_ai.set_setting('azure_openai.subscription_key', '{api-key}');
+```
+
+> **Using managed identity:** Only set the endpoint. When no `subscription_key` is configured, the extension automatically uses the server's system-assigned managed identity.
+
+```sql
+SELECT azure_ai.set_setting('azure_openai.endpoint', '{endpoint}');
 ```
 
 These settings allow PostgreSQL to call Azure AI for embedding generation.

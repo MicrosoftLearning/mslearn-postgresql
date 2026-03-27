@@ -33,10 +33,10 @@ param translatorServiceName string = 'trn-learn-${resourceGroup().location}-${un
 param storageAccountName string = 'st${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the AI Foundry Hub.')
-param aiHubName string = 'aihub-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+param aiHubName string = 'aihub-${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the AI Foundry Project.')
-param aiProjectName string = 'aiproj-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
+param aiProjectName string = 'aiproj-${uniqueString(resourceGroup().id)}'
 
 @description('Restore the service instead of creating a new instance. This is useful if you previously soft-delted the service and want to restore it. If you are restoring a service, set this to true. Otherwise, leave this as false.')
 param restore bool = false

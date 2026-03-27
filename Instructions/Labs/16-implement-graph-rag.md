@@ -120,7 +120,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 1. Throughout this exercise, you authenticate to Azure OpenAI using **one** of two methods. Choose the one that applies to your environment and follow only those instructions at each step:
 
     - **API keys** — use a key copied from the Azure portal (works in most environments).
-    - **Managed identity** — use Azure AD token-based authentication (required when API keys are disabled at the organization level).
+    - **Managed identity** — use Microsoft Entra ID token-based authentication (required when API keys are disabled at the organization level).
 
     If you're using **managed identity**, run the following commands now to set it up if you haven't already. Otherwise skip to the next step.
 
