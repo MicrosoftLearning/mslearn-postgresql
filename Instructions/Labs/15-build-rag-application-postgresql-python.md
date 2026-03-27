@@ -116,6 +116,49 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you previously created and observe the deployment progress there.
 
+1. Throughout this exercise, you authenticate to Azure OpenAI using **one** of two methods. Choose the one that applies to your environment and follow only those instructions at each step:
+
+    - **API keys** — use a key copied from the Azure portal (works in most environments).
+    - **Managed identity** — use Azure AD token-based authentication (required when API keys are disabled at the organization level).
+
+    If you're using **managed identity**, run the following commands now to set it up if you haven't already. Otherwise skip to the next step.
+
+    ```bash
+    # Get server name, AOAI name, subscription ID
+    PGSERVER=$(az postgres flexible-server list -g "$RG_NAME" --query "[0].name" -o tsv)
+    AOAI_ID=$(az cognitiveservices account show -g "$RG_NAME" -n "$AOAI" --query "id" -o tsv)
+    SUB_ID=$(az account show --query "id" -o tsv)
+
+    # Enable system-assigned managed identity on the PostgreSQL server
+    # (The az CLI has no direct flag for this, so we use az rest per Microsoft docs)
+    az rest --method patch \
+      --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
+      --body '{"identity":{"type":"SystemAssigned"}}'
+
+    # Get the system MI principal ID
+    SYS_MI=$(az rest --method get \
+      --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
+      --query "identity.principalId" -o tsv)
+
+    # Grant 'Cognitive Services OpenAI User' to the system MI (for in-database embeddings)
+    az role assignment create \
+      --assignee "$SYS_MI" \
+      --role "Cognitive Services OpenAI User" \
+      --scope "$AOAI_ID"
+
+    # Also grant the role to your own identity (needed for the Python app later)
+    MY_ID=$(az ad signed-in-user show --query id -o tsv)
+    az role assignment create \
+      --assignee "$MY_ID" \
+      --role "Cognitive Services OpenAI User" \
+      --scope "$AOAI_ID"
+
+    # Restart the server so it picks up the new identity
+    az postgres flexible-server restart -g "$RG_NAME" -n "$PGSERVER"
+    ```
+
+    > **Note:** Wait 2-3 minutes after the restart for the server to come back up and for role assignments to propagate. If you receive authorization errors in later steps, wait a couple of minutes and retry.
+
 1. Take note of the resource names and their corresponding ID, and the PostgreSQL server's fully qualified domain name (FQDN), username, and password, as you need them later.
 
 ### Troubleshooting deployment errors
@@ -152,11 +195,13 @@ You could encounter a few errors when running the Bicep deployment script. *If n
 
 You connect to the `ContosoHelpDesk` database on your Azure Database for PostgreSQL server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
 
-1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL server.
+1. In the [Azure portal](https://portal.azure.com/), open the Cloud Shell by selecting the **Cloud Shell** icon in the toolbar.
 
-1. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `ContosoHelpDesk` database. Selecting **Connect** doesn't actually connect you to the database; it simply provides instructions for connecting to the database using various methods. Review the instructions to **Connect from browser or locally** and use those instructions to connect using the Azure Cloud Shell.
+1. Run the following command to connect to your `ContosoHelpDesk` database, replacing `<server-name>` with the name of your PostgreSQL flexible server (found on the **Overview** page of your PostgreSQL resource in the Azure portal):
 
-    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the ContosoHelpDesk database are highlighted by red boxes.](./media/15-postgresql-database-connect.png)
+    ```bash
+    psql -h <server-name>.postgres.database.azure.com -U pgAdmin -d ContosoHelpDesk
+    ```
 
 1. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** sign in.
 
@@ -182,14 +227,24 @@ To store and query vectors, and to generate embeddings, you need to allowlist an
     CREATE EXTENSION azure_ai;
     ```
 
-1. To enable the `azure_ai` extension, run the following SQL command. You need the endpoint and API key for the Azure OpenAI resource. For detailed instructions, read [Enable the `azure_ai` extension](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension).
+1. Now configure the `azure_ai` extension connection to Azure OpenAI. You need the endpoint for your Azure OpenAI resource (found on the **Keys and Endpoint** page under **Resource Management** in the Azure portal).
 
-    On the *ContosoHelpDesk* prompt, run the following commands:
+    ![Screenshot of the Azure OpenAI service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/12-azure-openai-keys-and-endpoints.png)
+
+    On the *ContosoHelpDesk* prompt, run the commands for your chosen authentication method:
+
+    > **Using API keys:** Copy one of the available keys from the same page. You can use either `KEY 1` or `KEY 2`.
 
     ```sql
-    -- Configure Azure OpenAI (requires azure_ai_settings_manager role)
-    SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<endpoint>.openai.azure.com');      -- e.g., https://YOUR-RESOURCE.openai.azure.com
-    SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
+    SELECT azure_ai.set_setting('azure_openai.endpoint', '{endpoint}');
+    SELECT azure_ai.set_setting('azure_openai.subscription_key', '{api-key}');
+    ```
+
+    > **Using managed identity:** Only set the endpoint. When no `subscription_key` is configured, the extension automatically uses the server's system-assigned managed identity.
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_openai.endpoint', '{endpoint}');
+    SELECT azure_ai.set_setting('azure_openai.auth_type', 'managed-identity');
     ```
 
 ## Populate the database with sample data
@@ -207,7 +262,6 @@ Before you use the `azure_ai` extension, add a table to the `ContosoHelpDesk` da
       title       TEXT NOT NULL,
       department  TEXT NOT NULL,
       policy_text TEXT NOT NULL,
-      category    TEXT NOT NULL,
       embedding   vector(1536)  -- The `text-embedding-ada-002` model is configured to return 1,536 dimensions, so use that number for the vector column size.
     );
     ```
@@ -215,39 +269,20 @@ Before you use the `azure_ai` extension, add a table to the `ContosoHelpDesk` da
 1. In your Azure Cloud Shell, use the `COPY` command to load data from CSV files into each table you previously created. Run the following command to populate the `company_policies` table:
 
     ```sql
-    \COPY company_policies (title, department, policy_text, category) FROM 'mslearn-postgresql/Allfiles/Labs/Shared/company-policies.csv' WITH (FORMAT csv, HEADER)
+    \COPY company_policies (title, department, policy_text) FROM 'mslearn-postgresql/Allfiles/Labs/Shared/company_policies.csv' WITH (FORMAT csv, HEADER)
     ```
 
     The command output should be `COPY 108`, indicating that 108 rows were written into the table from the CSV file.
 
 1. Backfill embeddings for existing rows.
 
-    Run the following command in your **psql** session (Cloud Shell) to compute embeddings for any rows that don’t have them yet. Replace `<EMBEDDING_DEPLOYMENT_NAME>` with the name of your embedding deployment.
-
-    ```sql
-    -- Create embeddings for existing rows that currently have no embeddings
-    UPDATE company_policies
-    SET embedding = azure_openai.create_embeddings('<EMBEDDING_DEPLOYMENT_NAME>', policy_text)::vector
-    WHERE embedding IS NULL;
-    ```
-
-    This calls your Azure OpenAI embedding deployment from SQL (via `azure_ai`) and stores the result in the column `embedding`.
-
-If you successfully backfilled the 108 rows with embeddings, exit *psql* by typing `\q` and skip the following troubleshooting section. Otherwise, continue with the following troubleshooting steps.
-
-### Troubleshoot 429 errors if encountered
-
-*Skip this section if your UPDATE statement successfully backfilled 108 embeddings*. 
-
-1. Depending on your Azure OpenAI rate limits, you might experience **429 Too Many Requests** errors if you exceed the allowed number of requests. If that is the case for the previous UPDATE statement, you can run the following command to batch the requests and retry (if needed manually reduce the *batch_size* too):
+    Run the following command in your **psql** session (Cloud Shell) to compute embeddings in batches. This avoids **429 Too Many Requests** errors by processing rows in small groups with a pause between each batch.
 
     ```sql
     DO $$
     DECLARE
-      batch_size       int := 50;   -- rows per batch
-      optimistic_pause int := 10;   -- seconds to wait after a successful batch
-      pause_secs       int := 10;   -- current wait (resets to optimistic on success)
-      max_pause        int := 60;   -- cap the backoff
+      batch_size       int := 50;   -- rows per batch (reduce if you still get 429 errors)
+      pause_secs       int := 10;   -- seconds to wait between batches
       updated          int;
     BEGIN
       LOOP
@@ -265,35 +300,33 @@ If you successfully backfilled the 108 rows with embeddings, exit *psql* by typi
           WHERE p.policy_id = t.policy_id;
 
           GET DIAGNOSTICS updated = ROW_COUNT;
-    
+
           IF updated = 0 THEN
-            RAISE NOTICE 'No rows left to embed.';
+            RAISE NOTICE 'All rows embedded.';
             EXIT;
           END IF;
-    
-          -- Success: reset to optimistic pause and sleep briefly
-          pause_secs := optimistic_pause;
-          RAISE NOTICE 'Updated % rows; sleeping % seconds before next batch.', updated, pause_secs;
+
+          RAISE NOTICE 'Updated % rows; sleeping % seconds...', updated, pause_secs;
           PERFORM pg_sleep(pause_secs);
-    
+
         EXCEPTION WHEN OTHERS THEN
-          -- Likely throttled (429) or transient error: back off and retry
-          RAISE NOTICE 'Throttled/transient error; backing off % seconds.', pause_secs;
+          RAISE NOTICE 'Throttled - backing off % seconds...', pause_secs;
           PERFORM pg_sleep(pause_secs);
-          pause_secs := LEAST(pause_secs * 2, max_pause);
+          pause_secs := LEAST(pause_secs * 2, 60);
         END;
       END LOOP;
     END $$;
-    
     ```
 
-1. If you successfully backfilled the 108 rows with embeddings, exit *psql* by typing `\q`, otherwise, try reducing the *batch_size* by 10 and run the previous script again.
+    > **Note:** If you experience repeated throttling, reduce `batch_size` (try 40, 30, or 20) or increase `pause_secs` (try 20 or 30).
+
+    Once all 108 rows are backfilled, continue to the next section.
 
 ### Test the vector table with a similarity query
 
 Let's make sure everything is working by verifying with a similarity search and simple filtering directly from SQL.
 
-1. On the Azure Cloud Shell, connect to the *ContosoHelpDesk* database using *psql* as before.
+1. On the Azure Cloud Shell, connect to the *ContosoHelpDesk* database again using *psql* as before.
 
 1. Run the following SQL statement:
 
@@ -336,7 +369,9 @@ Before you look at our Python application, you need to set the correct environme
     code "mslearn-postgresql/Allfiles/Labs/14/.env"
     ```
 
-1. Update your `.env` file with your PostgreSQL and Azure OpenAI credentials:
+1. Update your `.env` file with your PostgreSQL and Azure OpenAI credentials. Use the template that matches your chosen authentication method:
+
+    > **Using API keys:**
 
     ```text
     # PostgreSQL connection
@@ -348,6 +383,24 @@ Before you look at our Python application, you need to set the correct environme
     # Azure OpenAI
     AZURE_OPENAI_API_KEY=<your Azure OpenAI key>
     AZURE_OPENAI_ENDPOINT=<value from output azureOpenAIEndpoint>  # e.g., https://oai-learn-<region>-<id>.openai.azure.com
+    OPENAI_API_VERSION=2024-02-15-preview
+
+    # Deployment names (match the Bicep resources)
+    OPENAI_EMBED_DEPLOYMENT=embedding
+    OPENAI_CHAT_DEPLOYMENT=chat
+    ```
+
+    > **Using managed identity:** Omit the `AZURE_OPENAI_API_KEY` line. The Python app authenticates using `DefaultAzureCredential` with the role you assigned earlier.
+
+    ```text
+    # PostgreSQL connection
+    PGHOST=<server FQDN from output serverFqdn>
+    PGUSER=pgAdmin
+    PGPASSWORD=<your admin password>
+    PGDATABASE=ContosoHelpDesk
+    
+    # Azure OpenAI (no key needed)
+    AZURE_OPENAI_ENDPOINT=<value from output azureOpenAIEndpoint>
     OPENAI_API_VERSION=2024-02-15-preview
 
     # Deployment names (match the Bicep resources)
@@ -407,7 +460,9 @@ On the GitHub repo you cloned, you can find the `app.py` file, which contains th
 
     This function formats the retrieved chunks into a context string suitable for the model prompt.
 
-1. Replace the comment **# Call Azure OpenAI to answer using the provided context** with the following script:
+1. Replace the comment **# Call Azure OpenAI to answer using the provided context** with the script that matches your authentication method:
+
+    > **Using API keys:**
 
     ```python
     # Call Azure OpenAI to answer using the provided context
@@ -420,15 +475,39 @@ On the GitHub repo you cloned, you can find the `app.py` file, which contains th
             temperature=0,
         )
         messages = [
-            {"role": "system", "content": "Answer ONLY from the provided context. If it isn't in the context, say you don’t have enough information. Cite policy titles in square brackets, e.g., [Vacation policy]."},
+            {"role": "system", "content": "Answer ONLY from the provided context. If it isn't in the context, say you don't have enough information. Cite policy titles in square brackets, e.g., [Vacation policy]."},
             {"role": "user", "content": f"Question: {question}\nContext:\n{format_context(chunks)}"},
         ]
         return llm.invoke(messages).content
     ```
 
-    This function generates an answer to the user's question using the provided context chunks.
+    > **Using managed identity:** Replace `api_key` with a token provider. Also add `azure-identity` to your `requirements.txt` or run `pip install azure-identity`.
 
-1. The final section of the application is the main application logic. This part of the code prompts the user for a question, retrieves relevant chunks, generates an answer, and loops until the user decides to quit.
+    ```python
+    from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+
+    token_provider = get_bearer_token_provider(
+        DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+    )
+
+    # Call Azure OpenAI to answer using the provided context
+    def generate_answer(question, chunks):
+        llm = AzureChatOpenAI(
+            azure_deployment=os.getenv("OPENAI_CHAT_DEPLOYMENT"),
+            azure_ad_token_provider=token_provider,
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            api_version=os.getenv("OPENAI_API_VERSION"),
+            temperature=0,
+        )
+        messages = [
+            {"role": "system", "content": "Answer ONLY from the provided context. If it isn't in the context, say you don't have enough information. Cite policy titles in square brackets, e.g., [Vacation policy]."},
+            {"role": "user", "content": f"Question: {question}\nContext:\n{format_context(chunks)}"},
+        ]
+        return llm.invoke(messages).content
+    ```
+
+    Both versions produce the same result — the only difference is how they authenticate to Azure OpenAI.
+
 
 1. Save the file and close the *code* editor.
 
@@ -470,8 +549,8 @@ But adding an index to such a small table might not show significant improvement
 
     ```sql
     -- Inflate to ~50k rows (keeps embeddings the same; OK for a demo)
-    INSERT INTO company_policies (title, department, policy_text, category, embedding)
-    SELECT title || ' (copy ' || gs || ')', department, policy_text, category, embedding
+    INSERT INTO company_policies (title, department, policy_text, embedding)
+    SELECT title || ' (copy ' || gs || ')', department, policy_text, embedding
     FROM company_policies
     CROSS JOIN generate_series(1, 500) AS gs;
     ```
