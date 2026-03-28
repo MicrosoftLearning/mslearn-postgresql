@@ -29,14 +29,11 @@ param languageServiceName string = 'lang-learn-${resourceGroup().location}-${uni
 @description('Unique name for the Azure AI Translator service account.')
 param translatorServiceName string = 'trn-learn-${resourceGroup().location}-${uniqueString(resourceGroup().id)}'
 
-@description('Unique name for the Storage Account.')
-param storageAccountName string = 'st${uniqueString(resourceGroup().id)}'
-
-@description('Unique name for the Microsoft Foundry Hub.')
-param aiHubName string = 'aihub-${uniqueString(resourceGroup().id)}'
+@description('Unique name for the Microsoft Foundry resource.')
+param aiFoundryName string = 'foundry-${uniqueString(resourceGroup().id)}'
 
 @description('Unique name for the Microsoft Foundry Project.')
-param aiProjectName string = 'aiproj-${uniqueString(resourceGroup().id)}'
+param aiProjectName string = '${aiFoundryName}-proj'
 
 @description('Restore the service instead of creating a new instance. This is useful if you previously soft-delted the service and want to restore it. If you are restoring a service, set this to true. Otherwise, leave this as false.')
 param restore bool = false
@@ -180,56 +177,49 @@ resource translatorService 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   }
 }
 
-@description('Creates a Storage Account for Microsoft Foundry Hub.')
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: storageAccountName
+@description('Creates a Microsoft Foundry resource (new-style, CognitiveServices-based).')
+resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
+  name: aiFoundryName
   location: location
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
-  properties: {
-    accessTier: 'Hot'
-    allowBlobPublicAccess: false
-    minimumTlsVersion: 'TLS1_2'
-  }
-}
-
-@description('Creates an Azure Microsoft Foundry Hub.')
-resource aiHub 'Microsoft.MachineLearningServices/workspaces@2024-04-01' = {
-  name: aiHubName
-  location: location
-  kind: 'Hub'
   identity: {
     type: 'SystemAssigned'
   }
   sku: {
-    name: 'Basic'
-    tier: 'Basic'
+    name: 'S0'
   }
+  kind: 'AIServices'
   properties: {
-    friendlyName: aiHubName
-    storageAccount: storageAccount.id
+    allowProjectManagement: true
+    customSubDomainName: aiFoundryName
+    disableLocalAuth: false
     publicNetworkAccess: 'Enabled'
   }
 }
 
-@description('Creates an Azure Microsoft Foundry Project.')
-resource aiProject 'Microsoft.MachineLearningServices/workspaces@2024-04-01' = {
+@description('Creates a Microsoft Foundry Project.')
+resource aiProject 'Microsoft.CognitiveServices/accounts/projects@2025-06-01' = {
   name: aiProjectName
+  parent: aiFoundry
   location: location
-  kind: 'Project'
   identity: {
     type: 'SystemAssigned'
   }
+  properties: {}
+}
+
+@description('Deploys a gpt-5.1 model for the Foundry agent.')
+resource agentModelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-06-01' = {
+  parent: aiFoundry
+  name: 'gpt-5.1'
   sku: {
-    name: 'Basic'
-    tier: 'Basic'
+    capacity: 1
+    name: 'GlobalStandard'
   }
   properties: {
-    friendlyName: aiProjectName
-    hubResourceId: aiHub.id
-    publicNetworkAccess: 'Enabled'
+    model: {
+      name: 'gpt-5.1'
+      format: 'OpenAI'
+    }
   }
 }
 
@@ -247,11 +237,7 @@ output languageServiceEndpoint string = languageService.properties.endpoint
 output translatorServiceName string = translatorService.name
 output translatorServiceEndpoint string = translatorService.properties.endpoint
 
-output storageAccountName string = storageAccount.name
-output storageAccountId string = storageAccount.id
-
-output aiHubName string = aiHub.name
-output aiHubId string = aiHub.id
+output aiFoundryName string = aiFoundry.name
+output aiFoundryEndpoint string = aiFoundry.properties.endpoint
 
 output aiProjectName string = aiProject.name
-output aiProjectId string = aiProject.id

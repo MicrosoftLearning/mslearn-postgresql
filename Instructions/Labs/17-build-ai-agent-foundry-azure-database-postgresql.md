@@ -61,10 +61,9 @@ You use **Azure Cloud Shell** with the **Bash** environment to deploy and config
    az deployment group create      --resource-group "$RG_NAME"      --template-file "~/mslearn-postgresql/Allfiles/Labs/Shared/deploy-all-plus-foundry.bicep"      --parameters adminLogin=pgAdmin adminLoginPassword="$ADMIN_PASSWORD" databaseName=rentals
    ```
    The deployment provisions:
-   - An **Azure Database for PostgreSQL Flexible Server** named `rentals`
-   - An **Azure Storage Account** for Function App operations
+   - An **Azure Database for PostgreSQL Flexible Server** with a `rentals` database
    - An **Azure OpenAI Service** with text-embedding-ada-002 model deployed
-   - An **Microsoft Foundry** project for building the agent
+   - A **Microsoft Foundry** resource and project with a **gpt-5.1** model deployment for the agent
 
 > Note the PostgreSQL server **FQDN**, username (`pgAdmin`), and password, you'll use these in the next steps.
 
@@ -227,13 +226,19 @@ Before we can create our agent service, we need to create the **Azure Function A
    - **Pricing plan:** lowest available tier (for example Basic B1 or Standard S1)
    - **Zone redundancy:** Disabled
 
+1. On the **Storage** tab, select **Create new** for the storage account and and if necessary, generate a name.
+
+1. Accept the defaults on the **Networking**, **Monitoring**, **Durable Functions**, and **Deployment** tabs.
+
+1. On the **Authentication** tab, change the **Host storage (AzureWebJobsStorage)** authentication typeto **Managed identity**. A **Managed identity** section appears below with a new user-assigned identity (for example `func-rental-search-<uniqueID>-uami`). Accept the defaults — the required **Storage Blob Data Owner** role is assigned automatically. Leave Application Insights as is.
+
+1. Accept the defaults on the **Tags** tab.
+
 1. Select **Review + Create → Create**, wait for deployment, then open your new Function App.
 
 1. Select **Go to resource** to open the Function App overview page.
 
-### 3.2 Configure managed identity and storage (Cloud Shell)
-
-Now configure the Function App to use managed identity for secure access to the storage account that was created during the initial deployment.
+### 3.2 Set Function App variables (Cloud Shell)
 
 1. Switch to **Cloud Shell (Bash)** in the Azure portal.
 
@@ -245,99 +250,7 @@ Now configure the Function App to use managed identity for secure access to the 
    echo "Resource Group: $RG_NAME"
    ```
 
-1. Enable system-assigned managed identity on the Function App:
-   ```bash
-   az functionapp identity assign \
-     --name $FUNCAPP_NAME \
-     --resource-group $RG_NAME
-   
-   PRINCIPAL_ID=$(az functionapp identity show \
-     --name $FUNCAPP_NAME \
-     --resource-group $RG_NAME \
-     --query principalId \
-     --output tsv)
-   
-   echo "Managed identity enabled with Principal ID: $PRINCIPAL_ID"
-   ```
-
-1. Find the existing storage account that was created during the initial deployment:
-
-   Azure Functions requires a storage account for internal operations like metadata, logs, and coordination. The Bicep template already created one for you. Now you configure the Function App to access it using managed identity for secure, connection-string-free access.
-
-   ```bash
-   # Find the storage account in your resource group
-   STORAGE_NAME=$(az storage account list \
-     --resource-group $RG_NAME \
-     --query "[0].name" \
-     --output tsv)
-   
-   echo "Found storage account: $STORAGE_NAME"
-   
-   # Get the storage account resource ID
-   STORAGE_ID=$(az storage account show \
-     --name $STORAGE_NAME \
-     --resource-group $RG_NAME \
-     --query id \
-     --output tsv)
-   
-   # Grant Storage Blob Data Contributor role to the Function App identity
-   az role assignment create \
-     --assignee $PRINCIPAL_ID \
-     --role "Storage Blob Data Contributor" \
-     --scope $STORAGE_ID
-   
-   # Grant Storage Queue Data Contributor role to the Function App identity
-   az role assignment create \
-     --assignee $PRINCIPAL_ID \
-     --role "Storage Queue Data Contributor" \
-     --scope $STORAGE_ID
-   
-   # Grant Storage Table Data Contributor role to the Function App identity
-   az role assignment create \
-     --assignee $PRINCIPAL_ID \
-     --role "Storage Table Data Contributor" \
-     --scope $STORAGE_ID
-   
-   echo "Managed identity granted Contributor roles for Blob, Queue, and Table storage."
-   ```
-   
-1. Remove any existing AzureWebJobsStorage connection string setting:
-
-   The Function App usually is created with a default connection string pointing to a storage account using shared keys. When using managed identity, you must remove this old setting first.
-
-   ```bash
-   # Remove old connection string setting if it exists
-   az functionapp config appsettings delete \
-     --name $FUNCAPP_NAME \
-     --resource-group $RG_NAME \
-     --setting-names "AzureWebJobsStorage"
-   
-   echo "Removed old AzureWebJobsStorage connection string (if it existed)."
-   ```
-
-1. Update the Function App to use managed identity for storage:
-
-   ```bash
-   # Get the blob endpoint
-   BLOB_ENDPOINT=$(az storage account show \
-     --name $STORAGE_NAME \
-     --resource-group $RG_NAME \
-     --query primaryEndpoints.blob \
-     --output tsv)
-   
-   # Configure Function App to use managed identity for storage
-   az functionapp config appsettings set \
-     --name $FUNCAPP_NAME \
-     --resource-group $RG_NAME \
-     --settings \
-       "AzureWebJobsStorage__accountName=$STORAGE_NAME" \
-       "AzureWebJobsStorage__blobServiceUri=${BLOB_ENDPOINT}" \
-       "AzureWebJobsStorage__queueServiceUri=$(echo $BLOB_ENDPOINT | sed 's/blob/queue/')" \
-       "AzureWebJobsStorage__tableServiceUri=$(echo $BLOB_ENDPOINT | sed 's/blob/table/')" \
-       "AzureWebJobsStorage__credential=managedidentity"
-   
-   echo "Storage configured to use managed identity."
-   ```
+    > **Note:** The Function App uses the storage account that Azure created automatically during the Function App setup. No additional storage configuration is needed.
 
 ### 3.3 Add PostgreSQL environment variables (Cloud Shell)
 
@@ -369,6 +282,14 @@ Configure your PostgreSQL connection values in the Function App.
    echo "Environment variables configured successfully."
    ```
 
+1. **Enable remote build** so Azure installs the Python dependencies from `requirements.txt`:
+
+   ```bash
+   az functionapp config appsettings set \
+     --name $FUNCAPP_NAME --resource-group $RG_NAME \
+     --settings "SCM_DO_BUILD_DURING_DEPLOYMENT=true" "ENABLE_ORYX_BUILD=true"
+   ```
+
 1. Restart the Function App to apply the settings:
    ```bash
    az functionapp restart \
@@ -380,282 +301,64 @@ Configure your PostgreSQL connection values in the Function App.
 
 These entries become the Function's runtime environment variables. Azure Functions automatically maps them to `os.getenv("<NAME>")` in your Python code, allowing `function_app.py` to connect to PostgreSQL securely at runtime.
 
-### 3.4 Author the Python code (Cloud Shell)
+### 3.4 Review the Function code
 
-Now create the Function's Python code files.
+The lab repository includes three pre-built files that make up the Azure Function, along with a pre-built zip file for deployment. You should review them so you understand what they do and can modify them if needed.
 
-If Cloud Shell prompts you to **switch to Classic mode** when using `code`, accept it. If the shell reloads, rerun the variable commands from step 3.2 and start here again.
+The files are in `mslearn-postgresql/Allfiles/Labs/18/`:
 
-1. Set up a working folder:
-   ```bash
-   mkdir -p $HOME/rental-search-func
-   cd $HOME/rental-search-func
-   ```
+| File | Purpose |
+|------|---------|
+| `requirements.txt` | Python dependencies — the Azure Functions SDK and `psycopg` (PostgreSQL driver) |
+| `host.json` | Azure Functions runtime configuration — logging settings and extension bundle |
+| `function_app.py` | The search API implementation (described below) |
+| `rental-search-func.zip` | Pre-built zip of the three files above, ready to deploy |
 
-1. Create `requirements.txt`:
-   ```bash
-   code requirements.txt
-   ```
-   Paste and save:
-   ```text
-   azure-functions>=1.20.0,<2.0.0
-   psycopg[binary]>=3.2.1,<4.0.0
-   ```
+#### `function_app.py` — The search API
 
-1. Create `function_app.py`:
+This is the main file. It implements a single HTTP-triggered function using the v2 programming model. Here's what it does:
 
-   This Python file implements the Azure Function using the v2 programming model. *The Microsoft Foundry agent calls this API to retrieve rental property data when responding to user queries.* The code:
-   
-      - **Connects to PostgreSQL** using environment variables for secure authentication
-      - **Defines a search endpoint** (`/search`) that accepts POST requests with query text and result count
-      - **Validates input** to ensure query safety
-      - **Executes vector search** by calling PostgreSQL's `azure_openai.create_embeddings()` function to generate embeddings on-demand, then uses pgvector's `<->` operator to find the most similar listings
-      - **Returns JSON results** formatted for the AI agent to consume
-      - **Requires function-level authentication** to protect your data
+- **Reads PostgreSQL connection details** from environment variables (`PGHOST`, `PGDB`, `PGUSER`, `PGPASSWORD`, `PGSSLMODE`) — these are the variables you set in step 3.3.
+- **Exposes a `POST /api/search` endpoint** that accepts JSON with a `query` (text) and `k` (number of results).
+- **Executes a vector search** by calling PostgreSQL's `azure_openai.create_embeddings()` function to generate an embedding from the query text, then uses pgvector's `<->` operator to find the most similar listings.
+- **Returns JSON results** with property id, name, description, type, and price — formatted for the Foundry agent to consume.
+- **Requires function-level authentication** (`AuthLevel.FUNCTION`) so only callers with a valid function key can access it.
+
+> **Tip:** If you want to customize the search behavior (for example, filter by price range or property type), modify `function_app.py` before deploying and recreate the zip file.
+
+### 3.5 Deploy and test
+
+1. **Deploy the Function code** from Cloud Shell:
 
    ```bash
-   code function_app.py
+   # Get the correct SCM hostname (new Function Apps use a different URL format)
+   HOST=$(az functionapp show --name $FUNCAPP_NAME --resource-group $RG_NAME --query defaultHostName -o tsv)
+   SCM_HOST=$(echo $HOST | sed 's/\./.scm./')
+   echo "SCM host: $SCM_HOST"
+
+   # Deploy using a bearer token (required when Basic auth is disabled)
+   cd ~/mslearn-postgresql/Allfiles/Labs/18
+   zip deploy.zip function_app.py host.json requirements.txt
+   TOKEN=$(az account get-access-token --query accessToken -o tsv)
+   curl -s -X POST --data-binary "@deploy.zip" \
+     -H "Authorization: Bearer $TOKEN" \
+     "https://$SCM_HOST/api/zipdeploy"
    ```
 
-   Paste and save:
-   
-   ```python
-   import os
-   import json
-   import logging
-   import psycopg
-   import azure.functions as func
-   from datetime import datetime
+   You should see an empty response — that means it succeeded.
 
-   # Configure logging
-   logging.basicConfig(level=logging.INFO)
-   logger = logging.getLogger(__name__)
+   > **Note:** If you receive a `401 Unauthorized` error, your token may have expired. Run the `TOKEN=...` and `curl` commands again.
 
-   app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
+   Wait 1-2 minutes for the remote build to install Python dependencies.
 
-   # Database connection parameters from environment variables
-   PGHOST = os.getenv("PGHOST")
-   PGDB = os.getenv("PGDB", "rentals")
-   PGUSER = os.getenv("PGUSER")
-   PGPASSWORD = os.getenv("PGPASSWORD")
-   PGSSLMODE = os.getenv("PGSSLMODE", "require")
-
-   def log_env_vars():
-      """Log environment variables for debugging (masked)"""
-      logger.info("=== Environment Variables ===")
-      logger.info(f"PGHOST: {PGHOST}")
-      logger.info(f"PGDB: {PGDB}")
-      logger.info(f"PGUSER: {PGUSER}")
-      logger.info(f"PGPASSWORD: {'***' if PGPASSWORD else 'NOT SET'}")
-      logger.info(f"PGSSLMODE: {PGSSLMODE}")
-      logger.info("============================")
-
-   def get_db_conn():
-      logger.info("Creating database connection...")
-      try:
-         conn = psycopg.connect(
-               host=PGHOST,
-               dbname=PGDB,
-               user=PGUSER,
-               password=PGPASSWORD,
-               sslmode=PGSSLMODE,
-               autocommit=True,
-               connect_timeout=10
-         )
-         logger.info("Database connection successful!")
-         return conn
-      except Exception as e:
-         logger.error(f"Database connection failed: {str(e)}")
-         raise
-
-   @app.route(route="search", methods=["POST"])
-   def search(req: func.HttpRequest) -> func.HttpResponse:
-      timestamp = datetime.utcnow().isoformat()
-      logger.info(f"========== NEW REQUEST {timestamp} ==========")
-      
-      try:
-         # Log environment on first request
-         log_env_vars()
-         
-         # Parse request body
-         logger.info("Parsing request body...")
-         try:
-               req_body = req.get_json()
-               logger.info(f"Request body parsed: {req_body}")
-         except Exception as e:
-               logger.error(f"Failed to parse JSON: {str(e)}")
-               return func.HttpResponse(
-                  json.dumps({"error": "Invalid JSON in request body", "details": str(e)}),
-                  mimetype="application/json",
-                  status_code=400
-               )
-         
-         query = req_body.get('query')
-         k = req_body.get('k', 3)
-         
-         logger.info(f"Query: '{query}', k: {k}")
-         
-         if not query:
-               logger.warning("Query parameter missing")
-               return func.HttpResponse(
-                  json.dumps({"error": "Missing 'query' parameter"}),
-                  mimetype="application/json",
-                  status_code=400
-               )
-         
-         # Validate k
-         if not isinstance(k, int) or k < 1 or k > 10:
-               logger.warning(f"Invalid k value: {k}, using default 3")
-               k = 3
-         
-         # Connect to database
-         logger.info("Connecting to PostgreSQL...")
-         with get_db_conn() as conn:
-               with conn.cursor() as cur:
-                  # Generate embedding and perform vector search in one query
-                  logger.info("Performing semantic search...")
-                  search_query = """
-                     WITH query_embedding AS (
-                        SELECT azure_openai.create_embeddings('embedding', %s, max_attempts => 5, retry_delay_ms => 500)::vector AS emb
-                     )
-                     SELECT l.id, l.name, l.description, l.property_type, l.room_type, l.price, l.weekly_price
-                     FROM listings l, query_embedding qe
-                     WHERE l.listing_vector IS NOT NULL
-                     ORDER BY l.listing_vector <-> qe.emb
-                     LIMIT %s;
-                  """
-                  
-                  try:
-                     cur.execute(search_query, (query, k))
-                     rows = cur.fetchall()
-                     logger.info(f"Vector search returned {len(rows)} results")
-                  except Exception as e:
-                     logger.error(f"Vector search failed: {str(e)}")
-                     raise
-                  
-                  # Format results
-                  logger.info("Formatting results...")
-                  results = []
-                  for idx, row in enumerate(rows):
-                     logger.info(f"Processing row {idx + 1}: id={row[0]}, name={row[1][:30]}...")
-                     results.append({
-                           "id": row[0],
-                           "name": row[1],
-                           "description": row[2],
-                           "property_type": row[3],
-                           "room_type": row[4],
-                           "price": float(row[5]) if row[5] is not None else None,
-                           "weekly_price": float(row[6]) if row[6] is not None else None
-                     })
-                  
-                  logger.info(f"Successfully formatted {len(results)} results")
-                  logger.info("========== REQUEST COMPLETED SUCCESSFULLY ==========")
-                  
-                  return func.HttpResponse(
-                     json.dumps({"results": results}),
-                     mimetype="application/json",
-                     status_code=200
-                  )
-                  
-      except ValueError as e:
-         logger.error(f"ValueError: {str(e)}", exc_info=True)
-         return func.HttpResponse(
-               json.dumps({"error": "Invalid JSON in request body", "details": str(e)}),
-               mimetype="application/json",
-               status_code=400
-         )
-      except Exception as e:
-         logger.error(f"FATAL ERROR: {str(e)}", exc_info=True)
-         return func.HttpResponse(
-               json.dumps({"error": str(e), "type": type(e).__name__}),
-               mimetype="application/json",
-               status_code=500
-         )
-   ```
-
-1. Create `host.json`:
-   ```bash
-   code host.json
-   ```
-   Paste and save:
-   ```json
-   {
-      "version": "2.0",
-      "logging": {
-         "applicationInsights": {
-            "samplingSettings": {
-            "isEnabled": true,
-            "excludedTypes": "Request"
-            }
-         },
-         "logLevel": {
-            "default": "Information",
-            "Function": "Information"
-         }
-      },
-      "extensionBundle": {
-         "id": "Microsoft.Azure.Functions.ExtensionBundle",
-         "version": "[4.*, 5.0.0)"
-      }
-   }
-   ```
-
-1. Verify the files were created:
-   ```bash
-   ls -la
-   echo "---"
-   echo "Files created successfully:"
-   echo "- requirements.txt"
-   echo "- function_app.py"
-   echo "- host.json"
-   ```
-
-### 3.5 Deploy and test (Cloud Shell)
-
-1. **Ensure variables are set** (if Cloud Shell reloaded, rerun these commands):
-
-   ```bash
-   # If variables are not set, run:
-   FUNCAPP_NAME=<your-function-app-name>
-   RG_NAME=<your-resource-group-name>
-   echo "Function App: $FUNCAPP_NAME"
-   echo "Resource Group: $RG_NAME"
-   ```
-
-1. **Deploy the Function via zip** (This step takes several minutes to run):
-
-   > **Note:** If your Cloud Shell session times out or disconnects during this step, you may see a message like *"A Cloud Shell credential problem occurred."* If this happens, close and reopen Cloud Shell, re-set your variables (`FUNCAPP_NAME` and `RG_NAME`), and retry the deploy command.
-
-   ```bash
-   cd $HOME/rental-search-func
-   
-   # Clean up any previous deployment
-   rm -f app.zip
-   
-   # Create zip file (exclude hidden files and git directories)
-   zip -r app.zip . -x ".*" "*.git*" "__pycache__/*" "*.pyc"
-   
-   # Deploy to Azure
-   az functionapp deployment source config-zip \
-     --name $FUNCAPP_NAME \
-     --resource-group $RG_NAME \
-     --src app.zip \
-     --build-remote true
-
-   echo "Deployment initiated. Waiting for completion..."
-   sleep 30
-   ```
-
-   > **Note:** The deployment may respond with status code **202** — this is normal and means the deployment was accepted and is building remotely. You may also see a Cloud Shell credential warning; if so, close and reopen Cloud Shell, re-set your variables, and retry the deploy command.
-
-1. **Restart the Function App to ensure all changes take effect**:
+1. **Restart the Function App**:
    ```bash
    az functionapp restart \
      --name $FUNCAPP_NAME \
      --resource-group $RG_NAME
    
    echo "Function App restarted. Waiting for startup..."
-   sleep 20
+   sleep 30
    ```
 
 1. **Get the Function App URL and function key**:
@@ -736,39 +439,51 @@ If Cloud Shell prompts you to **switch to Classic mode** when using `code`, acce
 
 ---
 
-## Task 4 – Register the API as a custom tool in Microsoft Foundry
+## Task 4 – Create an agent and register the API in Microsoft Foundry
 
-Now register your Function API with Microsoft Foundry so the agent can call it.
-
-> **Note**: This exercise uses an HTTP-triggered Azure Function with an OpenAPI specification, which allows the agent to call your function as a custom tool. Microsoft Foundry also supports native queue-based integration for queue-triggered functions, but the HTTP approach with OpenAPI offers simpler deployment and direct REST API access suitable for this learning scenario.
+Now create an agent in Microsoft Foundry and register your Function API as a tool so the agent can call it.
 
 1. Go to [Microsoft Foundry](https://ai.azure.com/).
 
-1. On the landing page, find your project in the resource list (it starts with `aiproj-`) and select it.
+    > **Note:** If you see a **New Foundry** toggle in the upper-right corner, make sure it's turned **on** to use the latest version of the Foundry portal.
 
-1. In the left menu, select **Agents**.
+1. Your project should appear in the upper-left corner of the page (it starts with `foundry-`). If a different project is shown, select the project name in the upper-left to switch to the correct one.
+
+1. On the project home page, select **Create agents**.
 
 1. Select **+ New agent** and configure:
    - **Agent name**: `RentalAdvisor`
-   - **Deployment**: select a **gpt-4o** or **gpt-4o-mini** deployment. If none is available, select **+ Create new deployment** and deploy one of these models.
-
-   > **Important:** Do not select gpt-5 family models — they only support code interpreter and file search, not custom Actions (OpenAPI tools) which this exercise requires.
-
    - Select **Create**
 
-1. In the agent setup page, scroll down to the **Actions** section and select **+ Add**.
+1. Under Model selection, choose the **gpt-5.1** deployment that was created in your Foundry resource. If you don't see it, choose **Browse more models** and filter by your resource name to find and select it.
 
-1. In the **Add action** dialog, select **OpenAPI 3.0 specified tool**.
+    > **Important:** Not all model versions support the OpenAPI tool, and not all models are available in every region. For this exercise, **gpt-5.1** is used because it supports the OpenAPI tool and is available in the West US 3 region. If you use a different region, consult the [tool support by region and model](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/tool-best-practice#tool-support-by-region-and-model) documentation to choose a compatible model.
+
+1. In the **Instructions** field, paste the following:
+
+   ```
+   You are an assistant for Margie's Travel helping customers find vacation rental properties.
+
+   When users ask for property recommendations, use the postgresqlRentalSearch tool with their
+   natural language query and a reasonable k value (3-5 results).
+
+   Use the JSON results from the tool to craft a friendly, natural-language response that
+   highlights the property names, descriptions, and prices. Be conversational and helpful.
+   ```
+
+1. Scroll down to the **Tools** section. Select **Add**, then select **Browse all tools**.
+
+1. In the **Select a tool** dialog, select the **Custom** tab.
+
+1. Select **OpenAPI tool** and select **Create**.
 
 1. Configure the tool:
 
    - **Name**: `postgresqlRentalSearch`
    - **Description**: `Searches vacation rental properties using semantic search on PostgreSQL. Returns property listings matching natural language queries.`
-   - **Authentication method**: Select **Anonymous** from the dropdown.
-   - In the **OpenAPI Specification** text area, paste the following specification, replacing `<your-func-host>` with your Function App hostname and `<your-function-key>` with your function key from the previous task:
-   
-   > **Note**: This approach embeds the function key as a query parameter in the OpenAPI specification. The specification is stored securely by Microsoft Foundry and the key is not exposed to end users.
-   
+   - **Authentication**: Select **Anonymous**
+   - In the **OpenAPI Specification** text area, paste the following JSON. Replace `<your-func-host>` with your Function App hostname and `<your-function-key>` with your function key from the previous task:
+
    ```json
    {
      "openapi": "3.0.0",
@@ -858,31 +573,14 @@ Now register your Function API with Microsoft Foundry so the agent can call it.
    }
    ```
 
-1. Select **Create Tool** to add the tool to your agent.
-
-1. Update the agent instructions:
-
-   ```
-   You are an assistant for Margie's Travel helping customers find vacation rental properties.
-   
-   When users ask for property recommendations, use the postgresqlRentalSearch tool with their 
-   natural language query and a reasonable k value (3-5 results). 
-   
-   Use the JSON results from the tool to craft a friendly, natural-language response that 
-   highlights the property names, descriptions, and prices. Be conversational and helpful.
-   ```
-
-Your agent is now ready to use the PostgreSQL-backed rental search tool!
+1. Select **Create tool** to add the tool to your agent.
 
 ---
-
 ## Task 5 – Test your agent
 
 Time to see your agent in action!
 
-Select the **Try in Playground**:
-
-On the chat screen, enter queries like:
+On the chat screen, enter messages like:
 
 ```
 Find beachside apartments with great reviews.
