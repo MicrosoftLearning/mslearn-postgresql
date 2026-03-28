@@ -32,8 +32,7 @@ param translatorServiceName string = 'trn-learn-${resourceGroup().location}-${un
 @description('Unique name for the Microsoft Foundry resource.')
 param aiFoundryName string = 'foundry-${uniqueString(resourceGroup().id)}'
 
-@description('Unique name for the Microsoft Foundry Project.')
-param aiProjectName string = '${aiFoundryName}-proj'
+
 
 @description('Restore the service instead of creating a new instance. This is useful if you previously soft-delted the service and want to restore it. If you are restoring a service, set this to true. Otherwise, leave this as false.')
 param restore bool = false
@@ -196,16 +195,7 @@ resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
   }
 }
 
-@description('Creates a Microsoft Foundry Project.')
-resource aiProject 'Microsoft.CognitiveServices/accounts/projects@2025-06-01' = {
-  name: aiProjectName
-  parent: aiFoundry
-  location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {}
-}
+
 
 @description('Deploys a gpt-5.1 model for the Foundry agent.')
 resource agentModelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-06-01' = {
@@ -240,4 +230,4 @@ output translatorServiceEndpoint string = translatorService.properties.endpoint
 output aiFoundryName string = aiFoundry.name
 output aiFoundryEndpoint string = aiFoundry.properties.endpoint
 
-output aiProjectName string = aiProject.name
+

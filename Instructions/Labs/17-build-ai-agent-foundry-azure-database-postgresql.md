@@ -63,7 +63,9 @@ You use **Azure Cloud Shell** with the **Bash** environment to deploy and config
    The deployment provisions:
    - An **Azure Database for PostgreSQL Flexible Server** with a `rentals` database
    - An **Azure OpenAI Service** with text-embedding-ada-002 model deployed
-   - A **Microsoft Foundry** resource and project with a **gpt-5.1** model deployment for the agent
+   - A **Microsoft Foundry** AI Services resource with a **gpt-5.1** model deployment for the agent
+
+   > **Note:** The Bicep template creates the Foundry resource and model deployment, but you create the Foundry **project** manually in Task 4. This ensures agent tools work reliably.
 
 > Note the PostgreSQL server **FQDN**, username (`pgAdmin`), and password, you'll use these in the next steps.
 
@@ -416,21 +418,22 @@ This is the main file. It implements a single HTTP-triggered function using the 
 **Expected results**:
 
 > Search should return a JSON response with rental listings similar to:
-> ```json
-> {
->   "results": [
->     {
->       "id": 41,
->       "name": "Magazine Profiled with Gorgeous View",
->       "description": "...",
->       "property_type": "House",
->       "room_type": "Entire home/apt",
->       "price": 395.0,
->       "weekly_price": null
->     }
->   ]
-> }
-> ```
+
+   ```json
+   {
+   "results": [
+      {
+         "id": 41,
+         "name": "Magazine Profiled with Gorgeous View",
+         "description": "...",
+         "property_type": "House",
+         "room_type": "Entire home/apt",
+         "price": 395.0,
+         "weekly_price": null
+      }
+   ]
+   }
+   ```
 
 **Troubleshooting**:
 > - If you get a 404, wait 30 more seconds for the Function to fully start, then try again
@@ -439,17 +442,21 @@ This is the main file. It implements a single HTTP-triggered function using the 
 
 ---
 
-## Task 4 – Create an agent and register the API in Microsoft Foundry
+## Task 4 – Create a Foundry project and agent, and register the API
 
-Now create an agent in Microsoft Foundry and register your Function API as a tool so the agent can call it.
+Now create a project in Microsoft Foundry, set up an agent, and register your Function API as a tool so the agent can call it.
 
-1. Go to [Microsoft Foundry](https://ai.azure.com/).
+1. Go to [Microsoft Foundry](https://ai.azure.com/) and sign in.
 
     > **Note:** If you see a **New Foundry** toggle in the upper-right corner, make sure it's turned **on** to use the latest version of the Foundry portal.
 
-1. Your project should appear in the upper-left corner of the page (it starts with `foundry-`). If a different project is shown, select the project name in the upper-left to switch to the correct one.
+1. Create a new project:
+   1. If a project name is shown in the upper-left corner, select it and then select **Create new project**. If no project exists, select **+ Create project** from the home page.
+   1. Enter a project name (for example, `rental-advisor-project`).
+   1. Expand **Advanced options**, select the **Resource group** you created earlier (`$RG_NAME`), and select the Foundry resource that starts with `foundry-`.
+   1. Select **Create project** and wait for it to complete.
 
-1. On the project home page, select **Create agents**.
+1. Once the project opens, select **Create agents** on the project home page.
 
 1. Select **+ New agent** and configure:
    - **Agent name**: `RentalAdvisor`
