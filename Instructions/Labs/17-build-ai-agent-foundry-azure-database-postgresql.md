@@ -186,11 +186,11 @@ Load CSV data:
 
 ```sql
 \COPY listings (id, name, description, property_type, room_type, price, weekly_price)
-  FROM 'mslearn-postgresql/Allfiles/Labs/Shared/listings.csv' WITH (FORMAT csv, HEADER);
+  FROM '~/mslearn-postgresql/Allfiles/Labs/Shared/listings.csv' WITH (FORMAT csv, HEADER);
 ```
 ```sql
 \COPY reviews (id, listing_id, date, comments)
-  FROM 'mslearn-postgresql/Allfiles/Labs/Shared/reviews.csv' WITH (FORMAT csv, HEADER);
+  FROM '~/mslearn-postgresql/Allfiles/Labs/Shared/reviews.csv' WITH (FORMAT csv, HEADER);
 ```
 
 Generate embeddings inside PostgreSQL:
@@ -200,6 +200,9 @@ UPDATE listings
 SET listing_vector = azure_openai.create_embeddings('embedding', description, max_attempts => 5, retry_delay_ms => 500)
 WHERE listing_vector IS NULL;
 ```
+
+Type `\q` to exit `psql` when done.
+
 
 ## Task 3 – Create an API so Foundry agents can query PostgreSQL
 
@@ -452,17 +455,17 @@ Now create a project in Microsoft Foundry, set up an agent, and register your Fu
 
 1. Create a new project:
    1. If a project name is shown in the upper-left corner, select it and then select **Create new project**. If no project exists, select **+ Create project** from the home page. If no project dialog appears, select **create an agent** and it should prompt you to create a new project.
+   1. If prompted, choose **Microsoft Foundry resource**.
    1. Enter a project name (for example, `rental-advisor-project`).
-   1. Expand **Advanced options**, select the **Resource group** you created earlier (`$RG_NAME`), and select the Foundry resource that starts with `foundry-`.
-   1. Select **Create project** and wait for it to complete.
+   1. Select **Create** and wait for it to complete.
 
-1. Once the project opens, select **Create agents** on the project home page.
+1. Once the project opens, select **Create agents** on the project home page or under the **Start building** pull-down menu.
 
 1. Select **+ New agent** and configure:
    - **Agent name**: `RentalAdvisor`
    - Select **Create**
 
-1. Under Model selection, choose the **gpt-5.1** deployment that was created in your Foundry resource. If you don't see it, choose **Browse more models** and filter by your resource name to find and select it.
+1. Under Model selection, select the **gpt-5.1** deployment that was created in your Foundry resource. If you don't see it, choose **Browse more models** and filter by your resource name to find and **Deploy** it.
 
     > **Important:** Not all model versions support the OpenAPI tool, and not all models are available in every region. For this exercise, **gpt-5.1** is used because it supports the OpenAPI tool and is available in the West US 3 region. If you use a different region, consult the [tool support by region and model](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/tool-best-practice#tool-support-by-region-and-model) documentation to choose a compatible model.
 
@@ -582,6 +585,8 @@ Now create a project in Microsoft Foundry, set up an agent, and register your Fu
 
 1. Select **Create tool** to add the tool to your agent.
 
+1. Select **Save** to save your agent configuration.
+
 ---
 ## Task 5 – Test your agent
 
@@ -601,9 +606,12 @@ Recommend a quiet cabin for families.
 Show modern apartments near downtown.
 ```
 
+   > **Note:** You might get a "Error Too Many Requests", if so, pick a different model in the agent configuration that is less busy and save the agent, or wait a few minutes and try again.
+
 Try other variations you can think of!
 
 The agent calls the Function, which embeds and queries PostgreSQL, then summarizes the results.
+
 
 
 ## Task 6 – Clean up
