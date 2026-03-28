@@ -451,7 +451,7 @@ Now create a project in Microsoft Foundry, set up an agent, and register your Fu
     > **Note:** If you see a **New Foundry** toggle in the upper-right corner, make sure it's turned **on** to use the latest version of the Foundry portal.
 
 1. Create a new project:
-   1. If a project name is shown in the upper-left corner, select it and then select **Create new project**. If no project exists, select **+ Create project** from the home page.
+   1. If a project name is shown in the upper-left corner, select it and then select **Create new project**. If no project exists, select **+ Create project** from the home page. If no project dialog appears, select **create an agent** and it should prompt you to create a new project.
    1. Enter a project name (for example, `rental-advisor-project`).
    1. Expand **Advanced options**, select the **Resource group** you created earlier (`$RG_NAME`), and select the Foundry resource that starts with `foundry-`.
    1. Select **Create project** and wait for it to complete.
