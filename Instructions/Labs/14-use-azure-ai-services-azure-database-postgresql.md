@@ -3,7 +3,7 @@ lab:
   title: Use Azure AI services with Azure Database for PostgreSQL
   module: Integrate AI Services to enrich your applications with intelligent features in Azure Database for PostgreSQL
   description: In this exercise, you learned how to use the azureai extension in Azure Database for PostgreSQL to implement intelligent features that enhance an application. You explored how to summarize text, analyze sentiment, extract key phrases and entities, protect sensitive information, and translate content into multiple languages. These capabilities enable applications to provide better user experiences, improve accessibility, and support global audiences.
-  duration: 104 minutes
+  duration: 45 minutes
   level: 500
   islab: true
   primarytopics:

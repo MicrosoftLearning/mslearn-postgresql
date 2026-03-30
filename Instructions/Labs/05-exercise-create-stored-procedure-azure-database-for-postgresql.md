@@ -3,7 +3,7 @@ lab:
   title: Create a stored procedure in Azure Database for PostgreSQL
   module: Procedures and functions in PostgreSQL
   description: In this exercise, you create a couple of stored procedures and execute them.
-  duration: 158 minutes
+  duration: 30 minutes
   level: 400
   islab: true
   primarytopics:

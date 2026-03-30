@@ -3,7 +3,7 @@ lab:
   title: Offline PostgreSQL Database Migration
   module: Migrate to Azure Database for PostgreSQL Flexible Server
   description: In this exercise, you'll create an Azure Database for PostgreSQL flexible server and perform an offline database migration from either an on-premise PostgreSQL server or an Azure Database for PostgreSQL server using the Migration feature within the Azure Database for PostgreSQL Flexible Server.
-  duration: 140 minutes
+  duration: 45 minutes
   level: 500
   islab: true
   primarytopics:

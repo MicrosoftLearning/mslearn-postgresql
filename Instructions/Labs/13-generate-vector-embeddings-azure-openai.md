@@ -3,7 +3,7 @@ lab:
   title: Generate vector embeddings with Azure OpenAI
   module: Enable Semantic Search with Azure Database for PostgreSQL
   description: 'You will get a result similar to this, but with 1536 vector columns:'
-  duration: 92 minutes
+  duration: 35 minutes
   level: 500
   islab: true
   primarytopics:

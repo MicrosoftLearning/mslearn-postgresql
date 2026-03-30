@@ -3,7 +3,7 @@ lab:
   title: Online PostgreSQL Database Migration
   module: Migrate to Azure Database for PostgreSQL Flexible Server
   description: In this exercise you will configure logical replication between a source PostgreSQL Server and Azure Database for PostgreSQL Flexible Server to allow for an online migration activity to take place.
-  duration: 62 minutes
+  duration: 20 minutes
   level: 300
   islab: true
   primarytopics:

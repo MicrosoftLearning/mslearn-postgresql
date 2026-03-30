@@ -3,9 +3,12 @@ lab:
   title: List table changes with logical decoding
   module: Understand write-ahead logging
   description: In this exercise, you configure logical replication, which is native to PostgreSQL. You create two servers, which act as publisher and subscriber. Data in the zoodb is replicated between them.
-  duration: 158 minutes
+  duration: 45 minutes
   level: 400
   islab: true
+  primarytopics:
+    - Azure
+    - Azure Database for PostgreSQL
 ---
 
 # List table changes with logical decoding

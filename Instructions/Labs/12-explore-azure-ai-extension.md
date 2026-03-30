@@ -3,7 +3,7 @@ lab:
   title: Explore the Azure AI Extension
   module: Explore Generative AI with Azure Database for PostgreSQL
   description: As the lead developer for Margie's Travel, you have been tasked with building an AI-powered application to provide your customers with intelligent recommendations on rental properties. You want to learn more about the azureai extension for Azure Database for PostgreSQL and how it can help you integrate the power of Generative AI (GenAI) into your app. In this exercise, you explore the azureai extension and its functionality by installing it in an Azure Database for PostgreSQL flexible server database and examining its capabilities for integrating Azure AI and ML services.
-  duration: 110 minutes
+  duration: 45 minutes
   level: 500
   islab: true
   primarytopics:

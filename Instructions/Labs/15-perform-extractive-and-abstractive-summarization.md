@@ -3,7 +3,7 @@ lab:
   title: Perform Extractive and Abstractive Summarization
   module: Summarize data using Azure AI Services and Azure Database for PostgreSQL
   description: The rental property app maintained by Margie's Travel provides a way for property managers to describe rental listings. Many of the descriptions in the system are long, giving many details about the rental property, its neighborhood, and local attractions, stores, and other amenities. A feature that has been requested as you implement new AI-powered capabilities for the app is using generative AI to create concise summaries of these descriptions, making it easier for your users to review properties quickly. In this exercise, you use the azureai extension in an Azure Database For PostgreSQL flexible server to perform abstractive and extractive summarization on rental property descriptions and compare the resulting summaries.
-  duration: 106 minutes
+  duration: 35 minutes
   level: 500
   islab: true
   primarytopics:

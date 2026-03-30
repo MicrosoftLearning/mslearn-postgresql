@@ -3,7 +3,7 @@ lab:
   title: Build RAG Applications with Azure Database for PostgreSQL and Python
   module: Build RAG applications with Azure Database for PostgreSQL
   description: The following command assigns the name to be used for the resource group that houses all the resources used in this exercise. The resource group name assigned to the corresponding variable is rg-learn-postgresql-ai-$REGION, where $REGION is the location you previously specified. However, you can change it to any other resource group name that suits your preference.
-  duration: 126 minutes
+  duration: 55 minutes
   level: 500
   islab: true
   primarytopics:

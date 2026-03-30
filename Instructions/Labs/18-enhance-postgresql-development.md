@@ -3,7 +3,7 @@ lab:
   title: Explore the Visual Studio Code PostgreSQL Extension and GitHub Copilot
   module: Develop PostgreSQL solutions in Visual Studio Code with the PostgreSQL extension and GitHub Copilot
   description: Earlier in this exercise, you deployed an Azure Database for PostgreSQL flexible server and created a rentals database with sample data. Now, you connect to that database using the PostgreSQL extension in Visual Studio Code. You need the server name, admin username, and password generated during deployment.
-  duration: 156 minutes
+  duration: 45 minutes
   level: 400
   islab: true
   primarytopics:
