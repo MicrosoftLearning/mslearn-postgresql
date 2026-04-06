@@ -30,7 +30,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 2. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/13-portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/portal-toolbar-cloud-shell.png)
 
     If prompted, select the required options to open a *Bash* shell. If you have previously used a *PowerShell* console, switch it to a *Bash* shell.
 
@@ -89,7 +89,50 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
-8. Close the Cloud Shell pane once your resource deployment is complete.
+8. Throughout this exercise, you authenticate to Azure OpenAI using **one** of two methods. Choose the one that applies to your environment and follow only those instructions at each step:
+
+    - **API keys** — use a key copied from the Azure portal (works in most environments).
+    - **Managed identity** — use Microsoft Entra ID token-based authentication (required when API keys are disabled at the organization level).
+
+    If you're using **managed identity**, run the following commands now to set it up. Otherwise skip to the next step.
+
+    ```bash
+    # Re-derive all variables (in case your Cloud Shell session was reset)
+    PGSERVER=$(az postgres flexible-server list -g "$RG_NAME" --query "[0].name" -o tsv)
+    AOAI=$(az cognitiveservices account list -g "$RG_NAME" --query "[?kind=='OpenAI'].name | [0]" -o tsv)
+    AOAI_ID=$(az cognitiveservices account show -g "$RG_NAME" -n "$AOAI" --query "id" -o tsv)
+    SUB_ID=$(az account show --query "id" -o tsv)
+
+    # Enable system-assigned managed identity on the PostgreSQL server
+    # (The az CLI has no direct flag for this, so we use az rest per Microsoft docs)
+    az rest --method patch \
+      --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
+      --body '{"identity":{"type":"SystemAssigned"}}'
+
+    # Wait for the identity to be assigned, then get the principal ID
+    echo "Waiting for system-assigned managed identity..."
+    SYS_MI=""
+    while [ -z "$SYS_MI" ] || [ "$SYS_MI" = "null" ]; do
+      sleep 15
+      SYS_MI=$(az rest --method get \
+        --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
+        --query "identity.principalId" -o tsv)
+      echo "principalId=$SYS_MI"
+    done
+
+    # Grant 'Cognitive Services OpenAI User' to the system MI (for in-database embeddings)
+    az role assignment create \
+      --assignee "$SYS_MI" \
+      --role "Cognitive Services OpenAI User" \
+      --scope "$AOAI_ID"
+
+    # Restart the server so it picks up the new identity
+    az postgres flexible-server restart -g "$RG_NAME" -n "$PGSERVER"
+    ```
+
+    > **Note:** Wait 2-3 minutes after the restart for the server to come back up and for role assignments to propagate. If you receive authorization errors in later steps, wait a couple of minutes and retry.
+
+9. Close the Cloud Shell pane once your resource deployment is complete.
  
 ### Troubleshooting deployment errors
 
@@ -123,40 +166,56 @@ You may encounter a few errors when running the Bicep deployment script.
 
 ## Connect to your database using psql in the Azure Cloud Shell
 
-In this task, you connect to the `rentals` database on your Azure Database for PostgreSQL server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
+You connect to the `rentals` database on your Azure Database for PostgreSQL server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
 
-1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL - Flexible Server.
+1. In the [Azure portal](https://portal.azure.com/), open the Cloud Shell by selecting the **Cloud Shell** icon in the toolbar.
 
-2. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `rentals` database. Note that selecting **Connect** does not actually connect you to the database; it simply provides instructions for connecting to the database using various methods. Review the instructions to **Connect from browser or locally** and use those to connect using the Azure Cloud Shell.
+1. Run the following command to connect to your `rentals` database, replacing `<server-name>` with the name of your PostgreSQL flexible server (found on the **Overview** page of your PostgreSQL resource in the Azure portal):
 
-    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](media/13-postgresql-rentals-database-connect.png)
+    ```bash
+    psql -h <server-name>.postgres.database.azure.com -U pgAdmin -d rentals
+    ```
 
-3. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** login.
+1. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** login.
 
     Once logged in, the `psql` prompt for the `rentals` database is displayed.
 
-4. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
+1. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
 
-    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/13-azure-cloud-shell-pane-maximize.png)
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/azure-cloud-shell-pane-rentals.png)
 
 ## Setup: Configure extensions
 
 To store and query vectors, and to generate embeddings, you need to allow-list and enable two extensions for Azure Database for PostgreSQL Flexible Server: `vector` and `azure_ai`.
 
-1. To allow-list both extensions, add `vector` and `azure_ai` to the server parameter `azure.extensions`, as per the instructions provided in [How to use PostgreSQL extensions](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
+1. To allow-list both extensions, add `vector` and `azure_ai` to the server parameter `azure.extensions`, as per the instructions provided in [How to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
 
-2. Run the following SQL command to enable the `vector` extension. For detailed instructions, read [How to enable and use `pgvector` on Azure Database for PostgreSQL - Flexible Server](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension).
+2. Run the following SQL command to enable the `vector` extension. For detailed instructions, read [How to enable and use `pgvector` on Azure Database for PostgreSQL - Flexible Server](https://learn.microsoft.com/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension).
 
     ```sql
     CREATE EXTENSION vector;
     ```
 
-3. To enable the `azure_ai` extension, run the following SQL command. You'll need the endpoint and API key for the Azure OpenAI resource. For detailed instructions, read [Enable the `azure_ai` extension](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension).
+3. To enable the `azure_ai` extension, run the following SQL command. You need the endpoint for your Azure OpenAI resource (found on the **Keys and Endpoint** page under **Resource Management** in the Azure portal). For detailed instructions, read [Enable the `azure_ai` extension](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension).
 
     ```sql
     CREATE EXTENSION azure_ai;
+    ```
+
+    Run the commands for your chosen authentication method:
+
+    > **Using API keys:** Copy one of the available keys from the same page. You can use either `KEY 1` or `KEY 2`.
+
+    ```sql
     SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<endpoint>.openai.azure.com');
     SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
+    ```
+
+    > **Using managed identity:** Only set the endpoint. When no `subscription_key` is configured, the extension automatically uses the server's system-assigned managed identity.
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<endpoint>.openai.azure.com');
+    SELECT azure_ai.set_setting('azure_openai.auth_type', 'managed-identity');
     ```
 
 ## Populate the database with sample data
@@ -231,6 +290,11 @@ Now that we have some sample data, it's time to generate and store the embedding
     Note that this may take several minutes, depending on the available quota.
 
 1. See an example vector by running this query:
+
+    ```sql
+    -- Disable pagination for better output readability
+    \pset pager off
+    ```
 
     ```sql
     SELECT listing_vector FROM listings LIMIT 1;
@@ -385,12 +449,12 @@ Once you have completed this exercise, delete the Azure resources you created. Y
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
 
-    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/13-azure-portal-home-azure-services-resource-groups.png)
+    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/azure-portal-home-azure-services-resource-groups.png)
 
 2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select your resource group from the list.
 
 3. On the **Overview** page of your resource group, select **Delete resource group**.
 
-    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/13-resource-group-delete.png)
+    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/azure-portal-overview-resource-group-delete.png)
 
 4. In the confirmation dialog, enter the resource group name you are deleting to confirm and then select **Delete**.

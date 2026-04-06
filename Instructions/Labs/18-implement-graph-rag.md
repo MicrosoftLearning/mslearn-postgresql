@@ -37,7 +37,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 1. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](./media/16-portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](./media/portal-toolbar-cloud-shell.png)
 
     If prompted, select the required options to open a *Bash* shell. If you previously used a *PowerShell* console, switch it to a *Bash* shell.
 
@@ -210,7 +210,7 @@ You connect to the `ContosoHelpDesk` database on your Azure Database for Postgre
 
 1. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it helps to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
 
-    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](./media/16-azure-cloud-shell-pane-maximize.png)
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](./media/azure-cloud-shell-pane-contoso.png)
 
 ## Setup: Configure extensions
 
@@ -230,7 +230,7 @@ To store and query vectors, and to generate embeddings, you need to allowlist an
 
 1. Now configure the `azure_ai` extension connection to Azure OpenAI. You need the endpoint for your Azure OpenAI resource (found on the **Keys and Endpoint** page under **Resource Management** in the Azure portal).
 
-    ![Screenshot of the Azure OpenAI service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/12-azure-openai-keys-and-endpoints.png)
+    ![Screenshot of the Azure OpenAI service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/azure-openai-keys-and-endpoints.png)
 
     On the *ContosoHelpDesk* prompt, run the commands for your chosen authentication method:
 
@@ -750,6 +750,22 @@ You can also change your question by modifying the `\set question` command in `p
 You can also try your own questions and change the topic list as you see fit.
 
 Combining your graph and vector search skills allow you to create powerful search applications. The larger the dataset you work with, the more effective your search capabilities become.
+
+## Clean up
+
+Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
+
+1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
+
+    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/azure-portal-home-azure-services-resource-groups.png)
+
+2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select the resource group from the list.
+
+3. On the **Overview** page of your resource group, select **Delete resource group**.
+
+    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/azure-portal-overview-resource-group-delete.png)
+
+4. In the confirmation dialog, enter the resource group name you are deleting to confirm and then select **Delete**.
 
 ## Key takeaways
 

@@ -38,7 +38,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 1. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/14-portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/portal-toolbar-cloud-shell.png)
 
     If prompted, select the required options to open a *Bash* shell. If you previously used a *PowerShell* console, switch it to a *Bash* shell.
 
@@ -101,6 +101,67 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you previously created and observe the deployment progress there.
 
+1. Throughout this exercise, you authenticate to Azure AI services using **one** of two methods. Choose the one that applies to your environment and follow only those instructions at each step:
+
+    - **API keys** — use a key copied from the Azure portal (works in most environments).
+    - **Managed identity** — use Microsoft Entra ID token-based authentication (required when API keys are disabled at the organization level).
+
+    If you're using **managed identity**, run the following commands now to set it up. Otherwise skip to the next step.
+
+    ```bash
+    # Re-derive all variables (in case your Cloud Shell session was reset)
+    PGSERVER=$(az postgres flexible-server list -g "$RG_NAME" --query "[0].name" -o tsv)
+    SUB_ID=$(az account show --query "id" -o tsv)
+
+    # Enable system-assigned managed identity on the PostgreSQL server
+    az rest --method patch \
+      --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
+      --body '{"identity":{"type":"SystemAssigned"}}'
+
+    # Wait for the identity to be assigned, then get the principal ID
+    echo "Waiting for system-assigned managed identity..."
+    SYS_MI=""
+    while [ -z "$SYS_MI" ] || [ "$SYS_MI" = "null" ]; do
+      sleep 15
+      SYS_MI=$(az rest --method get \
+        --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
+        --query "identity.principalId" -o tsv)
+      echo "principalId=$SYS_MI"
+    done
+
+    # Grant 'Cognitive Services User' to the system MI (for Azure AI Language calls)
+    LANG_ID=$(az cognitiveservices account list -g "$RG_NAME" --query "[?kind=='TextAnalytics'].id | [0]" -o tsv)
+    az role assignment create \
+      --assignee "$SYS_MI" \
+      --role "Cognitive Services User" \
+      --scope "$LANG_ID"
+
+    # Grant 'Cognitive Services User' to the system MI (for Azure AI Translator calls)
+    TRN_ID=$(az cognitiveservices account list -g "$RG_NAME" --query "[?kind=='TextTranslation'].id | [0]" -o tsv)
+    az role assignment create \
+      --assignee "$SYS_MI" \
+      --role "Cognitive Services User" \
+      --scope "$TRN_ID"
+
+    # Grant 'Cognitive Services OpenAI User' to the system MI (for in-database embeddings)
+    AOAI_ID=$(az cognitiveservices account list -g "$RG_NAME" --query "[?kind=='OpenAI'].id | [0]" -o tsv)
+    az role assignment create \
+      --assignee "$SYS_MI" \
+      --role "Cognitive Services OpenAI User" \
+      --scope "$AOAI_ID"
+
+    # Restart the server so it picks up the new identity
+    az postgres flexible-server restart -g "$RG_NAME" -n "$PGSERVER"
+    ```
+
+    > **Note:** Wait 2-3 minutes after the restart for the server to come back up and for role assignments to propagate. If you receive authorization errors in later steps, wait a couple of minutes and retry.
+
+1. If you're using **managed identity**, run the following command now and **save the output** — you need the Translator resource ID in **Task 4** to configure translation with managed identity.
+
+    ```bash
+    az cognitiveservices account list -g "$RG_NAME" --query "[?kind=='TextTranslation'].id | [0]" -o tsv
+    ```
+
 1. Take note of the resource names and their corresponding ID, and the PostgreSQL server's fully qualified domain name (FQDN), username, and password, as you need them later.
 
 ### Troubleshooting deployment errors
@@ -137,17 +198,21 @@ You could encounter a few errors when running the Bicep deployment script. *If n
 
 You connect to the `rentals` database on your Azure Database for PostgreSQL server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
 
-1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL server.
+1. In the [Azure portal](https://portal.azure.com/), open the Cloud Shell by selecting the **Cloud Shell** icon in the toolbar.
 
-1. In the resource menu, under **Settings**, select **Databases** and then select **Connect** for the `rentals` database. Selecting **Connect** doesn't actually connect you to the database; it simply provides instructions for connecting to the database using various methods. Review the instructions to **Connect from browser or locally** and use those instructions to connect using the Azure Cloud Shell.
+1. Run the following command to connect to your `rentals` database, replacing `<server-name>` with the name of your PostgreSQL flexible server (found on the **Overview** page of your PostgreSQL resource in the Azure portal):
 
-    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](media/14-postgresql-database-connect.png)
+    ```bash
+    psql -h <server-name>.postgres.database.azure.com -U pgAdmin -d rentals
+    ```
 
 1. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** sign in.
 
     Once you sign in, the `psql` prompt for the `rentals` database is displayed.
 
 1. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it helps to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
+
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/azure-cloud-shell-pane-rentals.png)
 
 ## Setup: Configure extensions
 
@@ -157,7 +222,7 @@ To store and query vectors, and to generate embeddings, you need to allowlist an
 
 1. Run the following SQL command to enable the `vector` and `azure_ai` extensions. For detailed instructions, read [How to enable and use `pgvector` on Azure Database for PostgreSQL](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension).
 
-    On *ContosoHelpDesk* prompt, run the following SQL commands:
+    On the *rentals* prompt, run the following SQL commands:
 
     ```sql
     -- Enable required extensions
@@ -165,14 +230,37 @@ To store and query vectors, and to generate embeddings, you need to allowlist an
     CREATE EXTENSION azure_ai;
     ```
 
-1. To enable the `azure_ai` extension, run the following SQL command. You need the endpoint and API key for the Azure OpenAI resource. For detailed instructions, read [Enable the `azure_ai` extension](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension).
+1. Configure the `azure_ai` extension connection to **Azure OpenAI**. You need the endpoint for your Azure OpenAI resource (found on the **Keys and Endpoint** page under **Resource Management** in the Azure portal).
 
-    On the *ContosoHelpDesk* prompt, run the following commands:
+    Run the commands for your chosen authentication method:
+
+    > **Using API keys:** Copy one of the available keys from the same page. You can use either `KEY 1` or `KEY 2`.
 
     ```sql
-    -- Configure Azure Language
+    SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<your-openai-resource>.openai.azure.com');
+    SELECT azure_ai.set_setting('azure_openai.subscription_key', '<your-openai-key>');
+    ```
+
+    > **Using managed identity:** Only set the endpoint. When no `subscription_key` is configured, the extension automatically uses the server's system-assigned managed identity.
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<your-openai-resource>.openai.azure.com');
+    SELECT azure_ai.set_setting('azure_openai.auth_type', 'managed-identity');
+    ```
+
+1. Configure the `azure_ai` extension connection to **Azure AI Language**. You need the endpoint for your Language resource (found on the **Keys and Endpoint** page under **Resource Management** in the Azure portal).
+
+    ```sql
     SELECT azure_ai.set_setting('azure_cognitive.endpoint', 'https://<your-language-resource>.cognitiveservices.azure.com');
     SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '<your-language-key>');
+    SELECT azure_ai.set_setting('azure_cognitive.region','<your-region>');  -- e.g., 'westus3'
+    ```
+
+    > **Using managed identity:** Only set the endpoint and region. When no `subscription_key` is configured, the extension automatically uses the server's system-assigned managed identity.
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_cognitive.endpoint', 'https://<your-language-resource>.cognitiveservices.azure.com');
+    SELECT azure_ai.set_setting('azure_cognitive.auth_type', 'managed-identity');
     SELECT azure_ai.set_setting('azure_cognitive.region','<your-region>');  -- e.g., 'westus3'
     ```
 
@@ -263,6 +351,11 @@ Long property descriptions can overwhelm guests and make comparisons harder. Mar
 1. Run the following SQL commands to generate the sql commands for summarizing property listings. First, extractive summarization pulls key sentences from the original text.
 
   ```sql
+  -- Disable pagination for better output readability
+  \pset pager off
+  ```
+
+  ```sql
   SELECT
     id,
     name,
@@ -311,7 +404,7 @@ Thousands of reviews arrive every month, and the company needs to understand how
   LIMIT 10;
   ```
 
-1. When issues need attention, staff can focus on the most negative reviews first, ordered by how negative they are. To identify the most negative reviews, run the following SQL commands.
+1. When issues need attention, staff can focus on the most negative reviews first, ordered by how negative they are. To identify the most negative reviews, run the following SQL commands (this one could take a moment to run, depending on the number of reviews and the available quota for sentiment analysis calls).
 
   ```sql
   WITH s AS (
@@ -359,7 +452,7 @@ The operations team wants the data to be easier to search while keeping private 
   LIMIT 50;
   ```
 
-1. Reviews often mention places, dates, and organizations. Identifying these details makes it easier to analyze patterns across properties and locations.
+1. Reviews often mention places, dates, and organizations. Identifying these details makes it easier to analyze patterns across properties and locations (this one could take a moment to run, depending on the number of reviews and the available quota for entity recognition calls).
 
   ```sql
   SELECT
@@ -411,13 +504,24 @@ With guests and hosts from many countries, language shouldn't be a barrier. List
 
 1. connect to the `rentals` database using `psql` in the Azure Cloud Shell, if you aren't already connected.
 
-1. Since we're currently pointing to the Language resource, we need to update the endpoint and region to point to the Translator resource. Run the following commands to update the settings:
+1. Since we're currently pointing to the Language resource, we need to update the endpoint and region to point to the Translator resource. Run the commands for your chosen authentication method:
 
-   ```sql
-   SELECT azure_ai.set_setting('azure_cognitive.endpoint', 'https://<your-translator-resource>.cognitiveservices.azure.com');
+    > **Using API keys:**
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_cognitive.endpoint', 'https://<your-translator-resource>.cognitiveservices.azure.com');
     SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '<your-translator-key>');
-   SELECT azure_ai.set_setting('azure_cognitive.region','<your-region>');  -- e.g., 'westus3'
-   ```
+    SELECT azure_ai.set_setting('azure_cognitive.region','<your-region>');  -- e.g., 'westus3'
+    ```
+
+    > **Using managed identity:** Set the endpoint, auth type, region, and the Translator resource ID (required for managed identity with Translator). Replace `<your-translator-resource-id>` with the value you saved from the deployment section (the output of the `az cognitiveservices account list` command). It looks like `/subscriptions/.../providers/Microsoft.CognitiveServices/accounts/trn-learn-...`. If you no longer have it, run `az cognitiveservices account list -g "$RG_NAME" --query "[?kind=='TextTranslation'].id | [0]" -o tsv` in Cloud Shell.
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_cognitive.endpoint', 'https://<your-translator-resource>.cognitiveservices.azure.com');
+    SELECT azure_ai.set_setting('azure_cognitive.auth_type', 'managed-identity');
+    SELECT azure_ai.set_setting('azure_cognitive.region','<your-region>');  -- e.g., 'westus3'
+    SELECT azure_ai.set_setting('azure_cognitive.translator_resource_id', '<your-translator-resource-id>');
+    ```
 
 1. Property descriptions can be translated into Spanish and French to help travelers read them in their preferred language. Run the following SQL commands to translate property descriptions into multiple languages.
 
@@ -458,6 +562,23 @@ With guests and hosts from many countries, language shouldn't be a barrier. List
   ```
 
 Margie’s Travel can now provide a more robust and user-friendly experience for both guests and hosts. By using Azure AI Services directly within Azure Database for PostgreSQL, the company enhanced its platform with intelligent features that tackle real-world challenges.
+
+## Clean up
+
+Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
+
+1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
+
+    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/azure-portal-home-azure-services-resource-groups.png)
+
+2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select your resource group from the list.
+
+3. On the **Overview** page of your resource group, select **Delete resource group**.
+
+    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/azure-portal-overview-resource-group-delete.png)
+
+4. In the confirmation dialog, enter the resource group name you are deleting to confirm and then select **Delete**.
+
 
 ## Key takeaways
 

@@ -30,7 +30,7 @@ This step will guide you through using Azure CLI commands from the Azure Cloud S
 
 2. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/11-portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/portal-toolbar-cloud-shell.png)
 
     If prompted, select the required options to open a *Bash* shell. If you have previously used a *PowerShell* console, switch it to a *Bash* shell.
 
@@ -139,15 +139,15 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 
 3. Select the **Launch studio** button to open the Azure Machine Learning Studio.
 
-    ![Screenshot of Azure Machine Learning with the Launch studio button highlighted by a red box.](media/19-aml-launch-studio.png)
+    ![Screenshot of Azure Machine Learning with the Launch studio button highlighted by a red box.](media/16-aml-launch-studio.png)
 
 4. Select the **Models** menu option from the **Assets** menu. Then, select the **+ Register** menu option and choose **From local files**.
 
-    ![Screenshot of the Model List page. A red box surrounds the Models menu option, the Register drop-down button, and the From local files option.](media/19-aml-register-from-local-files.png)
+    ![Screenshot of the Model List page. A red box surrounds the Models menu option, the Register drop-down button, and the From local files option.](media/16-aml-register-from-local-files.png)
 
 5. In the **Upload model** menu, set the model type to **MLflow**. Then, choose **Browse** and navigate to your **mlflow-model** folder, uploading the assets. After that, select the **Next** button to continue.
 
-    ![Screenshot of the Upload model menu page. A red box surrounds the MLflow model type, Browse, and Next buttons.](media/19-aml-register-upload-model.png)
+    ![Screenshot of the Upload model menu page. A red box surrounds the MLflow model type, Browse, and Next buttons.](media/16-aml-register-upload-model.png)
 
     > &#128221; If your environment does not allow shared key access on storage accounts, you may receive an error when registering the model that states you don't have permissions to perform upload actions on the datastore. To resolve this, first assign the required identity-based roles on the workspace's storage account by running the following Azure CLI commands in the Cloud Shell (replace `<storage_account_name>` with the name of the storage account found on your Machine Learning workspace's overview page):
 
@@ -162,7 +162,7 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 
 6. Name the model **RentalListings** and then select the **Next** button.
 
-    ![Screenshot of the Model settings screen with the value of RentalListings entered into the Name field. Red highlighting boxes surround the Name text box and Next button.](media/19-aml-register-model-settings.png)
+    ![Screenshot of the Model settings screen with the value of RentalListings entered into the Name field. Red highlighting boxes surround the Name text box and Next button.](media/16-aml-register-model-settings.png)
 
 7. Select the **Register** button to complete model registration. This action will take you back to the **Models** page. Select the newly created model.
 
@@ -170,17 +170,17 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
 
 8. Select the **Use this model** button option and create a new **Real-time endpoint**.
 
-    ![Screenshot of the Real-time endpoint menu option highlighted by a red box.](media/19-aml-automl-deploy-rte.png)
+    ![Screenshot of the Real-time endpoint menu option highlighted by a red box.](media/16-aml-automl-deploy-rte.png)
 
 9. On the deployment fly-out menu, set the **Virtual machine** to something like **Standard_DS2_v2** and the **Instance count** to 1. Select the **Use this** button. Deployment may take several minutes to complete, as the deployment process includes provisioning a virtual machine and deploying the model as a Docker container.
 
-    ![Screenshot of the deployment fly-out menu. The Virtual machine is Standard_DS2_v2, and the Instance count is 1. Red boxes highlight the Virtual machine drop-down, Instance count textbox, and Deploy button.](media/19-aml-automl-deploy-endpoint.png)
+    ![Screenshot of the deployment fly-out menu. The Virtual machine is Standard_DS2_v2, and the Instance count is 1. Red boxes highlight the Virtual machine drop-down, Instance count textbox, and Deploy button.](media/16-aml-automl-deploy-endpoint.png)
 
 10. After the endpoint deploys, navigate to the **Consume** tab and copy the REST endpoint and primary key so you can use them in the next section.
 
     > &#128221; If the **Consume** tab does not appear, select **Endpoints** on the left-hand side menu, and then select your newly created endpoint. The **Consume** tab should then be visible.
 
-    ![Screenshot of the endpoint Consume tab. Red boxes highlight the copy buttons for the REST endpoint and primary authentication key.](media/19-aml-automl-endpoint-consume.png)
+    ![Screenshot of the endpoint Consume tab. Red boxes highlight the copy buttons for the REST endpoint and primary authentication key.](media/16-aml-automl-endpoint-consume.png)
 
 11. To test that your endpoint is running correctly, you can use the **Test** tab on your endpoint. Then, paste in the following block, replacing any input that currently exists. Select the **Test** button, and you should see a JSON output containing an array with a single decimal value indicating the number of US dollars you should expect this particular property to earn for a single night of rental.
 
@@ -206,7 +206,7 @@ The first step is to deploy a model to Azure Machine Learning. The repository co
     }
     ```
 
-    ![Screenshot of the endpoint Test tab. The Input box contains a sample call, and the jsonOutput box contains the estimated value. The Test button is highlighted with a red box.](media/19-aml-automl-endpoint-test.png)
+    ![Screenshot of the endpoint Test tab. The Input box contains a sample call, and the jsonOutput box contains the estimated value. The Test button is highlighted with a red box.](media/16-aml-automl-endpoint-test.png)
 
 ## Connect to your database using psql in the Azure Cloud Shell
 
@@ -226,7 +226,7 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 4. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
 
-    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/19-azure-cloud-shell-pane.png)
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/azure-cloud-shell-pane-rentals.png)
 
 ## Install and configure the `azure_ai` extension
 
@@ -372,13 +372,13 @@ Once you have completed this exercise, delete the Azure resources you created. Y
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
 
-    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/17-azure-portal-home-azure-services-resource-groups.png)
+    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/azure-portal-home-azure-services-resource-groups.png)
 
 2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select the resource group from the list.
 
 3. On the **Overview** page of your resource group, select **Delete resource group**.
 
-    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/17-resource-group-delete.png)
+    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/azure-portal-overview-resource-group-delete.png)
 
 4. In the confirmation dialog, enter the resource group name you are deleting to confirm and then select **Delete**.
 

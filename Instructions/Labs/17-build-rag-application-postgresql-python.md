@@ -36,7 +36,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 1. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](./media/15-portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](./media/portal-toolbar-cloud-shell.png)
 
     If prompted, select the required options to open a *Bash* shell. If you previously used a *PowerShell* console, switch it to a *Bash* shell.
 
@@ -216,15 +216,15 @@ You connect to the `ContosoHelpDesk` database on your Azure Database for Postgre
 
 1. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it helps to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
 
-    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](./media/15-azure-cloud-shell-db-pane-maximize.png)
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](./media/azure-cloud-shell-pane-contoso.png)
 
 ## Setup: Configure extensions
 
 To store and query vectors, and to generate embeddings, you need to allowlist and enable two extensions for Azure Database for PostgreSQL: `vector` and `azure_ai`.
 
-1. To allowlist both extensions, add `vector` and `azure_ai` to the server parameter `azure.extensions`, as per the instructions provided in [How to use PostgreSQL extensions](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
+1. To allowlist both extensions, add `vector` and `azure_ai` to the server parameter `azure.extensions`, as per the instructions provided in [How to use PostgreSQL extensions](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions).
 
-1. Run the following SQL command to enable the `vector` and `azure_ai` extensions. For detailed instructions, read [How to enable and use `pgvector` on Azure Database for PostgreSQL](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension).
+1. Run the following SQL command to enable the `vector` and `azure_ai` extensions. For detailed instructions, read [How to enable and use `pgvector` on Azure Database for PostgreSQL](https://learn.microsoft.com/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension).
 
     On *ContosoHelpDesk* prompt, run the following SQL commands:
 
@@ -236,7 +236,7 @@ To store and query vectors, and to generate embeddings, you need to allowlist an
 
 1. Now configure the `azure_ai` extension connection to Azure OpenAI. You need the endpoint for your Azure OpenAI resource (found on the **Keys and Endpoint** page under **Resource Management** in the Azure portal).
 
-    ![Screenshot of the Azure OpenAI service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/12-azure-openai-keys-and-endpoints.png)
+    ![Screenshot of the Azure OpenAI service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/azure-openai-keys-and-endpoints.png)
 
     On the *ContosoHelpDesk* prompt, run the commands for your chosen authentication method:
 
@@ -629,7 +629,23 @@ Let's go ahead and create the index.
 
 You notice several improvements in the execution plan, including reduced *Execution Time* and *Buffers* metrics. Additionally, you also notice that the query is now using the IVFFlat index. Even if you run the query multiple times, the performance should remain consistent.
 
-### Key takeaways
+## Clean up
+
+Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
+
+1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
+
+    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/azure-portal-home-azure-services-resource-groups.png)
+
+2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select the resource group from the list.
+
+3. On the **Overview** page of your resource group, select **Delete resource group**.
+
+    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/azure-portal-overview-resource-group-delete.png)
+
+4. In the confirmation dialog, enter the resource group name you are deleting to confirm and then select **Delete**.
+
+## Key takeaways
 
 By completing this exercise, you now know how to build a retrieval augmented application in Python. Your application retrieved the relevant documents and answered user queries intelligently. You scratched the surface of what's possible with RAG applications. With further enhancements, you can improve the accuracy and efficiency of your document retrieval and response generation.
 

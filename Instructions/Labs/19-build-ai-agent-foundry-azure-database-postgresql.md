@@ -614,13 +614,21 @@ The agent calls the Function, which embeds and queries PostgreSQL, then summariz
 
 
 
-## Task 6 – Clean up
+## Clean up
 
-```azurecli
-az group delete --name $RG_NAME --yes --no-wait
-```
+Once you have completed this exercise, delete the Azure resources you created. You are charged for the configured capacity, not how much the database is used. Follow these instructions to delete your resource group and all resources you created for this lab.
 
----
+1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
+
+    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/azure-portal-home-azure-services-resource-groups.png)
+
+2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select the resource group from the list.
+
+3. On the **Overview** page of your resource group, select **Delete resource group**.
+
+    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/azure-portal-overview-resource-group-delete.png)
+
+4. In the confirmation dialog, enter the resource group name you are deleting to confirm and then select **Delete**.
 
 ## Key takeaways
 

@@ -27,7 +27,7 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
 2. Select the **Cloud Shell** icon in the Azure portal toolbar to open a new [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) pane at the bottom of your browser window.
 
-    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/12-portal-toolbar-cloud-shell.png)
+    ![Screenshot of the Azure toolbar with the Cloud Shell icon highlighted by a red box.](media/portal-toolbar-cloud-shell.png)
 
     If prompted, select the required options to open a *Bash* shell. If you have previously used a *PowerShell* console, switch it to a *Bash* shell.
 
@@ -86,7 +86,57 @@ This step guides you through using Azure CLI commands from the Azure Cloud Shell
 
     The deployment typically takes several minutes to complete. You can monitor it from the Cloud Shell or navigate to the **Deployments** page for the resource group you created above and observe the deployment progress there.
 
- 8. Close the Cloud Shell pane once your resource deployment is complete.
+8. Throughout this exercise, you authenticate to Azure OpenAI using **one** of two methods. Choose the one that applies to your environment and follow only those instructions at each step:
+
+    - **API keys** — use a key copied from the Azure portal (works in most environments).
+    - **Managed identity** — use Microsoft Entra ID token-based authentication (required when API keys are disabled at the organization level).
+
+    If you're using **managed identity**, run the following commands now to set it up. Otherwise skip to the next step.
+
+    ```bash
+    # Re-derive all variables (in case your Cloud Shell session was reset)
+    PGSERVER=$(az postgres flexible-server list -g "$RG_NAME" --query "[0].name" -o tsv)
+    AOAI=$(az cognitiveservices account list -g "$RG_NAME" --query "[?kind=='OpenAI'].name | [0]" -o tsv)
+    AOAI_ID=$(az cognitiveservices account show -g "$RG_NAME" -n "$AOAI" --query "id" -o tsv)
+    SUB_ID=$(az account show --query "id" -o tsv)
+
+    # Enable system-assigned managed identity on the PostgreSQL server
+    # (The az CLI has no direct flag for this, so we use az rest per Microsoft docs)
+    az rest --method patch \
+      --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
+      --body '{"identity":{"type":"SystemAssigned"}}'
+
+    # Wait for the identity to be assigned, then get the principal ID
+    echo "Waiting for system-assigned managed identity..."
+    SYS_MI=""
+    while [ -z "$SYS_MI" ] || [ "$SYS_MI" = "null" ]; do
+      sleep 15
+      SYS_MI=$(az rest --method get \
+        --url "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.DBforPostgreSQL/flexibleServers/$PGSERVER?api-version=2024-08-01" \
+        --query "identity.principalId" -o tsv)
+      echo "principalId=$SYS_MI"
+    done
+
+    # Grant 'Cognitive Services OpenAI User' to the system MI (for in-database embeddings)
+    az role assignment create \
+      --assignee "$SYS_MI" \
+      --role "Cognitive Services OpenAI User" \
+      --scope "$AOAI_ID"
+
+    # Also grant 'Cognitive Services User' for Azure AI Language service calls
+    LANG_ID=$(az cognitiveservices account list -g "$RG_NAME" --query "[?kind=='TextAnalytics'].id | [0]" -o tsv)
+    az role assignment create \
+      --assignee "$SYS_MI" \
+      --role "Cognitive Services User" \
+      --scope "$LANG_ID"
+
+    # Restart the server so it picks up the new identity
+    az postgres flexible-server restart -g "$RG_NAME" -n "$PGSERVER"
+    ```
+
+    > **Note:** Wait 2-3 minutes after the restart for the server to come back up and for role assignments to propagate. If you receive authorization errors in later steps, wait a couple of minutes and retry.
+
+9. Close the Cloud Shell pane once your resource deployment is complete.
  
 ### Troubleshooting deployment errors
 
@@ -120,13 +170,15 @@ You may encounter a few errors when running the Bicep deployment script.
 
 ## Connect to your database using psql in the Azure Cloud Shell
 
-In this task, you connect to the `rentals` database on your Azure Database for PostgreSQL flexible server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
+You connect to the `rentals` database on your Azure Database for PostgreSQL flexible server using the [psql command-line utility](https://www.postgresql.org/docs/current/app-psql.html) from the [Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview).
 
-1. In the [Azure portal](https://portal.azure.com/), navigate to your newly created Azure Database for PostgreSQL flexible server.
+1. In the [Azure portal](https://portal.azure.com/), open the Cloud Shell by selecting the **Cloud Shell** icon in the toolbar.
 
-1. In the resource menu, under **Settings**, select **Databases** select **Connect** for the `rentals` database. Note that selecting **Connect** does not actually connect you to the database; it simply provides instructions for connecting to the database using various methods. Review the instructions to **Connect from browser or locally** and use those to connect using the Azure Cloud Shell.
+1. Run the following command to connect to your `rentals` database, replacing `<server-name>` with the name of your PostgreSQL flexible server (found on the **Overview** page of your PostgreSQL resource in the Azure portal):
 
-    ![Screenshot of the Azure Database for PostgreSQL Databases page. Databases and Connect for the rentals database are highlighted by red boxes.](media/12-postgresql-rentals-database-connect.png)
+    ```bash
+    psql -h <server-name>.postgres.database.azure.com -U pgAdmin -d rentals
+    ```
 
 1. At the "Password for user pgAdmin" prompt in the Cloud Shell, enter the randomly generated password for the **pgAdmin** login.
 
@@ -134,7 +186,7 @@ In this task, you connect to the `rentals` database on your Azure Database for P
 
 1. Throughout the remainder of this exercise, you continue working in the Cloud Shell, so it may be helpful to expand the pane within your browser window by selecting the **Maximize** button at the top right of the pane.
 
-    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/12-azure-cloud-shell-pane-maximize.png)
+    ![Screenshot of the Azure Cloud Shell pane with the Maximize button highlighted by a red box.](media/azure-cloud-shell-pane-rentals.png)
 
 ## Populate the database with sample data
 
@@ -223,6 +275,11 @@ Reviewing the objects within the `azure_ai` extension can help you better unders
 
 2. The [`\dx` meta-command](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DX-LC) is used to list objects contained within an extension. Run the following from the `psql` command prompt to view the objects in the `azure_ai` extension. You may need to press the space bar to view the full list of objects.
 
+    ```sql
+    -- Disable pagination for better output readability
+    \pset pager off
+    ```
+
     ```psql
     \dx+ azure_ai
     ```
@@ -274,21 +331,25 @@ The `azure_ai` schema provides the framework for directly interacting with Azure
 
 2. To demonstrate how you use the `azure_ai.set_setting()` and `azure_ai.get_setting()` functions, configure the connection to your Azure OpenAI account. Using the same browser tab where your Cloud Shell is open, minimize or restore the Cloud Shell pane, then navigate to your Azure OpenAI resource in the [Azure portal](https://portal.azure.com/). Once you are on the Azure OpenAI resource page, in the resource menu, under the **Resource Management** section, select **Keys and Endpoint**, then copy your endpoint and one of the available keys.
 
-    ![Screenshot of the Azure OpenAI service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/12-azure-openai-keys-and-endpoints.png)
+    ![Screenshot of the Azure OpenAI service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/azure-openai-keys-and-endpoints.png)
 
-    You can use either `KEY 1` or `KEY 2`. Always having two keys allows you to securely rotate and regenerate keys without causing service disruption.
+3. Once you have your endpoint, maximize the Cloud Shell pane again, then run the commands for your chosen authentication method. Ensure you replace the `{endpoint}` and `{api-key}` tokens with the values you copied from the Azure portal.
 
-3. Once you have your endpoint and key, maximize the Cloud Shell pane again, then use the commands below to add your values to the configuration table. Ensure you replace the `{endpoint}` and `{api-key}` tokens with the values you copied from the Azure portal.
+    > **Using API keys:** Copy one of the available keys from the same page. You can use either `KEY 1` or `KEY 2`.
 
     ```sql
     SELECT azure_ai.set_setting('azure_openai.endpoint', '{endpoint}');
-    ```
-
-    ```sql
     SELECT azure_ai.set_setting('azure_openai.subscription_key', '{api-key}');
     ```
 
-4. You can verify the settings written into the `azure_ai.settings` table using the `azure_ai.get_setting()` function in the following queries:
+    > **Using managed identity:** Only set the endpoint. When no `subscription_key` is configured, the extension automatically uses the server's system-assigned managed identity.
+
+    ```sql
+    SELECT azure_ai.set_setting('azure_openai.endpoint', '{endpoint}');
+    SELECT azure_ai.set_setting('azure_openai.auth_type', 'managed-identity');
+    ```
+
+4. If you are using **API keys**, you can verify the settings written into the `azure_ai.settings` table using the `azure_ai.get_setting()` function in the following queries:
 
     ```sql
     SELECT azure_ai.get_setting('azure_openai.endpoint');
@@ -401,18 +462,24 @@ The `azure_cognitive` schema provides the framework for directly interacting wit
 
     The `azure_cognitive.sentiment_analysis_result` is a composite type containing the sentiment predictions of the input text. It includes the sentiment, which can be positive, negative, neutral, or mixed, and the scores for positive, neutral, and negative aspects found in the text. The scores are represented as real numbers between 0 and 1. For example, in (neutral, 0.26, 0.64, 0.09), the sentiment is neutral, with a positive score of 0.26, neutral of 0.64, and negative at 0.09.
 
-6. As with the `azure_openai` functions, to successfully make calls against Azure AI Services using the `azure_ai` extension, you must provide the endpoint and a key for your Azure AI Language service. Using the same browser tab where the Cloud Shell is open, minimize or restore the Cloud Shell pane, and then navigate to your Language service resource in the [Azure portal](https://portal.azure.com/). In the resource menu, under the **Resource Management** section, select **Keys and Endpoint**.
+6. As with the `azure_openai` functions, to successfully make calls against Azure AI Services using the `azure_ai` extension, you must provide the endpoint for your Azure AI Language service. Using the same browser tab where the Cloud Shell is open, minimize or restore the Cloud Shell pane, and then navigate to your Language service resource in the [Azure portal](https://portal.azure.com/). In the resource menu, under the **Resource Management** section, select **Keys and Endpoint**.
 
-    ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/12-azure-language-service-keys-and-endpoints.png)
+    ![Screenshot of the Azure Language service's Keys and Endpoints page is displayed, with the KEY 1 and Endpoint copy buttons highlighted by red boxes.](media/azure-language-service-keys-and-endpoints.png)
 
-7. Copy your endpoint and access key values, and replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Maximize the Cloud Shell again, and run the commands from the `psql` command prompt in the Cloud Shell to add your values to the configuration table.
+7. Copy your endpoint value, and replace the `{endpoint}` and `{api-key}` tokens with values you copied from the Azure portal. Maximize the Cloud Shell again, and run the commands for your chosen authentication method from the `psql` command prompt in the Cloud Shell to add your values to the configuration table.
+
+    > **Using API keys:** Copy one of the available keys from the same page. You can use either `KEY 1` or `KEY 2`.
 
     ```sql
     SELECT azure_ai.set_setting('azure_cognitive.endpoint', '{endpoint}');
+    SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '{api-key}');
     ```
 
+    > **Using managed identity:** Only set the endpoint. When no `subscription_key` is configured, the extension automatically uses the server's system-assigned managed identity.
+
     ```sql
-    SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '{api-key}');
+    SELECT azure_ai.set_setting('azure_cognitive.endpoint', '{endpoint}');
+    SELECT azure_ai.set_setting('azure_cognitive.auth_type', 'managed-identity');
     ```
 
 8. Now, execute the following query to analyze the sentiment of a couple of reviews:
@@ -460,12 +527,12 @@ Once you have completed this exercise, delete the Azure resources you created. Y
 
 1. Open a web browser and navigate to the [Azure portal](https://portal.azure.com/), and on the home page, select **Resource groups** under Azure services.
 
-    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/12-azure-portal-home-azure-services-resource-groups.png)
+    ![Screenshot of Resource groups highlighted by a red box under Azure services in the Azure portal.](media/azure-portal-home-azure-services-resource-groups.png)
 
 2. In the filter for any field search box, enter the name of the resource group you created for this lab, and then select your resource group from the list.
 
 3. On the **Overview** page of your resource group, select **Delete resource group**.
 
-    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/12-resource-group-delete.png)
+    ![Screenshot of the Overview blade of the resource group with the Delete resource group button highlighted by a red box.](media/azure-portal-overview-resource-group-delete.png)
 
 4. In the confirmation dialog, enter the resource group name you are deleting to confirm and then select **Delete**.
