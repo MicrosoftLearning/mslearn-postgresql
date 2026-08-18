@@ -1,0 +1,245 @@
+#cloud-config
+# Provisions the Oracle SOURCE for the rapid migration POC: an Ubuntu VM that
+# runs Oracle Database Free 23ai in a container, seeded with a sample HR schema.
+# Reached privately on port 1521 from inside the virtual network (no public
+# ports). Consumed by main.bicep as the Oracle VM's custom-data; the tokens
+# __ADMIN_USERNAME__ and __ORACLE_PWD__ are substituted at deploy time.
+#
+# The database exposes service FREEPDB1 with two accounts (both use the deploy
+# password): HR (owns the sample schema) and MIG (read-only migration user with
+# SELECT_CATALOG_ROLE), matching the Oracle-to-PostgreSQL conversion POC.
+
+package_update: true
+
+write_files:
+  - path: /etc/oracle/oracle.env
+    permissions: '0600'
+    content: |
+      ORACLE_PASSWORD=__ORACLE_PWD__
+
+  - path: /var/log/oracle-workstation-setup.log
+    permissions: '0644'
+    content: |
+      [boot] VM started. Provisioning the Oracle source database...
+
+  - path: /usr/local/bin/prog
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env bash
+      # Append a timestamped progress line to the setup log.
+      echo "[$(date '+%H:%M:%S')] $*" | tee -a /var/log/oracle-workstation-setup.log
+
+  - path: /usr/local/bin/oracle-status
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env bash
+      # Follow setup progress and show the final database state.
+      tail -n +1 -f /var/log/oracle-workstation-setup.log &
+      TAIL=$!
+      until grep -Eq 'PROVISION_(COMPLETE|FAILED)' /var/log/oracle-workstation-setup.log 2>/dev/null; do sleep 2; done
+      kill "$TAIL" 2>/dev/null || true
+      if grep -q PROVISION_COMPLETE /var/log/oracle-workstation-setup.log; then
+        echo "=== Oracle ready on 1521/FREEPDB1 (schema HR, migration user MIG). ==="
+      else
+        echo "=== Oracle provisioning FAILED - inspect 'docker logs oracle' and /var/log/oracle-workstation-setup.log. ==="
+      fi
+
+  # Verifies the HR sample schema actually loaded, and reseeds it if the
+  # first-run init script did not populate it.
+  - path: /usr/local/bin/verify-hr-seed
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env bash
+      # The gvenzl image only runs /container-entrypoint-initdb.d scripts on the
+      # FIRST database creation, so a transient failure there would otherwise
+      # leave HR empty with no second chance (and the wizard would list no user
+      # schema to convert). This checks the row count and reseeds once before
+      # declaring success, so a "succeeded" deploy can never ship an empty HR.
+      run_sql() { docker exec -i oracle sqlplus -s / as sysdba; }
+
+      hr_count() {
+        printf '%s\n' \
+          "whenever sqlerror exit failure" \
+          "set heading off feedback off pages 0 lines 200" \
+          "alter session set container=FREEPDB1;" \
+          "select 'HRROWS='||count(*) from HR.employees;" \
+          | run_sql 2>/dev/null \
+          | sed -n 's/.*HRROWS=\([0-9][0-9]*\).*/\1/p' | head -n1
+      }
+
+      reseed() {
+        printf '%s\n' \
+          "alter session set container=FREEPDB1;" \
+          "@/container-entrypoint-initdb.d/01_hr_schema.sql" \
+          | run_sql
+      }
+
+      count=$(hr_count); [ -z "$count" ] && count=0
+      if [ "$count" -lt 1 ]; then
+        prog "HR schema empty (rows=$count); re-running seed script..."
+        reseed >>/var/log/oracle-workstation-setup.log 2>&1
+        count=$(hr_count); [ -z "$count" ] && count=0
+      fi
+
+      if [ "$count" -ge 1 ]; then
+        prog "PROVISION_COMPLETE - Oracle Free 23ai on 1521/FREEPDB1 (schema HR verified: $count employee row(s), migration user MIG)."
+        exit 0
+      fi
+      prog "PROVISION_FAILED - HR schema did not load after reseed. Inspect 'docker logs oracle'."
+      exit 1
+
+  # Installs the PostgreSQL extensions the Migration Wizard recommends into the
+  # scratch database, so users never have to allow-list + create them by hand.
+  # The server-side allow-list is set by main.bicep (azure.extensions); this
+  # creates them in the DB. Best-effort per extension, with a reachability wait.
+  - path: /usr/local/bin/install-pg-extensions
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env bash
+      export PGHOST='__PG_FQDN__'
+      export PGUSER='__PG_ADMIN__'
+      export PGDATABASE='__PG_DATABASE__'
+      export PGPASSWORD='__ORACLE_PWD__'
+      export PGSSLMODE='require'
+
+      if [ -z "$PGHOST" ]; then
+        prog "PG extensions: PostgreSQL component not selected; skipping."
+        exit 0
+      fi
+
+      psql_c() { psql -w -tAc "$1" 2>&1; }
+
+      # pg_cron is intentionally omitted: it also needs shared_preload_libraries
+      # plus a server restart, which allow-listing alone does not cover.
+      EXTS=(orafce pgcrypto "uuid-ossp" tablefunc pg_trgm postgis postgis_topology pg_partman postgis_tiger_geocoder)
+
+      # Wait for the private PostgreSQL endpoint to resolve and accept logins.
+      ready=0
+      for i in $(seq 1 40); do
+        if [ "$(psql_c 'select 1')" = "1" ]; then ready=1; break; fi
+        prog "Waiting for PostgreSQL ($PGHOST) to become reachable... ($i)"
+        sleep 30
+      done
+      if [ "$ready" -ne 1 ]; then
+        prog "PG extensions: PostgreSQL not reachable; skipping (install manually if needed)."
+        exit 0
+      fi
+
+      ok=0; fail=0
+      for e in "${EXTS[@]}"; do
+        out=$(psql_c "create extension if not exists \"$e\" cascade;")
+        if printf '%s' "$out" | grep -qiE 'error|fatal'; then
+          prog "PG extension $e: skipped ($(printf '%s' "$out" | head -n1))"
+          fail=$((fail+1))
+        else
+          prog "PG extension $e: installed."
+          ok=$((ok+1))
+        fi
+      done
+      prog "PG extensions complete: $ok installed, $fail skipped (pg_cron needs shared_preload_libraries + restart if you want it)."
+
+  # Sample schema, executed once when the database is first created.
+  - path: /opt/oracle-init/01_hr_schema.sql
+    permissions: '0644'
+    content: |
+      whenever sqlerror continue
+      create user HR identified by "__ORACLE_PWD__" quota unlimited on users;
+      grant connect, resource to HR;
+      create user MIG identified by "__ORACLE_PWD__";
+      grant create session to MIG;
+      grant select any table, select_catalog_role to MIG;
+      -- The Migration Wizard reads procedure/function argument metadata from
+      -- SYS.ARGUMENT$, which SELECT_CATALOG_ROLE alone does not cover.
+      grant select any dictionary to MIG;
+
+      create table HR.regions (
+        region_id   number primary key,
+        region_name varchar2(50));
+      create table HR.countries (
+        country_id   char(2) primary key,
+        country_name varchar2(60),
+        region_id    number references HR.regions(region_id));
+      create table HR.locations (
+        location_id number primary key,
+        city        varchar2(50),
+        country_id  char(2) references HR.countries(country_id));
+      create table HR.departments (
+        department_id   number primary key,
+        department_name varchar2(50) not null,
+        location_id     number references HR.locations(location_id));
+      create sequence HR.employees_seq start with 1000;
+      create table HR.employees (
+        employee_id    number primary key,
+        first_name     varchar2(30),
+        last_name      varchar2(30) not null,
+        email          varchar2(60),
+        hire_date      date default sysdate not null,
+        salary         number(10,2),
+        commission_pct number(4,2),
+        department_id  number references HR.departments(department_id),
+        manager_id     number references HR.employees(employee_id));
+
+      create or replace trigger HR.employees_bi
+        before insert on HR.employees for each row
+      begin
+        if :new.employee_id is null then
+          :new.employee_id := HR.employees_seq.nextval;
+        end if;
+      end;
+      /
+
+      create or replace view HR.dept_headcount as
+        select d.department_id, d.department_name, count(e.employee_id) headcount
+        from HR.departments d
+        left join HR.employees e on e.department_id = d.department_id
+        group by d.department_id, d.department_name;
+
+      create or replace function HR.get_annual_salary(p_emp in number) return number is
+        v_total number;
+      begin
+        select nvl(salary, 0) * 12 + nvl(salary * commission_pct, 0) * 12
+          into v_total from HR.employees where employee_id = p_emp;
+        return v_total;
+      end;
+      /
+
+      create or replace package HR.emp_pkg as
+        function fmt_name(p_emp in number) return varchar2;
+        procedure give_raise(p_emp in number, p_pct in number);
+      end;
+      /
+      create or replace package body HR.emp_pkg as
+        function fmt_name(p_emp in number) return varchar2 is
+          v_name varchar2(100);
+        begin
+          select last_name || ', ' || first_name into v_name
+            from HR.employees where employee_id = p_emp;
+          return v_name;
+        end;
+        procedure give_raise(p_emp in number, p_pct in number) is
+        begin
+          update HR.employees set salary = salary * (1 + p_pct / 100)
+            where employee_id = p_emp;
+        end;
+      end;
+      /
+
+      insert into HR.regions values (1, 'Europe');
+      insert into HR.countries values ('UK', 'United Kingdom', 1);
+      insert into HR.locations values (100, 'London', 'UK');
+      insert into HR.departments values (10, 'Engineering', 100);
+      insert into HR.employees (first_name, last_name, email, salary, commission_pct, department_id)
+        values ('Ada', 'Lovelace', 'ada@example.com', 9000, 0.10, 10);
+      commit;
+
+runcmd:
+  - prog "[1/4] Installing Docker and the PostgreSQL client..."
+  - curl -fsSL https://get.docker.com | sh
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql-client
+  - prog "[2/4] Starting Oracle Database Free 23ai (this pulls a large image)..."
+  - docker run -d --name oracle --restart unless-stopped -p 1521:1521 --env-file /etc/oracle/oracle.env -v /opt/oracle-init:/container-entrypoint-initdb.d gvenzl/oracle-free:23-slim
+  - prog "[3/4] Waiting for the database to open and the sample schema to load..."
+  - bash -c 'for i in $(seq 1 80); do if docker logs oracle 2>&1 | grep -q "DATABASE IS READY TO USE"; then break; fi; sleep 15; done'
+  - /usr/local/bin/verify-hr-seed
+  - prog "[4/4] Installing recommended PostgreSQL extensions into the scratch database..."
+  - /usr/local/bin/install-pg-extensions

@@ -1,0 +1,687 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.44.1.10279",
+      "templateHash": "3601956631323242974"
+    }
+  },
+  "parameters": {
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Admin username for the workstation VM (RDP login) and the Oracle and PostgreSQL admin accounts."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the RDP login and for the Oracle and PostgreSQL admin accounts. Must satisfy Windows, Oracle, and PostgreSQL complexity rules."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region. Defaults to the resource group region."
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D4s_v3",
+      "metadata": {
+        "description": "Workstation VM size. D4s_v3 = 4 vCPU / 16 GB and is broadly available. If you prefer a newer family and have quota, use a Dsv5/Dasv5 size (for example Standard_D4s_v5)."
+      }
+    },
+    "oracleVmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D2s_v3",
+      "metadata": {
+        "description": "Oracle source VM size (Linux; runs Oracle Database Free 23ai in a container)."
+      }
+    },
+    "postgresSkuTier": {
+      "type": "string",
+      "defaultValue": "Burstable",
+      "allowedValues": [
+        "Burstable",
+        "GeneralPurpose",
+        "MemoryOptimized"
+      ],
+      "metadata": {
+        "description": "PostgreSQL flexible server compute tier. The compute SKU size is derived from this tier."
+      }
+    },
+    "postgresVersion": {
+      "type": "string",
+      "defaultValue": "16",
+      "metadata": {
+        "description": "PostgreSQL major version."
+      }
+    },
+    "scratchDatabaseName": {
+      "type": "string",
+      "defaultValue": "migration_sandbox",
+      "metadata": {
+        "description": "Name of the dedicated PostgreSQL database used as the migration scratch/sandbox target. Keeps converted objects out of the default 'postgres' maintenance database."
+      }
+    },
+    "openAiDeploymentName": {
+      "type": "string",
+      "defaultValue": "gpt-5-mini",
+      "metadata": {
+        "description": "Name of the Azure OpenAI (Microsoft Foundry) model deployment used for the conversion."
+      }
+    },
+    "openAiModelName": {
+      "type": "string",
+      "defaultValue": "gpt-5-mini",
+      "metadata": {
+        "description": "Azure OpenAI model name."
+      }
+    },
+    "openAiModelVersion": {
+      "type": "string",
+      "defaultValue": "2025-08-07",
+      "metadata": {
+        "description": "Azure OpenAI model version."
+      }
+    },
+    "openAiSkuName": {
+      "type": "string",
+      "defaultValue": "GlobalStandard",
+      "metadata": {
+        "description": "Azure OpenAI deployment SKU. GlobalStandard is broadly available for gpt-5-mini."
+      }
+    },
+    "openAiCapacity": {
+      "type": "int",
+      "defaultValue": 10,
+      "metadata": {
+        "description": "Azure OpenAI deployment capacity, in thousands of tokens per minute (TPM)."
+      }
+    },
+    "dnsLabelPrefix": {
+      "type": "string",
+      "defaultValue": "[format('oracle-bridge-{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "DNS label prefix for the workstation public IP. Must be globally unique in the region."
+      }
+    },
+    "deployWorkstation": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy the Windows migration workstation and Azure Bastion access."
+      }
+    },
+    "deployOracle": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy the Oracle source VM and sample HR schema."
+      }
+    },
+    "deployPostgres": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy the Azure Database for PostgreSQL flexible server target."
+      }
+    },
+    "deployOpenAi": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy the Azure OpenAI account and model used for AI-assisted conversion."
+      }
+    }
+  },
+  "variables": {
+    "$fxv#0": "#cloud-config\n# Provisions the Oracle SOURCE for the rapid migration POC: an Ubuntu VM that\n# runs Oracle Database Free 23ai in a container, seeded with a sample HR schema.\n# Reached privately on port 1521 from inside the virtual network (no public\n# ports). Consumed by main.bicep as the Oracle VM's custom-data; the tokens\n# __ADMIN_USERNAME__ and __ORACLE_PWD__ are substituted at deploy time.\n#\n# The database exposes service FREEPDB1 with two accounts (both use the deploy\n# password): HR (owns the sample schema) and MIG (read-only migration user with\n# SELECT_CATALOG_ROLE), matching the Oracle-to-PostgreSQL conversion POC.\n\npackage_update: true\n\nwrite_files:\n  - path: /etc/oracle/oracle.env\n    permissions: '0600'\n    content: |\n      ORACLE_PASSWORD=__ORACLE_PWD__\n\n  - path: /var/log/oracle-workstation-setup.log\n    permissions: '0644'\n    content: |\n      [boot] VM started. Provisioning the Oracle source database...\n\n  - path: /usr/local/bin/prog\n    permissions: '0755'\n    content: |\n      #!/usr/bin/env bash\n      # Append a timestamped progress line to the setup log.\n      echo \"[$(date '+%H:%M:%S')] $*\" | tee -a /var/log/oracle-workstation-setup.log\n\n  - path: /usr/local/bin/oracle-status\n    permissions: '0755'\n    content: |\n      #!/usr/bin/env bash\n      # Follow setup progress and show the final database state.\n      tail -n +1 -f /var/log/oracle-workstation-setup.log &\n      TAIL=$!\n      until grep -Eq 'PROVISION_(COMPLETE|FAILED)' /var/log/oracle-workstation-setup.log 2>/dev/null; do sleep 2; done\n      kill \"$TAIL\" 2>/dev/null || true\n      if grep -q PROVISION_COMPLETE /var/log/oracle-workstation-setup.log; then\n        echo \"=== Oracle ready on 1521/FREEPDB1 (schema HR, migration user MIG). ===\"\n      else\n        echo \"=== Oracle provisioning FAILED - inspect 'docker logs oracle' and /var/log/oracle-workstation-setup.log. ===\"\n      fi\n\n  # Verifies the HR sample schema actually loaded, and reseeds it if the\n  # first-run init script did not populate it.\n  - path: /usr/local/bin/verify-hr-seed\n    permissions: '0755'\n    content: |\n      #!/usr/bin/env bash\n      # The gvenzl image only runs /container-entrypoint-initdb.d scripts on the\n      # FIRST database creation, so a transient failure there would otherwise\n      # leave HR empty with no second chance (and the wizard would list no user\n      # schema to convert). This checks the row count and reseeds once before\n      # declaring success, so a \"succeeded\" deploy can never ship an empty HR.\n      run_sql() { docker exec -i oracle sqlplus -s / as sysdba; }\n\n      hr_count() {\n        printf '%s\\n' \\\n          \"whenever sqlerror exit failure\" \\\n          \"set heading off feedback off pages 0 lines 200\" \\\n          \"alter session set container=FREEPDB1;\" \\\n          \"select 'HRROWS='||count(*) from HR.employees;\" \\\n          | run_sql 2>/dev/null \\\n          | sed -n 's/.*HRROWS=\\([0-9][0-9]*\\).*/\\1/p' | head -n1\n      }\n\n      reseed() {\n        printf '%s\\n' \\\n          \"alter session set container=FREEPDB1;\" \\\n          \"@/container-entrypoint-initdb.d/01_hr_schema.sql\" \\\n          | run_sql\n      }\n\n      count=$(hr_count); [ -z \"$count\" ] && count=0\n      if [ \"$count\" -lt 1 ]; then\n        prog \"HR schema empty (rows=$count); re-running seed script...\"\n        reseed >>/var/log/oracle-workstation-setup.log 2>&1\n        count=$(hr_count); [ -z \"$count\" ] && count=0\n      fi\n\n      if [ \"$count\" -ge 1 ]; then\n        prog \"PROVISION_COMPLETE - Oracle Free 23ai on 1521/FREEPDB1 (schema HR verified: $count employee row(s), migration user MIG).\"\n        exit 0\n      fi\n      prog \"PROVISION_FAILED - HR schema did not load after reseed. Inspect 'docker logs oracle'.\"\n      exit 1\n\n  # Installs the PostgreSQL extensions the Migration Wizard recommends into the\n  # scratch database, so users never have to allow-list + create them by hand.\n  # The server-side allow-list is set by main.bicep (azure.extensions); this\n  # creates them in the DB. Best-effort per extension, with a reachability wait.\n  - path: /usr/local/bin/install-pg-extensions\n    permissions: '0755'\n    content: |\n      #!/usr/bin/env bash\n      export PGHOST='__PG_FQDN__'\n      export PGUSER='__PG_ADMIN__'\n      export PGDATABASE='__PG_DATABASE__'\n      export PGPASSWORD='__ORACLE_PWD__'\n      export PGSSLMODE='require'\n\n      if [ -z \"$PGHOST\" ]; then\n        prog \"PG extensions: PostgreSQL component not selected; skipping.\"\n        exit 0\n      fi\n\n      psql_c() { psql -w -tAc \"$1\" 2>&1; }\n\n      # pg_cron is intentionally omitted: it also needs shared_preload_libraries\n      # plus a server restart, which allow-listing alone does not cover.\n      EXTS=(orafce pgcrypto \"uuid-ossp\" tablefunc pg_trgm postgis postgis_topology pg_partman postgis_tiger_geocoder)\n\n      # Wait for the private PostgreSQL endpoint to resolve and accept logins.\n      ready=0\n      for i in $(seq 1 40); do\n        if [ \"$(psql_c 'select 1')\" = \"1\" ]; then ready=1; break; fi\n        prog \"Waiting for PostgreSQL ($PGHOST) to become reachable... ($i)\"\n        sleep 30\n      done\n      if [ \"$ready\" -ne 1 ]; then\n        prog \"PG extensions: PostgreSQL not reachable; skipping (install manually if needed).\"\n        exit 0\n      fi\n\n      ok=0; fail=0\n      for e in \"${EXTS[@]}\"; do\n        out=$(psql_c \"create extension if not exists \\\"$e\\\" cascade;\")\n        if printf '%s' \"$out\" | grep -qiE 'error|fatal'; then\n          prog \"PG extension $e: skipped ($(printf '%s' \"$out\" | head -n1))\"\n          fail=$((fail+1))\n        else\n          prog \"PG extension $e: installed.\"\n          ok=$((ok+1))\n        fi\n      done\n      prog \"PG extensions complete: $ok installed, $fail skipped (pg_cron needs shared_preload_libraries + restart if you want it).\"\n\n  # Sample schema, executed once when the database is first created.\n  - path: /opt/oracle-init/01_hr_schema.sql\n    permissions: '0644'\n    content: |\n      whenever sqlerror continue\n      create user HR identified by \"__ORACLE_PWD__\" quota unlimited on users;\n      grant connect, resource to HR;\n      create user MIG identified by \"__ORACLE_PWD__\";\n      grant create session to MIG;\n      grant select any table, select_catalog_role to MIG;\n      -- The Migration Wizard reads procedure/function argument metadata from\n      -- SYS.ARGUMENT$, which SELECT_CATALOG_ROLE alone does not cover.\n      grant select any dictionary to MIG;\n\n      create table HR.regions (\n        region_id   number primary key,\n        region_name varchar2(50));\n      create table HR.countries (\n        country_id   char(2) primary key,\n        country_name varchar2(60),\n        region_id    number references HR.regions(region_id));\n      create table HR.locations (\n        location_id number primary key,\n        city        varchar2(50),\n        country_id  char(2) references HR.countries(country_id));\n      create table HR.departments (\n        department_id   number primary key,\n        department_name varchar2(50) not null,\n        location_id     number references HR.locations(location_id));\n      create sequence HR.employees_seq start with 1000;\n      create table HR.employees (\n        employee_id    number primary key,\n        first_name     varchar2(30),\n        last_name      varchar2(30) not null,\n        email          varchar2(60),\n        hire_date      date default sysdate not null,\n        salary         number(10,2),\n        commission_pct number(4,2),\n        department_id  number references HR.departments(department_id),\n        manager_id     number references HR.employees(employee_id));\n\n      create or replace trigger HR.employees_bi\n        before insert on HR.employees for each row\n      begin\n        if :new.employee_id is null then\n          :new.employee_id := HR.employees_seq.nextval;\n        end if;\n      end;\n      /\n\n      create or replace view HR.dept_headcount as\n        select d.department_id, d.department_name, count(e.employee_id) headcount\n        from HR.departments d\n        left join HR.employees e on e.department_id = d.department_id\n        group by d.department_id, d.department_name;\n\n      create or replace function HR.get_annual_salary(p_emp in number) return number is\n        v_total number;\n      begin\n        select nvl(salary, 0) * 12 + nvl(salary * commission_pct, 0) * 12\n          into v_total from HR.employees where employee_id = p_emp;\n        return v_total;\n      end;\n      /\n\n      create or replace package HR.emp_pkg as\n        function fmt_name(p_emp in number) return varchar2;\n        procedure give_raise(p_emp in number, p_pct in number);\n      end;\n      /\n      create or replace package body HR.emp_pkg as\n        function fmt_name(p_emp in number) return varchar2 is\n          v_name varchar2(100);\n        begin\n          select last_name || ', ' || first_name into v_name\n            from HR.employees where employee_id = p_emp;\n          return v_name;\n        end;\n        procedure give_raise(p_emp in number, p_pct in number) is\n        begin\n          update HR.employees set salary = salary * (1 + p_pct / 100)\n            where employee_id = p_emp;\n        end;\n      end;\n      /\n\n      insert into HR.regions values (1, 'Europe');\n      insert into HR.countries values ('UK', 'United Kingdom', 1);\n      insert into HR.locations values (100, 'London', 'UK');\n      insert into HR.departments values (10, 'Engineering', 100);\n      insert into HR.employees (first_name, last_name, email, salary, commission_pct, department_id)\n        values ('Ada', 'Lovelace', 'ada@example.com', 9000, 0.10, 10);\n      commit;\n\nruncmd:\n  - prog \"[1/4] Installing Docker and the PostgreSQL client...\"\n  - curl -fsSL https://get.docker.com | sh\n  - DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql-client\n  - prog \"[2/4] Starting Oracle Database Free 23ai (this pulls a large image)...\"\n  - docker run -d --name oracle --restart unless-stopped -p 1521:1521 --env-file /etc/oracle/oracle.env -v /opt/oracle-init:/container-entrypoint-initdb.d gvenzl/oracle-free:23-slim\n  - prog \"[3/4] Waiting for the database to open and the sample schema to load...\"\n  - bash -c 'for i in $(seq 1 80); do if docker logs oracle 2>&1 | grep -q \"DATABASE IS READY TO USE\"; then break; fi; sleep 15; done'\n  - /usr/local/bin/verify-hr-seed\n  - prog \"[4/4] Installing recommended PostgreSQL extensions into the scratch database...\"\n  - /usr/local/bin/install-pg-extensions\n",
+    "$fxv#1": "# Provisions a Windows Server 2022 VM as a VNet-integrated workstation for the\n# OFFICIAL Oracle -> Azure Database for PostgreSQL schema conversion feature.\n#\n# Installs desktop Visual Studio Code + the Microsoft PostgreSQL extension\n# (ms-ossdata.vscode-pgsql), which runs the Migration Wizard and performs the\n# AI conversion via Microsoft Foundry, validated against your scratch database.\n# Plus GitHub Copilot, Oracle Instant Client (thick mode), and the Azure CLI.\n# No conversion logic runs on this VM; it only hosts VS Code inside the virtual\n# network so it can reach a privately networked Oracle source.\n#\n# Run by an Azure VM Run Command at deploy time. Access is RDP only, over an\n# Azure Bastion tunnel. Progress is logged to C:\\oracle-workstation-setup.log.\n\n$ErrorActionPreference = 'Continue'\n$ProgressPreference    = 'SilentlyContinue'\n$log = 'C:\\oracle-workstation-setup.log'\n\nfunction Prog($m) { \"$(Get-Date -Format HH:mm:ss) $m\" | Tee-Object -FilePath $log -Append }\n\nProg 'Provisioning the schema conversion workstation...'\n\n# --- Ensure copy/paste (clipboard) works over the Bastion RDP session ------\n# Clipboard redirection is on by default; set it explicitly so text (e.g. URLs,\n# SQL) can be pasted into this VM from your local machine. fDisableClip = 0\n# keeps the RDP clipboard channel enabled.\nProg 'Ensuring RDP clipboard redirection is enabled...'\nSet-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp' -Name 'fDisableClip' -Value 0 -Type DWord -Force\n\n# --- Visual Studio Code (desktop, system-wide) -----------------------------\nProg '[1/4] Installing Visual Studio Code...'\n$vscode = \"$env:TEMP\\vscode-setup.exe\"\nInvoke-WebRequest -Uri 'https://update.code.visualstudio.com/latest/win32-x64/stable' -OutFile $vscode\nStart-Process -Wait -FilePath $vscode -ArgumentList '/VERYSILENT','/NORESTART','/MERGETASKS=!runcode,addtopath'\n\n# --- PostgreSQL extension + GitHub Copilot ---------------------------------\n# Extensions are per-user, so install them at the first interactive logon via\n# a machine RunOnce entry (code is on the machine PATH after the system install).\nProg '[2/4] Queuing PostgreSQL extension + GitHub Copilot for first logon...'\n$extCmd = 'code --install-extension ms-ossdata.vscode-pgsql && ' +\n          'code --install-extension github.copilot && ' +\n          'code --install-extension github.copilot-chat'\n$runOnce = 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce'\nNew-Item -Path $runOnce -Force | Out-Null\nSet-ItemProperty -Path $runOnce -Name 'InstallVSCodeExtensions' -Value \"cmd /c $extCmd\"\n\n# --- Oracle Instant Client 21 (thick client mode) --------------------------\nProg '[3/4] Installing Oracle Instant Client 21 (thick client mode)...'\n$oraZip = \"$env:TEMP\\instantclient.zip\"\nInvoke-WebRequest -Uri 'https://download.oracle.com/otn_software/nt/instantclient/2113000/instantclient-basic-windows.x64-21.13.0.0.0dbru.zip' -OutFile $oraZip\nExpand-Archive -Path $oraZip -DestinationPath 'C:\\oracle' -Force\n$ic = (Get-ChildItem 'C:\\oracle' -Directory | Where-Object { $_.Name -like 'instantclient*' } | Select-Object -First 1).FullName\nif ($ic) {\n  $machinePath = [Environment]::GetEnvironmentVariable('PATH','Machine')\n  [Environment]::SetEnvironmentVariable('PATH', \"$machinePath;$ic\", 'Machine')\n}\n\n# --- Azure CLI (Microsoft Entra ID sign-in for Foundry / target DB) --------\nProg '[4/4] Installing Azure CLI...'\n$azMsi = \"$env:TEMP\\azure-cli.msi\"\nInvoke-WebRequest -Uri 'https://aka.ms/installazurecliwindows' -OutFile $azMsi\nStart-Process -Wait -FilePath 'msiexec.exe' -ArgumentList '/i',\"$azMsi\",'/qn','/norestart'\n\n# --- Foundry convenience values (the extension also prompts for these) -----\n[Environment]::SetEnvironmentVariable('FOUNDRY_ENDPOINT',   '__FOUNDRY_ENDPOINT__',   'Machine')\n[Environment]::SetEnvironmentVariable('FOUNDRY_DEPLOYMENT', '__FOUNDRY_DEPLOYMENT__', 'Machine')\n\n# --- Connection cheat-sheet on the desktop ---------------------------------\n# The databases have no public endpoint and resolve only from this workstation,\n# so the full names are written here to avoid mistyped/truncated hostnames.\nProg 'Writing connection details to the Public desktop...'\n$connInfo = @\"\n=== Oracle -> Azure Database for PostgreSQL POC: connection details ===\nOpen Visual Studio Code and use these in the PostgreSQL extension.\n\nPostgreSQL target  (Scratch database step)\n  Server name : __PG_FQDN__\n  Port        : 5432\n  Database    : __PG_DATABASE__\n  Username    : __PG_ADMIN__\n  Password    : the password you set at deployment\n  SSL mode    : require\n\nOracle source  (Connect to Oracle step)\n  Hostname    : __ORACLE_HOST__\n  Port        : 1521\n  Service name: FREEPDB1\n  Username    : MIG\n  Password    : the password you set at deployment\n\nFoundry  (AI conversion step)\n  Endpoint    : __FOUNDRY_ENDPOINT__\n  Deployment  : __FOUNDRY_DEPLOYMENT__  (this is the model deployment, not the resource name)\n  Auth        : Microsoft Entra ID - sign in with the account you deployed with\n                (it has the Cognitive Services OpenAI User role), OR API Key from the\n                Azure OpenAI resource -> Keys and Endpoint.\n                NOTE: if the portal shows \"API key authentication is disabled by your\n                resource owner\", key auth is blocked by policy - use Entra ID sign-in.\n\nUse the FULL PostgreSQL server name above (ends in .postgres.database.azure.com).\nIt resolves only from THIS workstation - the databases have no public endpoint.\n\"@\n$connInfo | Out-File -FilePath 'C:\\Users\\Public\\Desktop\\connection-info.txt' -Encoding utf8\n\nProg 'PROVISION_COMPLETE - VS Code + PostgreSQL extension ready.'\nProg 'Connect over a Bastion RDP tunnel, then open VS Code and start the Migration Wizard.'\n",
+    "suffix": "[uniqueString(resourceGroup().id)]",
+    "vnetName": "oracle-bridge-vnet",
+    "subnetName": "default",
+    "oracleSubnet": "oracle",
+    "pgSubnet": "postgres",
+    "nsgName": "oracle-bridge-nsg",
+    "pipName": "oracle-bridge-pip",
+    "nicName": "oracle-bridge-nic",
+    "vmName": "migration-workstation",
+    "bastionName": "oracle-bridge-bastion",
+    "oracleVmName": "oracle-source-vm",
+    "oracleNicName": "oracle-source-nic",
+    "pgName": "[format('orabridge-pg-{0}', variables('suffix'))]",
+    "openaiName": "[format('orabridge-oai-{0}', variables('suffix'))]",
+    "pgDnsZoneName": "[format('{0}.private.postgres.database.azure.com', variables('pgName'))]",
+    "deployNetwork": "[or(or(parameters('deployWorkstation'), parameters('deployOracle')), parameters('deployPostgres'))]",
+    "pgSkuNameMap": {
+      "Burstable": "Standard_B2s",
+      "GeneralPurpose": "Standard_D2ds_v5",
+      "MemoryOptimized": "Standard_E2ds_v5"
+    },
+    "pgSkuName": "[variables('pgSkuNameMap')[parameters('postgresSkuTier')]]",
+    "computerName": "migration-ws",
+    "openAiUserRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')]"
+  },
+  "resources": [
+    {
+      "condition": "[variables('deployNetwork')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2023-11-01",
+      "name": "[variables('nsgName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowRdpFromBastion",
+            "properties": {
+              "priority": 1000,
+              "protocol": "Tcp",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3389"
+            }
+          },
+          {
+            "name": "AllowOracleFromVnet",
+            "properties": {
+              "priority": 1010,
+              "protocol": "Tcp",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "1521"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "condition": "[variables('deployNetwork')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2023-11-01",
+      "name": "[variables('vnetName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.42.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "10.42.1.0/24",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+              }
+            }
+          },
+          {
+            "name": "AzureBastionSubnet",
+            "properties": {
+              "addressPrefix": "10.42.2.0/26"
+            }
+          },
+          {
+            "name": "[variables('oracleSubnet')]",
+            "properties": {
+              "addressPrefix": "10.42.3.0/24",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('pgSubnet')]",
+            "properties": {
+              "addressPrefix": "10.42.4.0/24",
+              "delegations": [
+                {
+                  "name": "pgFlex",
+                  "properties": {
+                    "serviceName": "Microsoft.DBforPostgreSQL/flexibleServers"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployWorkstation')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2023-11-01",
+      "name": "[variables('pipName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+        }
+      }
+    },
+    {
+      "condition": "[parameters('deployWorkstation')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2023-11-01",
+      "name": "[variables('nicName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[format('{0}/subnets/{1}', resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), variables('subnetName'))]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployWorkstation')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2024-03-01",
+      "name": "[variables('vmName')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('computerName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "windowsConfiguration": {
+            "enableAutomaticUpdates": true,
+            "provisionVMAgent": true
+          }
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2022-datacenter-azure-edition",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "diskSizeGB": 128,
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            }
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployWorkstation')]",
+      "type": "Microsoft.Compute/virtualMachines/runCommands",
+      "apiVersion": "2024-03-01",
+      "name": "[format('{0}/{1}', variables('vmName'), 'install-workstation')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "source": {
+          "script": "[replace(replace(replace(replace(replace(replace(variables('$fxv#1'), '__FOUNDRY_ENDPOINT__', if(parameters('deployOpenAi'), reference(resourceId('Microsoft.CognitiveServices/accounts', variables('openaiName')), '2024-10-01').endpoint, '')), '__FOUNDRY_DEPLOYMENT__', parameters('openAiDeploymentName')), '__PG_FQDN__', if(parameters('deployPostgres'), reference(resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('pgName')), '2023-06-01-preview').fullyQualifiedDomainName, '')), '__ORACLE_HOST__', if(parameters('deployOracle'), reference(resourceId('Microsoft.Network/networkInterfaces', variables('oracleNicName')), '2023-11-01').ipConfigurations[0].properties.privateIPAddress, '')), '__PG_ADMIN__', parameters('adminUsername')), '__PG_DATABASE__', parameters('scratchDatabaseName'))]"
+        },
+        "timeoutInSeconds": 3600,
+        "asyncExecution": false
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('openaiName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('oracleNicName'))]",
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('pgName'))]",
+        "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployWorkstation')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2023-11-01",
+      "name": "[format('{0}-pip', variables('bastionName'))]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static"
+      }
+    },
+    {
+      "condition": "[parameters('deployWorkstation')]",
+      "type": "Microsoft.Network/bastionHosts",
+      "apiVersion": "2023-11-01",
+      "name": "[variables('bastionName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "enableTunneling": true,
+        "disableCopyPaste": false,
+        "ipConfigurations": [
+          {
+            "name": "IpConf",
+            "properties": {
+              "subnet": {
+                "id": "[format('{0}/subnets/AzureBastionSubnet', resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')))]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}-pip', variables('bastionName')))]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}-pip', variables('bastionName')))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployOracle')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2023-11-01",
+      "name": "[variables('oracleNicName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[format('{0}/subnets/{1}', resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), variables('oracleSubnet'))]"
+              },
+              "privateIPAllocationMethod": "Dynamic"
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployOracle')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2024-03-01",
+      "name": "[variables('oracleVmName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('oracleVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "oracle-source",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "customData": "[base64(replace(replace(replace(replace(replace(variables('$fxv#0'), '__ADMIN_USERNAME__', parameters('adminUsername')), '__ORACLE_PWD__', parameters('adminPassword')), '__PG_FQDN__', if(parameters('deployPostgres'), reference(resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('pgName')), '2023-06-01-preview').fullyQualifiedDomainName, '')), '__PG_ADMIN__', parameters('adminUsername')), '__PG_DATABASE__', parameters('scratchDatabaseName')))]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": false
+          }
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "ubuntu-24_04-lts",
+            "sku": "server",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "diskSizeGB": 64,
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            }
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('oracleNicName'))]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('oracleNicName'))]",
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers/configurations', variables('pgName'), 'azure.extensions')]",
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers/databases', variables('pgName'), parameters('scratchDatabaseName'))]",
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('pgName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployPostgres')]",
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('pgDnsZoneName')]",
+      "location": "global"
+    },
+    {
+      "condition": "[parameters('deployPostgres')]",
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2020-06-01",
+      "name": "[format('{0}/{1}', variables('pgDnsZoneName'), 'vnet-link')]",
+      "location": "global",
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', variables('pgDnsZoneName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployPostgres')]",
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+      "apiVersion": "2023-06-01-preview",
+      "name": "[variables('pgName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[variables('pgSkuName')]",
+        "tier": "[parameters('postgresSkuTier')]"
+      },
+      "properties": {
+        "version": "[parameters('postgresVersion')]",
+        "administratorLogin": "[parameters('adminUsername')]",
+        "administratorLoginPassword": "[parameters('adminPassword')]",
+        "storage": {
+          "storageSizeGB": 32
+        },
+        "network": {
+          "delegatedSubnetResourceId": "[format('{0}/subnets/{1}', resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), variables('pgSubnet'))]",
+          "privateDnsZoneArmResourceId": "[resourceId('Microsoft.Network/privateDnsZones', variables('pgDnsZoneName'))]"
+        },
+        "highAvailability": {
+          "mode": "Disabled"
+        },
+        "backup": {
+          "backupRetentionDays": 7,
+          "geoRedundantBackup": "Disabled"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', variables('pgDnsZoneName'))]",
+        "[resourceId('Microsoft.Network/privateDnsZones/virtualNetworkLinks', variables('pgDnsZoneName'), 'vnet-link')]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployPostgres')]",
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+      "apiVersion": "2023-06-01-preview",
+      "name": "[format('{0}/{1}', variables('pgName'), 'azure.extensions')]",
+      "properties": {
+        "value": "ORAFCE,PG_PARTMAN,PGCRYPTO,POSTGIS,POSTGIS_TIGER_GEOCODER,POSTGIS_TOPOLOGY,PG_CRON,TABLEFUNC,UUID-OSSP,PG_TRGM,FUZZYSTRMATCH,ADDRESS_STANDARDIZER,ADDRESS_STANDARDIZER_DATA_US",
+        "source": "user-override"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('pgName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployPostgres')]",
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases",
+      "apiVersion": "2023-06-01-preview",
+      "name": "[format('{0}/{1}', variables('pgName'), parameters('scratchDatabaseName'))]",
+      "properties": {
+        "charset": "UTF8",
+        "collation": "en_US.utf8"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('pgName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployOpenAi')]",
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2024-10-01",
+      "name": "[variables('openaiName')]",
+      "location": "[parameters('location')]",
+      "kind": "OpenAI",
+      "sku": {
+        "name": "S0"
+      },
+      "properties": {
+        "customSubDomainName": "[variables('openaiName')]",
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    {
+      "condition": "[parameters('deployOpenAi')]",
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2024-10-01",
+      "name": "[format('{0}/{1}', variables('openaiName'), parameters('openAiDeploymentName'))]",
+      "sku": {
+        "name": "[parameters('openAiSkuName')]",
+        "capacity": "[parameters('openAiCapacity')]"
+      },
+      "properties": {
+        "model": {
+          "format": "OpenAI",
+          "name": "[parameters('openAiModelName')]",
+          "version": "[parameters('openAiModelVersion')]"
+        },
+        "versionUpgradeOption": "NoAutoUpgrade"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('openaiName'))]"
+      ]
+    },
+    {
+      "condition": "[and(parameters('deployOpenAi'), parameters('deployWorkstation'))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.CognitiveServices/accounts', variables('openaiName'))]",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', variables('openaiName')), resourceId('Microsoft.Compute/virtualMachines', variables('vmName')), variables('openAiUserRoleId'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('openAiUserRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', variables('vmName')), '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('openaiName'))]",
+        "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployOpenAi')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.CognitiveServices/accounts', variables('openaiName'))]",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', variables('openaiName')), deployer().objectId, variables('openAiUserRoleId'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('openAiUserRoleId')]",
+        "principalId": "[deployer().objectId]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('openaiName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "publicFqdn": {
+      "type": "string",
+      "value": "[if(parameters('deployWorkstation'), reference(resourceId('Microsoft.Network/publicIPAddresses', variables('pipName')), '2023-11-01').dnsSettings.fqdn, '')]"
+    },
+    "vmResourceId": {
+      "type": "string",
+      "value": "[if(parameters('deployWorkstation'), resourceId('Microsoft.Compute/virtualMachines', variables('vmName')), '')]"
+    },
+    "bastionRdpTunnelCommand": {
+      "type": "string",
+      "value": "[if(parameters('deployWorkstation'), format('az network bastion tunnel -n {0} -g {1} --target-resource-id {2} --resource-port 3389 --port 13389  # then RDP to localhost:13389', variables('bastionName'), resourceGroup().name, resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))), '')]"
+    },
+    "oraclePrivateIp": {
+      "type": "string",
+      "value": "[if(parameters('deployOracle'), reference(resourceId('Microsoft.Network/networkInterfaces', variables('oracleNicName')), '2023-11-01').ipConfigurations[0].properties.privateIPAddress, '')]"
+    },
+    "oracleServiceName": {
+      "type": "string",
+      "value": "[if(parameters('deployOracle'), 'FREEPDB1', '')]"
+    },
+    "postgresFqdn": {
+      "type": "string",
+      "value": "[if(parameters('deployPostgres'), reference(resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('pgName')), '2023-06-01-preview').fullyQualifiedDomainName, '')]"
+    },
+    "postgresAdmin": {
+      "type": "string",
+      "value": "[if(parameters('deployPostgres'), parameters('adminUsername'), '')]"
+    },
+    "postgresDatabase": {
+      "type": "string",
+      "value": "[if(parameters('deployPostgres'), parameters('scratchDatabaseName'), '')]"
+    },
+    "foundryEndpoint": {
+      "type": "string",
+      "value": "[if(parameters('deployOpenAi'), reference(resourceId('Microsoft.CognitiveServices/accounts', variables('openaiName')), '2024-10-01').endpoint, '')]"
+    },
+    "foundryDeployment": {
+      "type": "string",
+      "value": "[if(parameters('deployOpenAi'), parameters('openAiDeploymentName'), '')]"
+    }
+  }
+}
