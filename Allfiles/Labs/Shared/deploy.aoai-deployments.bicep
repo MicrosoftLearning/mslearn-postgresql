@@ -11,10 +11,10 @@ param embeddingModelVersion string = '2'
 param embeddingCapacity int = 1
 
 @description('Chat model to deploy.')
-param chatModelName string = 'gpt-4o-mini'
+param chatModelName string = 'gpt-5-mini'
 
 @description('Chat model version.')
-param chatModelVersion string = '2024-07-18'
+param chatModelVersion string = '2025-08-07'
 
 @description('Capacity for chat deployment (keep small for labs).')
 param chatCapacity int = 1
