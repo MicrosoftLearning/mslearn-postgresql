@@ -94,7 +94,7 @@ Now that the cluster exists, take a moment to see how the components you learned
     - **Read/write endpoint** — the fully qualified name that points to the primary replica. It looks similar to `horizondb-lab-<yourinitials><random-number>.<randomId>.<region>.horizondb.azure.com`.
     - **Read-only endpoint** — a separate endpoint that load-balances connections across the readable replicas.
 1. Copy the **read/write endpoint** value. You use it in the next section.
-1. In the left menu, select **Replicas**. Confirm that you see two replicas — one primary and one readable standby.
+1. In the left menu, select **Replicas** under **Settings**. Confirm that you see two replicas — one primary and one readable standby.
 
     Because storage is shared, the standby replica was provisioned quickly and doesn't require a data copy.
 
