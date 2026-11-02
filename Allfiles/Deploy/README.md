@@ -228,18 +228,16 @@ installation above. **Those infrastructure steps are unchanged.** All conversion
 in **Visual Studio Code on the workstation**, where the private database endpoints are
 reachable.
 
-This walkthrough follows `Schema_Conversion_Full_Demo.mp4` and these official Microsoft
-instructions:
+Use these official Microsoft instructions alongside the walkthrough:
 
 - [Convert Oracle schemas to Azure Database for PostgreSQL](https://learn.microsoft.com/en-us/azure/postgresql/migrate/oracle-conversions-schema/schema-conversions-tutorial).
 - [Oracle migration in the PostgreSQL extension](https://learn.microsoft.com/en-us/azure/postgresql/development/vs-code-extension/oracle-migration).
 - [Set up a converted Oracle schema](https://learn.microsoft.com/en-us/azure/postgresql/migrate/oracle-conversions-schema/schema-conversions-setup).
 - [Review converted objects in Conversion Object Explorer](https://learn.microsoft.com/en-us/azure/postgresql/migrate/oracle-conversions-schema/schema-conversions-object-explorer).
 
-Button names can vary: the tutorial uses **Migrate**, while the recording shows **Start
-conversion**. Follow the equivalent action in your installed extension; the recording doesn't
-establish an exact extension version. The extension workflow is interactive, not a headless
-conversion command.
+Button names can vary by extension version: **Migrate** and **Start conversion** start the
+schema-conversion operation. Follow the equivalent action in your installed extension.
+The extension workflow is interactive, not a headless conversion command.
 
 > **Compatibility check — the POC model defaults need attention.** The current Microsoft
 > tutorial requires a **Microsoft Foundry `gpt-5.2` deployment with more than 1,000,000 tokens
@@ -294,14 +292,13 @@ definitions, not table rows; row-data access isn't required for conversion. The 
 **Checkpoint:** VS Code and the PostgreSQL extension are ready, the required accounts and
 supported model deployment are available, and you know which values belong to each connection.
 
-Screenshots below are real frames from the supplied schema-conversion demo, not captures
-of a run against this POC. Connection details are redacted where needed. Select a screenshot
-to view it at full resolution; captions identify its video timestamp.
+Use the highlighted controls in each screenshot to find the next action. Select an image
+to view it at full resolution.
 
-> **Demo values aren't lab requirements.** The video's additional schemas, connection names,
-> database names, and object counts belong to its environment. This POC seeds a much smaller
-> HR sample. Don't copy private hostnames, passwords, API keys, or the video's dependency
-> schema names into your own configuration.
+> **Use your own connection values.** Screenshots illustrate the controls, not settings to
+> copy. Their connection names, databases, dependency schemas, and object counts can differ
+> from this POC's small HR sample. Use the field tables below and your deployment outputs;
+> never copy another environment's hostnames, passwords, API keys, or schema names.
 
 ### 2. Connect PostgreSQL, open a workspace, and create the project
 
@@ -324,6 +321,11 @@ to view it at full resolution; captions identify its video timestamp.
 5. Select **Test Connection**. Correct any reported error before continuing.
 6. Select **Save & Connect**. Expand the saved server under **Connections**, then expand
    **Databases** to confirm the intended scratch database is present.
+
+   [![Enter the PostgreSQL connection parameters, check Advanced settings, test, then save and connect.](azure/media/extension-walkthrough/01-postgresql-connection.png)](azure/media/extension-walkthrough/01-postgresql-connection.png)
+
+   *Enter your PostgreSQL values, check port and SSL under Advanced, then select Test Connection and Save & Connect.*
+
 7. Select **File** > **Open Folder**. Create and select a writable folder on the
    workstation, for example `Desktop\SchemaConversionPOC`, and select **Select Folder**.
    If VS Code asks about workspace trust, trust only this folder that you created and
@@ -334,6 +336,11 @@ to view it at full resolution; captions identify its video timestamp.
    `pgsql.enableMigrations`, and confirm it is enabled.
 9. On **New Oracle to Azure Database for PostgreSQL migration project**, enter a
    **Project Name**, for example `HRSchemaPOC`. Select **Next: Oracle Connection**.
+
+   [![Enter a migration project name and select Next: Oracle Connection.](azure/media/extension-walkthrough/02-project-setup.png)](azure/media/extension-walkthrough/02-project-setup.png)
+
+   *Name the project, then select Next: Oracle Connection.*
+
 10. On **Connect to Oracle**, fill in the separate source connection:
 
     | Field | Value for the built-in Oracle source |
@@ -349,22 +356,13 @@ to view it at full resolution; captions identify its video timestamp.
     the application schemas you intend to convert instead.
 13. Select **Next: Discovery**.
 
+    [![Enter the Oracle source connection, load schemas, select HR, and continue to Discovery.](azure/media/extension-walkthrough/03-oracle-connection.png)](azure/media/extension-walkthrough/03-oracle-connection.png)
+
+    *Use your Oracle connection values. For the built-in source, use service FREEPDB1 and user MIG; select HR, then Next: Discovery.*
+
 **Checkpoint:** the Oracle connection succeeds and the selected source schemas appear in
 Discovery. A successful PostgreSQL connection doesn't establish that Oracle is reachable;
 these are separate connections.
-
-
-[![Connect to PostgreSQL Server with Parameters, Advanced, Test Connection, and Save & Connect.](azure/media/extension-walkthrough/01-postgresql-connection.png)](azure/media/extension-walkthrough/01-postgresql-connection.png)
-
-*Video frame 0:32: Connect to PostgreSQL Server with Parameters, Advanced, Test Connection, and Save & Connect.*
-
-[![Create the migration project by entering Project Name and selecting Next: Oracle Connection.](azure/media/extension-walkthrough/02-project-setup.png)](azure/media/extension-walkthrough/02-project-setup.png)
-
-*Video frame 0:41: Create the migration project by entering Project Name and selecting Next: Oracle Connection.*
-
-[![Load Oracle schemas and select HR. Use FREEPDB1 and MIG for this POC, not the video service/user values.](azure/media/extension-walkthrough/03-oracle-connection.png)](azure/media/extension-walkthrough/03-oracle-connection.png)
-
-*Video frame 1:00: Load Oracle schemas and select HR. Use FREEPDB1 and MIG for this POC, not the video service/user values.*
 
 ### 3. Complete Discovery and acknowledge scope
 
@@ -372,7 +370,7 @@ Discovery runs **before extraction and conversion**. It checks permissions, obje
 and dependencies.
 
 1. Wait for Discovery to finish. No source DDL has been extracted at this stage.
-2. Under **Source permissions**, read each result. The video shows five checks covering
+2. Under **Source permissions**, read each result. The five checks cover
    connection/session access, `SELECT_CATALOG_ROLE`, `SELECT ANY DICTIONARY`,
    `SYS.ARGUMENT$`, and `V$RESOURCE_LIMIT`. If a check fails, ask the Oracle administrator
    to review the [required source privileges](https://learn.microsoft.com/en-us/azure/postgresql/migrate/oracle-conversions-schema/schema-conversions-tutorial#source-oracle-privileges);
@@ -384,10 +382,20 @@ and dependencies.
    counts for each type. Supported does not mean every object will convert without work.
 5. Expand **Not supported object types** if shown. Record any functionality that will need
    a PostgreSQL alternative or separate remediation.
+
+   [![Review the five source-permission checks and the Discovery inventory and supported-object counts.](azure/media/extension-walkthrough/04-discovery.png)](azure/media/extension-walkthrough/04-discovery.png)
+
+   *Check source permissions, then compare Discovered, To be extracted, Excluded, and Invalid objects before continuing.*
+
 6. Under **Dependent schemas**, inspect references to application schemas you did not
    select. Select **Show diagram**, review the relationships, then select **Close**.
    Diagram edge numbers count dependency references, not objects to migrate. Referenced
    Oracle system schemas are not additional application schemas selected for migration.
+
+   [![Open Show diagram and inspect cross-schema references before choosing the conversion scope.](azure/media/extension-walkthrough/05-dependency-diagram.png)](azure/media/extension-walkthrough/05-dependency-diagram.png)
+
+   *Select Show diagram to review dependencies; close it and decide whether the selected schemas cover your intended scope.*
+
 7. If the source selection needs to change, select **Previous**, update **Schemas** on
    **Connect to Oracle**, and select **Next: Discovery** again. Listing a dependency
    does not itself select it for conversion.
@@ -396,21 +404,11 @@ and dependencies.
 9. Select **I have reviewed the objects, exclusions and dependent schemas**.
 10. Select **Next: PostgreSQL Connection**.
 
-In the recording, Discovery identifies a `GOLDEN_PG_FULL` dependency. That is an example of
-what to inspect, **not** a schema to add to the built-in HR POC. Its inventory of 338 objects
-and 247 to extract isn't a conversion outcome or an expected count for this repository.
+Dependency names and inventory totals in the illustrations belong to an example source.
+Don't add those schemas to the built-in HR POC or treat discovery counts as conversion results.
 
 **Checkpoint:** Discovery has no unresolved blockers, and you understand the conversion scope
 and dependencies rather than just accepting a green status.
-
-
-[![Discovery source-permission checks, inventory categories, supported object types, and dependent schemas.](azure/media/extension-walkthrough/04-discovery.png)](azure/media/extension-walkthrough/04-discovery.png)
-
-*Video frame 1:20: Discovery source-permission checks, inventory categories, supported object types, and dependent schemas.*
-
-[![Discovery dependency diagram. GOLDEN_PG_FULL is a video-only example, not a required POC schema.](azure/media/extension-walkthrough/05-dependency-diagram.png)](azure/media/extension-walkthrough/05-dependency-diagram.png)
-
-*Video frame 1:41: Discovery dependency diagram. GOLDEN_PG_FULL is a video-only example, not a required POC schema.*
 
 ### 4. Configure a disposable scratch database
 
@@ -429,8 +427,8 @@ objects. It isn't the final deployment destination.
    return to **Connections** and create or correct the profile before continuing.
 3. Open **PostgreSQL Database** and choose the actual `postgresDatabase`, normally
    **`migration_sandbox`**. Select **Load Databases** if the list is empty.
-   Use your configured name if you changed the deployment parameter, not the video's
-   `demodb` example.
+   Use your configured name if you changed the deployment parameter, not the database name
+   shown in the illustration.
 4. Select **Verify Extensions**. This checks extension availability; it **does not install
    extensions**.
 5. If extensions are missing, have the PostgreSQL administrator allow-list required extensions
@@ -446,13 +444,12 @@ objects. It isn't the final deployment destination.
    and their existing objects and data deleted. Accept only if the scope is disposable.
 8. Select **Next: Microsoft Foundry Model Configuration**.
 
+   [![Select the saved PostgreSQL profile and disposable database, verify extensions, then review the schema-reset acknowledgment.](azure/media/extension-walkthrough/06-scratch-database.png)](azure/media/extension-walkthrough/06-scratch-database.png)
+
+   *Verify the selected scratch database and extensions. Acknowledge the destructive reset only for disposable schemas, then select Next.*
+
 **Checkpoint:** required extensions are ready and you knowingly accepted the scratch reset
 scope. Azure deployment completion alone isn't proof of either condition.
-
-
-[![Scratch database selection, Extensions Verified, and the destructive schema-reset acknowledgment.](azure/media/extension-walkthrough/06-scratch-database.png)](azure/media/extension-walkthrough/06-scratch-database.png)
-
-*Video frame 2:17: Scratch database selection, Extensions Verified, and the destructive schema-reset acknowledgment.*
 
 ### 5. Configure and test Microsoft Foundry
 
@@ -462,12 +459,12 @@ scope. Azure deployment completion alone isn't proof of either condition.
    authentication details from its owner or administrator. In Microsoft Foundry, verify
    the deployment details and allocated TPM quota before starting.
 3. Enter **Microsoft Foundry Endpoint** using the resource URL documented for that
-   deployment. Do not paste the Azure portal page address or copy the video's endpoint.
+   deployment. Do not paste the Azure portal page address or copy another resource's endpoint.
 4. Enter **Deployment Name** using the name assigned to the deployed model. This name
    need not match `gpt-5.2` or the Azure resource name.
 5. Choose an allowed **Authentication Method**:
    - **API key:** use a key from the selected resource if your organization permits local
-     authentication. The video demonstrates this method. Keep the key out of source files,
+     authentication. Keep the key out of source files,
      logs, screenshots, and reports.
    - **Microsoft Entra ID:** sign in with the Azure Account extension using an account
      authorized for the selected Foundry resource. Confirm the documented roles rather
@@ -478,59 +475,59 @@ scope. Azure deployment completion alone isn't proof of either condition.
    Resolve authentication, quota, endpoint, or model errors before proceeding.
 8. Select **Create Migration Project**.
 
+   [![Select the supported Foundry model, enter your endpoint and deployment name, choose authentication, and test the connection.](azure/media/extension-walkthrough/07-foundry-configuration.png)](azure/media/extension-walkthrough/07-foundry-configuration.png)
+
+   *Enter your supported Foundry deployment values, test the connection, then create the project. Follow the Microsoft Learn quota requirement above even if extension help text recommends a lower value.*
+
 The model receives source definitions and metadata, not table rows. Review organizational
 policies before using a customer source even though no row data is migrated.
 
 **Checkpoint:** the model connection test succeeds and the project is created.
 
-
-[![Foundry model, authentication, deployment, and connection-test controls. Resource values are redacted; the video UI recommendation is 500,000 TPM, but follow the current Microsoft Learn requirement above of more than 1,000,000 TPM.](azure/media/extension-walkthrough/07-foundry-configuration.png)](azure/media/extension-walkthrough/07-foundry-configuration.png)
-
-*Video frame 2:29: Foundry model, authentication, deployment, and connection-test controls. Resource values are redacted; the video UI recommendation is 500,000 TPM, but follow the current Microsoft Learn requirement above of more than 1,000,000 TPM.*
-
 ### 6. Run conversion and read the results
 
-1. In the project's schema-conversion view, select **Migrate**, or **Start conversion** as
-   shown in the video.
+1. In the project's schema-conversion view, select **Migrate** or **Start conversion**.
+
+   [![Start schema conversion from the Schema Conversions card.](azure/media/extension-walkthrough/08-start-conversion.png)](azure/media/extension-walkthrough/08-start-conversion.png)
+
+   *Select Start conversion on Schema Conversions; application migration is a separate workflow.*
+
 2. Watch extraction, PostgreSQL definition generation, and compile attempts in scratch.
    Keep VS Code and its connections available until the operation completes.
 3. When **Schema conversion is complete** appears, select **Review conversion summary**.
    The HTML conversion report can also open automatically.
+
+   [![Check extraction and conversion completion, then select Review conversion summary.](azure/media/extension-walkthrough/09-conversion-progress.png)](azure/media/extension-walkthrough/09-conversion-progress.png)
+
+   *Wait for conversion to complete, then select Review conversion summary.*
+
 4. On **Conversion summary**, inspect counts and results by object type. Select
    **Conversion report** to open or reopen the HTML report.
+
+   [![Review object-type results and choose Conversion object explorer, Conversion report, or Setup instruction.](azure/media/extension-walkthrough/10-conversion-summary.png)](azure/media/extension-walkthrough/10-conversion-summary.png)
+
+   *Read the summary totals and object-type results; open Conversion report to investigate unsuccessful objects.*
+
 5. In the report, expand the discovery, extraction, and conversion sections and inspect
    object-level notes and unsuccessful results. Keep discovery inventory,
    extracted objects, conversion entries, and deployed objects separate: their totals can
    differ because they describe different phases and scopes.
+
+   [![Inspect the report's discovery, extraction, and conversion sections and per-object results.](azure/media/extension-walkthrough/11-conversion-report.png)](azure/media/extension-walkthrough/11-conversion-report.png)
+
+   *Expand the report sections and inspect unsuccessful results and notes instead of relying on the overall percentage.*
+
 6. Return to **Conversion summary** to open **Conversion object explorer** or
    **Setup instruction**. The first opens detailed review; the second opens generated
    deployment documentation, **not deployment**.
 
-> **Interpret the recording carefully.** At 3:28 it shows **241 converted, 9 not converted,
-> 96.4%**. The denominator is 250 conversion entries: 247 extracted objects plus 3 schema
-> entries. Those aren't expected outcomes for this POC. Conversion status describes
-> conversion/compile coverage, not behavioral correctness or production readiness. The video
-> fast-forwards processing, so its duration isn't a performance benchmark.
+> **Conversion coverage isn't acceptance.** The illustrated totals are examples, not expected
+> outcomes for the built-in HR source. Discovery, extraction, and conversion use different
+> scopes; inspect each stage's denominator before comparing percentages. Conversion status
+> describes conversion/compile coverage, not behavioral correctness or production readiness.
 
 **Checkpoint:** the summary is available, and you have identified outstanding issues rather
 than treating completion as acceptance.
-
-
-[![Start conversion on the Schema Conversions card; application migration is a separate workflow.](azure/media/extension-walkthrough/08-start-conversion.png)](azure/media/extension-walkthrough/08-start-conversion.png)
-
-*Video frame 2:43: Start conversion on the Schema Conversions card; application migration is a separate workflow.*
-
-[![Separate extraction and conversion completion indicators with Review conversion summary.](azure/media/extension-walkthrough/09-conversion-progress.png)](azure/media/extension-walkthrough/09-conversion-progress.png)
-
-*Video frame 3:24: Separate extraction and conversion completion indicators with Review conversion summary.*
-
-[![Conversion summary with object-type results and the Object Explorer, Conversion report, and Setup instruction actions.](azure/media/extension-walkthrough/10-conversion-summary.png)](azure/media/extension-walkthrough/10-conversion-summary.png)
-
-*Video frame 4:08: Conversion summary with object-type results and the Object Explorer, Conversion report, and Setup instruction actions.*
-
-[![HTML report separates discovery, extraction, conversion counts, and schema/object-type results.](azure/media/extension-walkthrough/11-conversion-report.png)](azure/media/extension-walkthrough/11-conversion-report.png)
-
-*Video frame 3:37: HTML report separates discovery, extraction, conversion counts, and schema/object-type results.*
 
 ### 7. Inspect mappings and review Copilot-assisted fixes
 
@@ -539,8 +536,18 @@ than treating completion as acceptance.
    Read **Schema**, **Source type**, and **Source object** together, then compare
    **Target object**, **Target type**, and **Status**. Use the page controls below the table
    if there are more results.
+
+   [![Filter Conversion Object Explorer and compare source-to-target mapping and status.](azure/media/extension-walkthrough/12-object-explorer.png)](azure/media/extension-walkthrough/12-object-explorer.png)
+
+   *Filter to the object you need, then read its source, target, type, and status before opening it.*
+
 2. Open the object's diff: **Oracle on the left, PostgreSQL on the right**. Read the
    **Conversion notes** panel and warnings, even for an object marked converted.
+
+   [![Compare the Oracle source with generated PostgreSQL and read conversion notes.](azure/media/extension-walkthrough/13-object-comparison.png)](azure/media/extension-walkthrough/13-object-comparison.png)
+
+   *Compare both definitions and review the conversion notes. Don't execute SQL until the intended nonproduction database exists.*
+
 3. Review the SQL and notes now. If a separate nonproduction database has not yet been
    deployed, **do not execute the object yet**: complete Steps 8-10 first. You can still
    use **Ask** and review **Fix** edits before deploying.
@@ -555,13 +562,23 @@ than treating completion as acceptance.
    **With no selection, the action can execute the entire editor.** Inspect the selected
    statements and their effects first.
 7. If a relation is missing, verify the active database, required dependencies, target
-   mapping, and deployment order before changing SQL. In the demo, `public.customers`
-   requires investigation rather than blindly creating another table.
+   mapping, and deployment order before changing SQL. A missing relation requires
+   investigation rather than blindly creating another table.
 8. Select **Ask** to send the object's SQL, conversion notes, and error context to Copilot.
    Sign in with your licensed GitHub account when prompted. **Fix** can edit the converted
    SQL; inspect its changes before accepting and testing them.
+
+   [![Use Ask to review an object's SQL, conversion notes, and error context with Copilot.](azure/media/extension-walkthrough/14-copilot-ask.png)](azure/media/extension-walkthrough/14-copilot-ask.png)
+
+   *Select Ask for an explanation; review the object and error context sent to Copilot before choosing a repair.*
+
 9. Review the proposed change against the Oracle definition and intended PostgreSQL
    mapping before accepting it. Save accepted edits with **Ctrl+S**.
+
+   [![Review Copilot's proposed qualifier edits and check whether database compilation has been performed.](azure/media/extension-walkthrough/15-copilot-fix.png)](azure/media/extension-walkthrough/15-copilot-fix.png)
+
+   *Inspect each proposed change before keeping it. Save accepted edits, and check whether compilation is still pending.*
+
 10. Inspect the consolidated deployment SQL and ensure it contains every accepted change.
    Saving a per-object file, applying SQL to a database, and updating `deploy.sql` are
    **three separate actions**; none proves the other two happened.
@@ -573,9 +590,8 @@ The object-type filter inside an expanded package filters its members by **Oracl
 type**, while **All source object types** above the main table filters top-level objects.
 Use expand-all or collapse-all at the explorer or package level to manage the hierarchy.
 
-The recording changes `public` qualifiers to `golden_pg_full`. That illustrates a schema
-mapping correction; it isn't a required target schema for this POC. Inspect your generated
-SQL instead of assuming Oracle HR must map to PostgreSQL `public`.
+Schema qualifiers in an illustrated correction are examples, not required target names.
+Inspect your generated mapping instead of assuming Oracle HR must map to PostgreSQL `public`.
 
 > **Don't rerun conversion to rebuild deployment SQL.** The current tutorial says a completed
 > schema conversion **can't be rerun**. Keep the reviewed per-object definitions and
@@ -584,26 +600,8 @@ SQL instead of assuming Oracle HR must map to PostgreSQL `public`.
 
 **Checkpoint:** mappings and outstanding issues have been reviewed, accepted edits are saved,
 and deployment SQL matches the reviewed object definitions. If no destination exists yet,
-compilation and behavioral validation are still pending. The video's Copilot repair summary
-explicitly says database compilation was not performed; editing a file is not proof of a
-successful database repair.
-
-
-[![Conversion Object Explorer filters, source-to-target mappings, statuses, and Ask/Fix actions.](azure/media/extension-walkthrough/12-object-explorer.png)](azure/media/extension-walkthrough/12-object-explorer.png)
-
-*Video frame 4:42: Conversion Object Explorer filters, source-to-target mappings, statuses, and Ask/Fix actions.*
-
-[![Oracle source on the left and generated PostgreSQL on the right, with editor execution controls.](azure/media/extension-walkthrough/13-object-comparison.png)](azure/media/extension-walkthrough/13-object-comparison.png)
-
-*Video frame 5:18: Oracle source on the left and generated PostgreSQL on the right, with editor execution controls.*
-
-[![Ask opens a Copilot explanation using the selected object, its SQL, and conversion context.](azure/media/extension-walkthrough/14-copilot-ask.png)](azure/media/extension-walkthrough/14-copilot-ask.png)
-
-*Video frame 6:05: Ask opens a Copilot explanation using the selected object, its SQL, and conversion context.*
-
-[![Reviewed Copilot schema-qualifier correction. The repair summary states that database compilation was not performed.](azure/media/extension-walkthrough/15-copilot-fix.png)](azure/media/extension-walkthrough/15-copilot-fix.png)
-
-*Video frame 6:30: Reviewed Copilot schema-qualifier correction. The repair summary states that database compilation was not performed.*
+compilation and behavioral validation are still pending. A repair summary that says
+compilation wasn't performed is not proof of a successful database repair.
 
 ### 8. Locate the generated deployment package
 
@@ -621,6 +619,11 @@ successful database repair.
    **`setup.sh`**, **`sql`**, **`reports`**, and **`logs`**. Keep the **full project** and
    relative layout: the runners also use the neighboring conversion session's deployment SQL.
    Don't copy only a runner to another folder.
+
+   [![Open setup_instructions.md and inspect the generated setup folder and prerequisites.](azure/media/extension-walkthrough/16-setup-instructions.png)](azure/media/extension-walkthrough/16-setup-instructions.png)
+
+   *Open setup_instructions.md from the generated setup folder, keep the full project layout, and read your package's prerequisites.*
+
 4. Follow the package's client and permission prerequisites. On this Windows workstation,
    use **PowerShell 5.1 or later** and install a PostgreSQL **`psql` client whose major
    version matches the conversion-server major version recorded in the package**. Don't
@@ -634,8 +637,8 @@ successful database repair.
 6. Ensure the client `bin` directory is on **PATH**, for example
    `C:\Program Files\PostgreSQL\<major-version>\bin`. If you change PATH in Windows
    Environment Variables, reopen VS Code and its terminal so they receive the change.
-   Do not copy the video's PostgreSQL 18 requirement over this POC's PostgreSQL 16
-   configuration: use the version recorded by **your** generated package.
+   The illustrated package uses PostgreSQL 18, while this POC defaults to PostgreSQL 16.
+   Use the version recorded by **your** generated package, not the screenshot's example.
 7. In a terminal, check the selected client:
 
    ```powershell
@@ -650,11 +653,6 @@ successful database repair.
 
 **Checkpoint:** the generated package remains intact, the correct client is available, and
 the terminal is in the generated setup folder.
-
-
-[![Setup instruction opens generated package layout and prerequisites without deploying. PostgreSQL 18 is the video package example; use the version in your generated POC package.](azure/media/extension-walkthrough/16-setup-instructions.png)](azure/media/extension-walkthrough/16-setup-instructions.png)
-
-*Video frame 6:45: Setup instruction opens generated package layout and prerequisites without deploying. PostgreSQL 18 is the video package example; use the version in your generated POC package.*
 
 ### 9. Choose the destination and validate
 
@@ -694,8 +692,8 @@ a database on that server; it doesn't provision another Azure server.
    create the database, install extensions, or deploy objects**. Destination-only checks
    that can't run are **skipped**, not passed.
 
-The video explains validate-only but doesn't execute it. Use the generated instructions for
-your own validation; don't treat the recording as a passed validation run.
+Run validation for your own destination and read its results; an illustration is not evidence
+that your environment has passed these checks.
 
 For Linux or another Bash environment, the documented equivalents are:
 
@@ -738,8 +736,18 @@ skipped checks. Required blockers are resolved before deployment.
 
 2. Enter missing connection values at the prompts. Check the final confirmation's
    **destination, database mode, schema scope, and operation** before approving deployment.
+
+   [![Check the generated runner's connection prompts and destination, mode, TLS, schemas, and operation before confirming.](azure/media/extension-walkthrough/17-deployment-command.png)](azure/media/extension-walkthrough/17-deployment-command.png)
+
+   *Enter your destination values and hidden password, then verify the confirmation summary before answering Continue.*
+
 3. The runner prepares the database, checks readiness/extensions, executes deployment SQL,
    and verifies objects. Watch for reported failures rather than just waiting for it to stop.
+
+   [![Read deployed and not-deployed totals, output locations, and the runner's exit status.](azure/media/extension-walkthrough/18-deployment-results.png)](azure/media/extension-walkthrough/18-deployment-results.png)
+
+   *Read the final totals and exit status. An exit code of 4 means outstanding items remain, not a fully successful deployment.*
+
 4. Read the generated outputs:
 
    | Output | What to inspect |
@@ -750,6 +758,10 @@ skipped checks. Required blockers are resolved before deployment.
    | `reports\extensions_<timestamp>.csv` | Extension readiness and deployment results |
    | `reports\preflight_<timestamp>.csv` | Preflight/readiness results |
    | `logs\setup_<timestamp>.log` | Detailed execution context and errors |
+
+   [![Inspect the deployment report and verification outputs to identify why objects were not deployed.](azure/media/extension-walkthrough/19-deployment-report.png)](azure/media/extension-walkthrough/19-deployment-report.png)
+
+   *Open the deployment report and verification CSV; distinguish items not included in deployment from objects not found during verification.*
 
 5. Inspect the process exit code. In PowerShell, check `$LASTEXITCODE` immediately after
    the runner; in Bash, check `$?` immediately after the command. Continue only on **0**
@@ -774,10 +786,10 @@ skipped checks. Required blockers are resolved before deployment.
 > SQL changes. Inspect the destination, report, and logs before retrying. Don't blindly rerun
 > destructive SQL or use `DROP SCHEMA ... CASCADE` as a generic undo operation.
 
-> **The recorded deployment is incomplete.** At 8:20, the demo reports **245 deployed,
-> 17 not deployed, exit code 4**. The 17 comprise **16 not included and 1 not found**,
-> **not 17 failed SQL statements**. Those are illustrative counts, not expected POC output
-> or a successful acceptance criterion.
+> **Not deployed doesn't always mean SQL execution failed.** A report can include objects
+> that weren't included in deployment and objects not found during verification. Read the
+> per-object reason and resolve outstanding items. The illustrated exit-code-4 result is
+> incomplete, not an expected POC output or a successful acceptance criterion.
 
 This remains a **schema-only** workflow: it doesn't migrate table rows. Plan data movement
 separately, and validate data handling and application behavior independently of conversion
@@ -787,19 +799,6 @@ database; don't accidentally use the `postgres` maintenance database.
 **Checkpoint:** deployment reports and exit status have been reviewed, outstanding issues
 are resolved, the expected objects are in the intended database, and independent validation
 is complete before any production use.
-
-
-[![Generated PowerShell runner prompts and final confirmation: database mode, TLS, schema scope, and operation. Connection values are redacted.](azure/media/extension-walkthrough/17-deployment-command.png)](azure/media/extension-walkthrough/17-deployment-command.png)
-
-*Video frame 7:50: Generated PowerShell runner prompts and final confirmation: database mode, TLS, schema scope, and operation. Connection values are redacted.*
-
-[![Deployment console reports 245 deployed, 17 not deployed, and exit code 4. This is an incomplete demo deployment.](azure/media/extension-walkthrough/18-deployment-results.png)](azure/media/extension-walkthrough/18-deployment-results.png)
-
-*Video frame 8:25: Deployment console reports 245 deployed, 17 not deployed, and exit code 4. This is an incomplete demo deployment.*
-
-[![Deployment report and verification outputs show remaining items, including 16 not included and one not found. Destination connection is redacted.](azure/media/extension-walkthrough/19-deployment-report.png)](azure/media/extension-walkthrough/19-deployment-report.png)
-
-*Video frame 8:37: Deployment report and verification outputs show remaining items, including 16 not included and one not found. Destination connection is redacted.*
 
 ### 11. Validate the schema in the separate nonproduction database
 
@@ -815,7 +814,7 @@ not move that data for you.
    `deployment_report_<timestamp>.md` and `verification_<timestamp>.csv`. For the built-in
    source, the five seeded tables are `REGIONS`, `COUNTRIES`, `LOCATIONS`, `DEPARTMENTS`,
    and `EMPLOYEES`; inspect their **mapped** PostgreSQL names rather than expecting the
-   video's larger inventory.
+   larger inventory in the illustrations.
 4. For corrections, return to **Conversion object explorer**, open the relevant object,
    and confirm the SQL editor's active **server and destination database**.
 5. Select the complete PostgreSQL statements you intend to run, then select the SQL editor's
