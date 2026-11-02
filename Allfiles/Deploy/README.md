@@ -401,6 +401,15 @@ and dependencies.
    does not itself select it for conversion.
 8. After an administrator changes source grants, select **Refresh Discovery** and inspect
    the results again.
+
+   **Can I continue?** Use this checklist before acknowledging the scope:
+
+   | Finding | Before continuing |
+   |---|---|
+   | A source-permission check failed | Ask the Oracle DBA to review the required grants, then select **Refresh Discovery** and recheck. Don't substitute broad grants for the required access review. |
+   | Unsupported object types are present | Record the affected functionality and an explicit, separate remediation plan. A supported type also isn't a guarantee that every object will convert successfully. |
+   | Dependent application schemas aren't selected | Confirm the selected scope, or document which dependencies will be managed externally and how they'll be available. Change the selection if needed and review Discovery again; the diagram doesn't select schemas for you. |
+
 9. Select **I have reviewed the objects, exclusions and dependent schemas**.
 10. Select **Next: PostgreSQL Connection**.
 
@@ -592,6 +601,25 @@ Use expand-all or collapse-all at the explorer or package level to manage the hi
 
 Schema qualifiers in an illustrated correction are examples, not required target names.
 Inspect your generated mapping instead of assuming Oracle HR must map to PostgreSQL `public`.
+
+**Worked example: `relation does not exist`**
+
+Suppose an execution error names `public.departments`. That name is illustrative, not the
+required mapping for the HR sample. Before changing SQL:
+
+1. Read the error's exact relation name. Confirm the active **server and database** in the
+   status bar; use the prepared nonproduction destination, not scratch or `postgres`.
+2. Find the intended dependency in the source-to-target mapping, such as Oracle
+   `HR.DEPARTMENTS` and its mapped PostgreSQL table. Check that the mapped relation exists in
+   that database and that its creation precedes the dependent object. An absent dependency
+   isn't automatically a wrong schema qualifier.
+3. Change a qualifier only if the intended mapping confirms it is wrong. Review any Copilot
+   fix against that mapping, the Oracle definition, and the conversion notes.
+
+Complete the repair as **three separate actions**: save the reviewed per-object SQL;
+compile and test complete selected statements in the prepared nonproduction database;
+and keep the consolidated `deploy.sql` aligned with the accepted correction. A file save
+doesn't execute SQL or update the consolidated deployment script.
 
 > **Don't rerun conversion to rebuild deployment SQL.** The current tutorial says a completed
 > schema conversion **can't be rerun**. Keep the reviewed per-object definitions and
@@ -790,6 +818,17 @@ skipped checks. Required blockers are resolved before deployment.
 > that weren't included in deployment and objects not found during verification. Read the
 > per-object reason and resolve outstanding items. The illustrated exit-code-4 result is
 > incomplete, not an expected POC output or a successful acceptance criterion.
+
+**If the runner returns exit code 4**, inspect partial database changes before any correction
+or retry, then use the per-object reason to choose the next check:
+
+| Reason in the report | Inspect before correcting or retrying |
+|---|---|
+| **Not included in deployment** | Compare the intended scope with the consolidated `deploy.sql`. Check whether the required definition and its dependencies are included, and review why an object was omitted before deciding how to remediate it. |
+| **Not found during verification** | Confirm the expected source-to-target mapping and selected target database. Inspect the verification CSV, execution log, and actual SQL effects to determine why the expected object is missing. |
+
+Neither classification alone establishes that a SQL statement failed. Resolve the identified
+cause and review the destination's current state rather than assuming a retry will recover it.
 
 This remains a **schema-only** workflow: it doesn't migrate table rows. Plan data movement
 separately, and validate data handling and application behavior independently of conversion
